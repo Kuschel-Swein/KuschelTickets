@@ -11,7 +11,7 @@ $KT_N = 1;
  */
 
 define("KT_N", $KT_N);
-define("VERSION", "v2.0");
+define("VERSION", "v2.1");
 if(file_exists("data/INSTALLED")) {
     header("Location: index.php");
 }
@@ -297,8 +297,48 @@ if(STEP == 2 && isset($_POST['submit'])) {
             $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (1, ?, 1)");
             $stmt->execute([$permission['name']]);
         }
+        $extraperms = ['general.tickets.quote', 'admin.login.other', 'admin.bypass.login.other', 'general.notifications.view', 'general.notifications.settings', 'admin.acp.page.cleanup', 'admin.acp.page.errors', 'general.editor.templates'];
+        foreach($pdo->query("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1") as $row) {
+            foreach($extraperms as $perm) {
+                $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (?, ? , 0)");
+                $stmt->execute([$row['groupID'], $perm]);
+            }
+        }
+        foreach($extraperms as $perm) {
+            $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (1, ? , 1)");
+            $stmt->execute([$perm]);
+        }
+        $pdo->query("UPDATE kuscheltickets".KT_N."_group_permissions SET `name`='mod.view.ticket.all' WHERE name = 'general.view.ticket.all'");  
+        $pdo->query("DELETE FROM kuscheltickets".KT_N."_group_permissions WHERE name = 'general.view.pages'");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys ADD `color` VARCHAR(535) NOT NULL AFTER `categoryName`;");
+        $pdo->query("UPDATE kuscheltickets".KT_N."_ticket_categorys SET `color`='blue' WHERE 1;");
+        $pdo->query("CREATE TABLE kuscheltickets".KT_N."_notifications (
+            notificationID int NOT NULL AUTO_INCREMENT,
+            linkIdentifier TEXT NOT NULL,
+            content TEXT NOT NULL,
+            userID int NOT NULL,
+            PRIMARY KEY (notificationID),
+            FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE
+        );");
+        $pdo->query("CREATE TABLE kuscheltickets".KT_N."_editortemplates (
+            templateID int NOT NULL AUTO_INCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            userID int,
+            PRIMARY KEY (templateID),
+            FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE
+        );");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD `description` TEXT NOT NULL AFTER `content`;");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `time` INT NOT NULL AFTER `userID`;");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `done` INT(1) NOT NULL AFTER `time`;");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD `color` VARCHAR(255) NOT NULL AFTER `time`;");
+        $pdo->query("UPDATE kuscheltickets".KT_N."_tickets SET `color`='blue' WHERE 1");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `notificationsettings` TEXT NOT NULL AFTER `userGroup`;");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages ADD `type` INT(1) NOT NULL AFTER `login`;");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages CHANGE `login` `groups` TEXT NOT NULL;");
+        $pdo->query("UPDATE kuscheltickets".KT_N."_pages SET `groups`='[]' WHERE 1");
         header("Location: install.php?step=3");
-    }
+        }
 }
 
 $mailexception = "";
@@ -328,7 +368,6 @@ if(STEP == 3 && isset($_POST['submit'])) {
     } catch (Exception $e) {
         $mailexception = $e;
     }
-    var_dump($_SESSION);
     if($mailexception == "") {
         $file = fopen("config.php", "w");
         fwrite($file, '<?php' . PHP_EOL . '  /*' . PHP_EOL . '      Automatisch erstellte Config-Datei    ' . PHP_EOL . '      Erstellt am ' . date('d.m.Y  H:i:s') . '    ' . PHP_EOL . '  */'.PHP_EOL.
@@ -351,6 +390,15 @@ if(STEP == 3 && isset($_POST['submit'])) {
         '        "database" => false'.PHP_EOL.
         '    ),'.PHP_EOL.
         '    "cookie" => "KuschelTickets",'.PHP_EOL.
+        '    "seourls" => false,'.PHP_EOL.
+        '    "faviconextension" => "png",'.PHP_EOL.
+        '    "externalURLTitle" => true,'.PHP_EOL.
+        '    "faviconmime" => "image/png",'.PHP_EOL.
+        '    "proxyAllImages" => true,'.PHP_EOL.
+        '    "externalURLFavicons" => true,'.PHP_EOL.
+        '    "externalURLWarning" => true,'.PHP_EOL.
+        '    "useDesktopNotification" => true,'.PHP_EOL.
+        '    "emailnotifications" => true,'.PHP_EOL.
         '    "adminmail" => "admin@example.com",'.PHP_EOL.
         '    "mail" => array('.PHP_EOL.
         '        "host" => "'.$_POST['smtphost'].'",'.PHP_EOL.
