@@ -6,7 +6,7 @@ use KuschelTickets\lib\Exceptions\AccessDeniedException;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
 
-class PagePage extends Page {
+class pagePage extends Page {
 
     private $identifier;
 
