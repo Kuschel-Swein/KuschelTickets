@@ -1,5 +1,12 @@
 ![KuschelTickets](https://i.imgur.com/I1LQDr1.png)
 ---
+
+===
+DERZEIT GIBT ES EINEN FEHLER WELCHEN ICH MIT DEM NÄCHSTEN UPDATE BEHEBE: Benennt bitte die Datei pages/PagePage.class.php zu pagePage.class.php um und fügt den folgenden Inhalt ein, um den Fehler direkt zu beheben. Inhalt: https://pastebin.com/7iEB6B0L
+===
+
+
+
 Willkommen bei KuschelTickets!
 KuschelTickets ist ein auf PHP basierendes Ticketsystem.
 
