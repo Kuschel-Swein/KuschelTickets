@@ -7,8 +7,8 @@ if(file_exists("data/INSTALLED")) {
 }
 $success = "";
 require("config.php");
-define("UPDATERTOVERSION", "v2.1");
-define("UPDATERFROMVERSION", "v2.0");
+define("UPDATERTOVERSION", "v2.2");
+define("UPDATERFROMVERSION", "v2.1");
 if($config['version'] !== UPDATERFROMVERSION) {
     die("Dieser Updater kann nur von der Version <b>".UPDATERFROMVERSION."</b> auf die Version <b>".UPDATERTOVERSION."</b> aktualisieren.");
 }
