@@ -298,7 +298,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             $stmt->execute([$permission['name']]);
         }
         $extraperms = ['general.tickets.quote', 'admin.login.other', 'admin.bypass.login.other', 'general.notifications.view', 'general.notifications.settings', 'admin.acp.page.cleanup', 'admin.acp.page.errors', 'general.editor.templates'];
-        foreach($pdo->query("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1") as $row) {
+        foreach($pdo->query("SELECT * FROM kuscheltickets".KT_N."_groups WHERE NOT groupID = 1") as $row) {
             foreach($extraperms as $perm) {
                 $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (?, ? , 0)");
                 $stmt->execute([$row['groupID'], $perm]);
