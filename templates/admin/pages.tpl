@@ -16,14 +16,15 @@
             <div class="menu">
               <div class="item" data-value="0">ID</div>
               <div class="item" data-value="1">Titel</div>
-              <div class="item" data-value="2">URL</div>
+              <div class="item" data-value="2">Typ</div>
+              <div class="item" data-value="3">URL</div>
             </div>
           </div>
         </div>
       </div>
       <div class="four wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/pages/add">Seite erstellen</a>
+        <a class="ui blue button right floated" href="javascript:createPage();">Seite erstellen</a>
       </div>
     </div>
     
@@ -34,6 +35,7 @@
         <tr>
             <th>ID</th>
             <th>Titel</th>
+            <th>Typ</th>
             <th>URL</th>
             <th>Aktion</th>
         </tr>
@@ -42,20 +44,19 @@
         {foreach from=$site['pages'] item="page"}
         <tr id="pageentry{$page['pageID']}">
         <td data-label="ID">{$page['pageID']}</td>
-        <td data-label="Titel">{$page['title']}</a></td>
-        <td data-label="URL"><a href="{$site['mainurl']}?page/{$page['url']}" target="_blank">{$site['mainurl']}?page/{$page['url']}</a></td>
+        <td data-label="Titel">{$page['title']}</td>
+        <td data-label="Typ">{if $page['type'] == "1"}HTML{else if $page['type'] == "2"}Template{else}WYSIWYG{/if}</td>
+        <td data-label="URL"><a href="{link url="page/{$page['url']}"}" target="_blank">{link url="page/{$page['url']}"}</a></td>
         <td data-label="Aktion">
           {if $page['system'] !== "1"}
             <a href="javascript:deletePage({$page['pageID']});" data-tooltip="Löschen"><i class="icon times"></i></a>
           {/if}
-            <a href="index.php?admin/pages/edit-{$page['pageID']}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
-            <a href="javascript:showPage({$page['pageID']});" data-tooltip="Ansehen"><i class="icon eye"></i></a>
-            <div id="pagecontent{$page['pageID']}" data-title="{$page['title']}" class="display-none">{$page['content']}</div>
+            <a href="{link url="admin/pages/edit-{$page['pageID']}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
         <tr>
-            <td colspan="4">
+            <td colspan="5">
                 <div class="ui info message">
                     <ul class="list">
                         <li>Es wurden noch keine Seiten erstellt.</li>
@@ -71,45 +72,70 @@
             modal.confirm("Möchtest du diese Seite wirklich löschen. Dies kann nicht rückgängig gemacht werden.", function() {
                 var data = ajax.call(9, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#pageentry" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="5"><div class="ui info message"><ul class="list"><li>Es wurden noch keine Seiten erstellt.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#pageentry" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
         }
 
-        function showPage(id) {
-            modal.modal("Seite ansehen", '' +
-            '<p><b>Titel: </b></p>' +
-            '<p>' + document.getElementById("pagecontent" + id).dataset.title + '</p>' +
-            '<p><b>Inhalt: </b></p>' +
-            '<p>' + document.getElementById("pagecontent" + id).innerHTML + '</p>' +
-            '');
+        function createPage() {
+          modal.modal("Seite erstellen", '' +
+            '<p>Wähle den Typ der zu erstellenden Seite aus:' +
+            '<br>Beachte: Der Typ einer Seite kann nach der Erstellung <b>NICHT</b> geändert werden.</p>' +
+            '<form action="#" method="post" id="addform">' +
+            '<div class="ui radio checkbox">' +
+              '<input type="radio" checked value="0" name="type">' +
+              '<label>WYSIWYG</label>' +
+              '<small class="helper">erstellung mit dem WYSIWYG Editor und weiteren nutzbaren Variablen</small>' +
+            '</div><br><br>' +
+            '<div class="ui radio checkbox">' +
+              '<input type="radio" value="1" name="type">' +
+              '<label>HTML</label>' +
+              '<small class="helper">HTML lässt dich eigenes HTML und JavaScript einbinden.</small>' +
+            '</div><br><br>' +
+            '<div class="ui radio checkbox">' +
+              '<input type="radio" value="2" name="type">' +
+              '<label>Template</label>' +
+              '<small class="helper">entspricht HTML, zusätzlich wird Smarty Templatescripting unterstützt.</small>' +
+            '</div><br><br>' +
+            '<button type="submit" name="submit" class="ui blue submit button">Absenden</button>' + 
+            '</form>' +
+          '');
+          document.getElementById("addform").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var elems = document.getElementsByName("type");
+            var value = "0";
+            for(var i = 0; i < elems.length; i++) {
+              if(elems[i].checked) {
+                value = elems[i].value;
+              }
+            }
+            value = parseInt(value);
+            var links = ["{link url="admin/pages/add-0"}", "{link url="admin/pages/add-1"}", "{link url="admin/pages/add-2"}"];
+            window.location.href = links[value];
+          });
         }
+
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/pages">Seiten Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/pages"}">Seiten Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['loginneed'] !== false || $site['errors']['text'] !== false || $site['errors']['url'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/pages/add" method="post">
+<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['url'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/pages/add-{$site['type']}"}" method="post">
     <div class="field required{if $site['errors']['title'] !== false} error{/if}">
     <label>Titel</label>
         <div class="ui input">
@@ -122,28 +148,26 @@
             <input type="text" name="url" value="{if isset($tpl['post']['url']) && !$site['success']}{$tpl['post']['url']}{/if}">
         </div>
     </div>
-    <div class="field required{if $site['errors']['loginneed'] !== false} error{/if}">
-        <label>Login benötigt</label>
-        <div class="ui selection dropdown loginneed">
-            <input type="hidden" name="loginneed" id="type">
+    <div class="field">
+        <label>Zugriff</label>
+        <div class="ui multiple selection dropdown groups">
+            <input type="hidden" name="groupsaccess">
             <i class="dropdown icon"></i>
             <div class="default text"></div>
             <div class="menu">
             </div>
         </div>
+        <small class="helper">Wähle hier alle Gruppen aus welche Zugriff auf diese Seite haben sollen, wähle keine Gruppe aus, wenn alle zugriff auf diese Seite haben sollen (auch Gäste).</small>
     </div>
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
-        <label>Inhalt</label>
+        <label>Inhalt <a href="javascript:variablesInfo()"><i class="icon question"></i></a></label>
         <textarea id="text" rows="10" name="text">{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}</textarea>
     </div>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
-    {if $site['errors']['loginneed'] !== false || $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['url'] !== false}
+    {if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['url'] !== false}
         <div class="ui error message">
           <ul class="list">
-            {if $site['errors']['loginneed'] !== false}
-              <li>{$site['errors']['loginneed']}</li>
-            {/if}
             {if $site['errors']['title'] !== false}
               <li>{$site['errors']['title']}</li>
             {/if}
@@ -167,36 +191,124 @@
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text"}
+
+{if $site['type'] == "1"}
+  {include file="codeeditor_html.tpl" selector="#text"}
+{else if $site['type'] == "2"}
+  {include file="codeeditor_smarty.tpl" selector="#text"}
+{else}
+  {include file="wysiwyg.tpl" template="false" selector="#text"}
+{/if}
 <script>
-$('.ui.selection.dropdown.loginneed').dropdown({
+$('.ui.selection.dropdown.groups').dropdown({
     values: [
+        {foreach from=$site['allgroups'] item="group"}
         {
-        {if isset($tpl['post']['loginneed']) && !$site['success']}
-          {if $tpl['post']['loginneed'] == 1}
+        {if isset($tpl['post']['groupsaccess']) && !$site['success']}
+          {if (String) $group->groupID|in_array:$site['selectedgroups']}
             selected: true,
           {/if}
         {/if}
-          name: "Ja",
-          value: "1"
+          name: '{$group->getGroupBadge()}',
+          value: "{$group->groupID}"
         },
-        {
-        {if isset($tpl['post']['loginneed']) && !$site['success']}
-          {if $tpl['post']['loginneed'] == 0}
-            selected: true,
-          {/if}
-        {/if}
-          name: "Nein",
-          value: "0"
-        }
-    ],
+        {/foreach}
+    ]
 });
+{if $site['type'] !== "1" && $site['type'] !== "2"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Variablen", '' +
+    '<p>Du kannst in Seiten, folgende Variablen verwenden, ist ein Benutzer nicht eingeloggt, werden diese Variablen mit Beispieldaten gefüllt.</p>' +
+    '<p></p>' +
+    '<table class="ui celled table">' +
+      '<thead>' +
+          '<tr>' +
+              '<th>Variable</th>' +
+              '<th>Inhalt</th>' +
+          '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERNAME}</i></td>' +
+          '<td data-label="Inhalt">Benutzername</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERID}</i></td>' +
+          '<td data-label="Inhalt">Benutzer ID</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERGROUP}</i></td>' +
+          '<td data-label="Inhalt">Gruppenname des Benutzers</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@EMAIL}</i></td>' +
+          '<td data-label="Inhalt">E-Mail Adresse des Benutzer</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@TICKETS}</i></td>' +
+          '<td data-label="Inhalt">Anzahl der Tickets des Benutzers</td>' +
+        '</tr>' +
+      '</tbody>' +
+    '</table>' +
+    '');
+  }
+  {/literal}
+{else if $site['type'] == "1"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Information", '' +
+    '<p>Du kannst im HTML Modus normales HTML verwenden. Beachte bitte dass wir deinen Code nicht überprüfen. Du kannst ebenfalls diese Variablen verwenden um deine Seite dynamisch zu gestalten.</p>' +
+    '<p></p>' +
+    '<table class="ui celled table">' +
+      '<thead>' +
+          '<tr>' +
+              '<th>Variable</th>' +
+              '<th>Inhalt</th>' +
+          '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERNAME}</i></td>' +
+          '<td data-label="Inhalt">Benutzername</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERID}</i></td>' +
+          '<td data-label="Inhalt">Benutzer ID</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERGROUP}</i></td>' +
+          '<td data-label="Inhalt">Gruppenname des Benutzers</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@EMAIL}</i></td>' +
+          '<td data-label="Inhalt">E-Mail Adresse des Benutzer</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@TICKETS}</i></td>' +
+          '<td data-label="Inhalt">Anzahl der Tickets des Benutzers</td>' +
+        '</tr>' +
+      '</tbody>' +
+    '</table>' +
+    '');
+  }
+  {/literal}
+{else if $site['type'] == "2"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Information", '' +
+    '<p>Im Template Modus kannst du mit Template-Scripting deine Seite erstellen. Du verwendest hier die Scripting Sprache <a href="https://www.smarty.net/docs/en/">Smarty</a> in der Version 3.</p>' +
+    '<p>Du kannst die <i>$__KT</i> Variable verwenden, diese beinhaltet die gesamte Konfirgurationsdatei sowie weitere wichtige Hinweise. Die Variable <i>$tpl</i> beinhaltet Variablen wie <i>$_COOKIE</i> oder <i>$_POST</i></p>' +
+    '');
+  }
+  {/literal}
+{/if}
 </script>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/pages">Seiten Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/pages"}">Seiten Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['loginneed'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/pages/edit-{$site['page']['pageID']}" method="post">
+<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/pages/edit-{$site['page']['pageID']}"}" method="post">
     <div class="field required{if $site['errors']['title'] !== false} error{/if}">
     <label>Titel</label>
         <div class="ui input">
@@ -205,32 +317,30 @@ $('.ui.selection.dropdown.loginneed').dropdown({
     </div>
     <div class="field required{if $site['errors']['url'] !== false} error{/if}">
     <label>URL</label>
-        <div class="ui input">
+        <div class="ui input disabled">
             <input type="text" {if $site['page']['system'] == "1"}readonly{/if} name="url" value="{$site['page']['url']}">
         </div>
     </div>
-    <div class="field required{if $site['errors']['loginneed'] !== false} error{/if}">
-        <label>Login benötigt</label>
-        <div class="ui selection dropdown loginneed">
-            <input type="hidden" name="loginneed" id="type">
+    <div class="field">
+        <label>Zugriff</label>
+        <div class="ui multiple selection dropdown groups{if $site['page']['system'] == "1"} disabled{/if}">
+            <input type="hidden" name="groupsaccess">
             <i class="dropdown icon"></i>
             <div class="default text"></div>
             <div class="menu">
             </div>
         </div>
+        <small class="helper">Wähle hier alle Gruppen aus welche Zugriff auf diese Seite haben sollen, wähle keine Gruppe aus, wenn alle zugriff auf diese Seite haben sollen (auch Gäste).</small>
     </div>
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
-        <label>Inhalt</label>
+        <label>Inhalt <a href="javascript:variablesInfo()"><i class="icon question"></i></a></label>
         <textarea id="text" rows="10" name="text">{$site['page']['content']}</textarea>
     </div>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
-    {if $site['errors']['loginneed'] !== false || $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false}
+    {if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false}
         <div class="ui error message">
           <ul class="list">
-            {if $site['errors']['loginneed'] !== false}
-              <li>{$site['errors']['loginneed']}</li>
-            {/if}
             {if $site['errors']['title'] !== false}
               <li>{$site['errors']['title']}</li>
             {/if}
@@ -251,25 +361,114 @@ $('.ui.selection.dropdown.loginneed').dropdown({
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text"}
+{if $site['page']['type'] == "1"}
+  {include file="codeeditor_html.tpl" selector="#text"}
+{else if $site['page']['type'] == "2"}
+  {include file="codeeditor_smarty.tpl" selector="#text"}
+{else}
+  {include file="wysiwyg.tpl" template="false" selector="#text"}
+{/if}
 <script>
-$('.ui.selection.dropdown.loginneed').dropdown({
+$('.ui.selection.dropdown.groups').dropdown({
     values: [
+        {foreach from=$site['allgroups'] item="group"}
         {
-          {if $site['page']['login'] == "1"}
+          {if (String) $group->groupID|in_array:$site['selectedgroups']}
             selected: true,
           {/if}
-          name: "Ja",
-          value: "1"
+          name: '{$group->getGroupBadge()}',
+          value: "{$group->groupID}"
         },
-        {
-          {if $site['page']['login'] == "0"}
-            selected: true,
-          {/if}
-          name: "Nein",
-          value: "0"
-        }
+        {/foreach}
     ],
 });
+{if $site['page']['type'] !== "1" && $site['page']['type'] !== "2"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Variablen", '' +
+    '<p>Du kannst in Seiten, folgende Variablen verwenden, ist ein Benutzer nicht eingeloggt, werden diese Variablen mit Beispieldaten gefüllt.</p>' +
+    '<p></p>' +
+    '<table class="ui celled table">' +
+      '<thead>' +
+          '<tr>' +
+              '<th>Variable</th>' +
+              '<th>Inhalt</th>' +
+          '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERNAME}</i></td>' +
+          '<td data-label="Inhalt">Benutzername</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERID}</i></td>' +
+          '<td data-label="Inhalt">Benutzer ID</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERGROUP}</i></td>' +
+          '<td data-label="Inhalt">Gruppenname des Benutzers</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@EMAIL}</i></td>' +
+          '<td data-label="Inhalt">E-Mail Adresse des Benutzer</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@TICKETS}</i></td>' +
+          '<td data-label="Inhalt">Anzahl der Tickets des Benutzers</td>' +
+        '</tr>' +
+      '</tbody>' +
+    '</table>' +
+    '');
+  }
+  {/literal}
+{else if $site['page']['type'] == "1"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Information", '' +
+    '<p>Du kannst im HTML Modus normales HTML verwenden. Beachte bitte dass wir deinen Code nicht überprüfen. Du kannst ebenfalls diese Variablen verwenden um deine Seite dynamisch zu gestalten.</p>' +
+    '<p></p>' +
+    '<table class="ui celled table">' +
+      '<thead>' +
+          '<tr>' +
+              '<th>Variable</th>' +
+              '<th>Inhalt</th>' +
+          '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERNAME}</i></td>' +
+          '<td data-label="Inhalt">Benutzername</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERID}</i></td>' +
+          '<td data-label="Inhalt">Benutzer ID</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@USERGROUP}</i></td>' +
+          '<td data-label="Inhalt">Gruppenname des Benutzers</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@EMAIL}</i></td>' +
+          '<td data-label="Inhalt">E-Mail Adresse des Benutzer</td>' +
+        '</tr>' +
+        '<tr>' +
+          '<td data-label="Variable"><i>{@TICKETS}</i></td>' +
+          '<td data-label="Inhalt">Anzahl der Tickets des Benutzers</td>' +
+        '</tr>' +
+      '</tbody>' +
+    '</table>' +
+    '');
+  }
+  {/literal}
+{else if $site['page']['type'] == "2"}
+  {literal}
+  function variablesInfo() {
+    modal.modal("Information", '' +
+    '<p>Im Template Modus kannst du mit Template-Scripting deine Seite erstellen. Du verwendest hier die Scripting Sprache <a href="https://www.smarty.net/docs/en/">Smarty</a> in der Version 3.</p>' +
+    '<p>Du kannst die <i>$__KT</i> Variable verwenden, diese beinhaltet die gesamte Konfirgurationsdatei sowie weitere wichtige Hinweise. Die Variable <i>$tpl</i> beinhaltet Variablen wie <i>$_COOKIE</i> oder <i>$_POST</i></p>' +
+    '');
+  }
+  {/literal}
+{/if}
 </script>
 {/if}

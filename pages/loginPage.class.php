@@ -1,6 +1,7 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\recaptcha;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
@@ -42,7 +43,7 @@ class loginPage extends Page {
                                 } else {
                                     if($account->hasPermission("general.login")) {
                                         UserUtils::loginAs($account, $row['password']);
-                                        Utils::redirect("index.php");
+                                        Utils::redirect(Link::get(""));
                                     } else {
                                         throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung um diese Seite zu sehen.");
                                     }

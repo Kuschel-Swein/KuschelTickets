@@ -1,6 +1,7 @@
 <?php
 namespace KuschelTickets\lib\system;
 use KuschelTickets\lib\Mailer;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\Utils;
 
 class UserUtils {
@@ -67,11 +68,10 @@ class UserUtils {
         $token = UserUtils::generateToken();
         $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_accounts(`username`, `password`, `email`, `token`, `userGroup`, `banned`, `password_reset`) VALUES (?, ?, ?, ?, 3, 0, 0)");
         $stmt->execute([$username, $password, $email, $token]);
-        $mainurl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? "https" : "http") . "://".$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'];
         $mail = new Mailer($email, $config['pagetitle']." - Registrierung", $username);
         $message = "<p>Hey ".$username.",</p>
         <p>Vielen Dank für die Registrierung bei ".$config['pagetitle'].". Um deinen Account zu aktivieren folge bitte dem untenstehenden Link.</p>
-        <p><b>Link:</b> <a href='".$mainurl."?activate/token-".$token."'>".$mainurl."?activate/token-".$token."</a></p>
+        <p><b>Link:</b> <a href='".Link::get("activate/token-".$token)."'>".Link::get("activate/token-".$token)."</a></p>
         <p></p>
         <p><hr></p>
         <p>Mit freundlichen Grüßen,</p>

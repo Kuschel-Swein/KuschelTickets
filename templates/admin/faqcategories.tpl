@@ -24,7 +24,7 @@
       </div>
       <div class="five wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/faqcategories/add">Kategorie erstellen</a>
+        <a class="ui blue button right floated" href="{link url="admin/faqcategories/add"}">Kategorie erstellen</a>
       </div>
     </div>
     <br>
@@ -46,7 +46,7 @@
         <td data-label="FAQs">{$category['faqs']}</a></td>
         <td data-label="Aktion">
             <a href="javascript:deleteCategory({$category['id']});" data-tooltip="Löschen"><i class="icon times"></i></a>
-            <a href="index.php?admin/faqcategories/edit-{$category['id']}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="{link url="admin/faqcategories/edit-{$category['id']}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
@@ -67,36 +67,31 @@
             modal.confirm("Möchtest du diese Kategorie wirklich löschen. Dies kann nicht rückgängig gemacht werden.<br><b>Beachte:</b> alle in dieser Kategorie befindlichen FAQ Einträge werden ebenfalls gelöscht.", function() {
                 var data = ajax.call(8, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#faqcategory" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="4"><div class="ui info message"><ul class="list"><li>Es wurden noch keine Kategorien eingetragen.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#faqcategory" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
         }
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/faqcategories">Kategorien Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/faqcategories"}">Kategorien Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/faqcategories/add" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faqcategories/add"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
@@ -126,10 +121,10 @@
     {/if}
 </form>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/faqcategories">Kategorien Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/faqcategories"}">Kategorien Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/faqcategories/edit-{$site['id']}" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faqcategories/edit-{$site['id']}"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">

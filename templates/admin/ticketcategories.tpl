@@ -16,14 +16,14 @@
             <div class="menu">
               <div class="item" data-value="0">ID</div>
               <div class="item" data-value="1">Name</div>
-              <div class="item" data-value="2">Eingabefelder</div>
+              <div class="item" data-value="3">Eingabefelder</div>
             </div>
           </div>
         </div>
       </div>
       <div class="five wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/ticketcategories/add">Ticket Kategorie erstellen</a>
+        <a class="ui blue button right floated" href="{link url="admin/ticketcategories/add"}">Ticket Kategorie erstellen</a>
       </div>
     </div>
     <br>
@@ -33,6 +33,7 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Farbe</th>
             <th>Eingabefelder</th>
             <th>Aktion</th>
         </tr>
@@ -42,15 +43,16 @@
         <tr id="ticketcategoryentry{$category->categoryID}">
         <td data-label="ID">{$category->categoryID}</td>
         <td data-label="Name">{$category->getName()}</a></td>
+        <td data-label="Farbe"><span class="ui label {$category->getColor()}">{$category->getName()}</span></td>
         <td data-label="Eingabefelder">{$category->getInputCount()}</a></td>
         <td data-label="Aktion">
             <a href="javascript:deleteCategory({$category->categoryID});" data-tooltip="Löschen"><i class="icon times"></i></a>
-            <a href="index.php?admin/ticketcategories/edit-{$category->categoryID}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="{link url="admin/ticketcategories/edit-{$category->categoryID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
         <tr>
-            <td colspan="4">
+            <td colspan="5">
                 <div class="ui info message">
                     <ul class="list">
                         <li>Es wurden noch keine Ticket Kategorien eingetragen.</li>
@@ -66,42 +68,48 @@
             modal.confirm("Möchtest du diese Kategorie wirklich löschen. Dies kann nicht rückgängig gemacht werden.<br><b>Beachte:</b> alle in dieser Kategorie befindlichen Tickets werden <b>NICHT</b> gelöscht.", function() {
                 var data = ajax.call(12, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#ticketcategoryentry" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="5"><div class="ui info message"><ul class="list"><li>Es wurden noch keine Ticket Kategorien eingetragen.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#ticketcategoryentry" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
         }
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/ticketcategories">Ticket Kategorien Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/ticketcategories"}">Ticket Kategorien Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/ticketcategories/add" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false || $site['errors']['color'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/ticketcategories/add"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
+            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
         </div>
     </div>
+    <div class="field{if $site['errors']['color'] !== false} error{/if}">
+      <label>Farbe</label>
+    </div>
+    {foreach from=$site['colors'] item="color"}
+    <div class="field">
+      <div class="ui radio checkbox">
+        <input type="radio" value="{$color}" name="color"{if isset($tpl['post']['color']) && !$site['success']}{if $tpl['post']['color'] == $color} checked{/if}{/if}>
+        <label><div class="ui {$color} label preview">{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{else}Farbe{/if}</div></label>
+      </div>
+    </div>
+    {/foreach}
     <div class="ui divider"></div>
     <button class="ui button float-right" type="button" onClick="custominput.addField()">Eingabefeld hinzufügen</button>
     <br>
@@ -134,7 +142,7 @@
     <input type="hidden" id="custominputCounter" name="custominputCounter" value="{if isset($tpl['post']['custominputCounter']) && !$site['success']}{$tpl['post']['custominputCounter']}{/if}">
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
-    {if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false}
+    {if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false || $site['errors']['color'] !== false}
         <div class="ui error message">
           <ul class="list">
             {if $site['errors']['text'] !== false}
@@ -145,6 +153,9 @@
             {/if}
             {if $site['errors']['custominput'] !== false}
               <li>{$site['errors']['custominput']}</li>
+            {/if}
+            {if $site['errors']['color'] !== false}
+              <li>{$site['errors']['color']}</li>
             {/if}
           </ul>
         </div>
@@ -157,17 +168,42 @@
         </div>
     {/if}
 </form>
+<script>
+function preview(elem) {
+  var value = elem.value;
+  if(value == "") {
+    value = "Farbe";
+  }
+  value = value.replace(/</, "&lt;");
+  value = value.replace(/>/, "&gt;");
+  var elems = document.getElementsByClassName("preview");
+  for(var i = 0; i < elems.length; i++) {
+    elems[i].innerHTML = value;
+  }
+}
+</script>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/ticketcategories">Ticket Kategorien Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/ticketcategories"}">Ticket Kategorien Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/ticketcategories/edit-{$site['ticketcategory']->categoryID}" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false || $site['errors']['color'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/ticketcategories/edit-{$site['ticketcategory']->categoryID}"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" value="{$site['ticketcategory']->getName()}">
+            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{$site['ticketcategory']->getName()}">
         </div>
     </div>
+    <div class="field{if $site['errors']['color'] !== false} error{/if}">
+      <label>Farbe</label>
+    </div>
+    {foreach from=$site['colors'] item="color"}
+    <div class="field">
+      <div class="ui radio checkbox">
+        <input type="radio" value="{$color}" name="color"{if $site['ticketcategory']->getColor() == $color} checked{/if}>
+        <label><div class="ui {$color} label preview">{$site['ticketcategory']->getName()}</div></label>
+      </div>
+    </div>
+    {/foreach}
     <div class="ui divider"></div>
     <button class="ui button float-right" type="button" onClick="custominput.addField()">Eingabefeld hinzufügen</button>
     <br>
@@ -196,7 +232,7 @@
     <input type="hidden" id="custominputCounter" name="custominputCounter" value="{$site['ticketcategory']->getInputCount()}">
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
-    {if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false}
+    {if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false || $site['errors']['color'] !== false}
         <div class="ui error message">
           <ul class="list">
             {if $site['errors']['text'] !== false}
@@ -207,6 +243,9 @@
             {/if}
             {if $site['errors']['custominput'] !== false}
               <li>{$site['errors']['custominput']}</li>
+            {/if}
+            {if $site['errors']['color'] !== false}
+              <li>{$site['errors']['color']}</li>
             {/if}
           </ul>
         </div>
@@ -219,4 +258,18 @@
         </div>
     {/if}
 </form>
+<script>
+function preview(elem) {
+  var value = elem.value;
+  if(value == "") {
+    value = "Farbe";
+  }
+  value = value.replace(/</, "&lt;");
+  value = value.replace(/>/, "&gt;");
+  var elems = document.getElementsByClassName("preview");
+  for(var i = 0; i < elems.length; i++) {
+    elems[i].innerHTML = value;
+  }
+}
+</script>
 {/if}

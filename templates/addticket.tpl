@@ -1,6 +1,6 @@
 {include file="header.tpl" title="Ticket erstellen"}
 {if $__KT['user']->hasPermission("general.view.tickets.self")}
-    <a class="ui blue button right floated" href="index.php?mytickets">Meine Tickets</a>
+    <a class="ui blue button right floated" href="{link url="mytickets"}">Meine Tickets</a>
     <br>
     <br>
 {/if}
@@ -10,7 +10,7 @@
     {assign var="custominput" value="true"}
   {/if}
 {/foreach}
-<form class="ui form{if $errors['title'] !== false || $errors['category'] !== false || $errors['text'] !== false || $errors['token'] !== false || $custominput == "true"} error{/if}{if $success == true} success{/if}" action="index.php?addticket" method="post">
+<form class="ui form{if $errors['title'] !== false || $errors['category'] !== false || $errors['text'] !== false || $errors['token'] !== false || $custominput == "true"} error{/if}{if $success == true} success{/if}" action="{link url="addticket"}" method="post">
     <div class="field required{if $errors['title'] !== false} error{/if}">
     <label>Titel</label>
         <div class="ui input">
@@ -49,17 +49,21 @@
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
     {foreach from=$categorys item="category"}
       {if $custominput == "true"}
-        <div class="ui error message">
-          <ul class="list">
-            {foreach from=$category->getFormattedInputfields() item="input"}
-              {if isset($errors['custominput'][$input['id']]) && $errors['custominput'][$input['id']] !== false}
-                {if $errors['custominput'][$input['id']] !== false}
-                  <li>{$errors['custominput'][$input['id']]}</li>
-                {/if}
-              {/if}
-            {/foreach}
-          </ul>
-        </div>
+        {if isset($tpl['post']['category']) && !$success}
+          {if $tpl['post']['category'] == $category->categoryID}
+            <div class="ui error message">
+              <ul class="list">
+                {foreach from=$category->getFormattedInputfields() item="input"}
+                  {if isset($errors['custominput'][$input['id']]) && $errors['custominput'][$input['id']] !== false}
+                    {if $errors['custominput'][$input['id']] !== false}
+                      <li>{$errors['custominput'][$input['id']]}</li>
+                    {/if}
+                  {/if}
+                {/foreach}
+              </ul>
+            </div>
+          {/if}
+        {/if}
       {/if}
     {/foreach}
     {if $errors['title'] !== false || $errors['category'] !== false || $errors['text'] !== false || $errors['token'] !== false}
@@ -99,7 +103,7 @@ $('.ui.selection.dropdown.category').dropdown({
             selected: true,
           {/if}
         {/if}
-          name: "{$category->getName()}",
+          name: "<span class='ui label {$category->getColor()}'>{$category->getName()}</span>",
           value: "{$category->categoryID}"
         },
       {/foreach}

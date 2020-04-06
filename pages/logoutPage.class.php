@@ -1,6 +1,7 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\CRSF;
 
 class logoutPage extends Page {
@@ -11,7 +12,7 @@ class logoutPage extends Page {
         if(isset($parameters['token']) && !empty($parameters['token'])) {
             if(CRSF::validate($parameters['token'])) {
                 session_destroy();
-                Utils::redirect("index.php?login");
+                Utils::redirect(Link::get("login"));
                 $this->result = "Du wurdest erfolgreich ausgeloggt.";
             } else {
                 $this->result = "Dein CRSF Token stimmt nicht überein, bitte lade die Seite neu.";

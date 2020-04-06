@@ -10,12 +10,17 @@
                 <p>
                     <ul class="ui list">
                         {if $__KT['user']->hasPermission("admin.acp.page.dashboard")}
-                            <a class="item" href="index.php?admin/">Dashboard</a>
+                            <a class="item" href="{link url="admin"}">Dashboard</a>
                         {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.settings")}
-                            <a class="item" href="index.php?admin/settings">Einstellungen</a>
+                            <a class="item" href="{link url="admin/settings"}">Einstellungen</a>
                         {/if}
-                        
+                        {if $__KT['user']->hasPermission("admin.acp.page.cleanup")}
+                            <a class="item" href="{link url="admin/cleanup"}">Aufräumarbeiten</a>
+                        {/if}
+                        {if $__KT['user']->hasPermission("admin.acp.page.errors")}
+                            <a class="item" href="{link url="admin/errors"}">Fehler</a>
+                        {/if}
                     </ul>
                 </p>
             </div>
@@ -27,16 +32,16 @@
                 <p>
                     <ul class="ui list">
                         {if $__KT['user']->hasPermission("admin.acp.page.faq")}
-                            <a class="item" href="index.php?admin/faq">FAQ</a>
+                            <a class="item" href="{link url="admin/faq"}">FAQ</a>
                         {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.faqcategories")}
-                            <a class="item" href="index.php?admin/faqcategories">FAQ Kategorien</a>
+                            <a class="item" href="{link url="admin/faqcategories"}">FAQ Kategorien</a>
                         {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.pages")}
-                            <a class="item" href="index.php?admin/pages">Seiten</a>
+                            <a class="item" href="{link url="admin/pages"}">Seiten</a>
                         {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.ticketcategories")}
-                            <a class="item" href="index.php?admin/ticketcategories">Ticket Kategorien</a>
+                            <a class="item" href="{link url="admin/ticketcategories"}">Ticket Kategorien</a>
                         {/if}
                     </ul>
                 </p>
@@ -49,10 +54,10 @@
                 <p>
                     <ul class="ui list">
                         {if $__KT['user']->hasPermission("admin.acp.page.accounts")}
-                            <a class="item" href="index.php?admin/accounts">Accounts</a>
+                            <a class="item" href="{link url="admin/accounts"}">Accounts</a>
                         {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.groups")}
-                            <a class="item" href="index.php?admin/groups">Benutzergruppen</a>
+                            <a class="item" href="{link url="admin/groups"}">Benutzergruppen</a>
                         {/if}
                     </ul>
                 </p>

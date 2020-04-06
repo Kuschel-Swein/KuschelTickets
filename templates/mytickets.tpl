@@ -26,7 +26,7 @@
 <div class="five wide column right floated">
   <br>
   {if $__KT['user']->hasPermission("general.tickets.add")}
-    <a class="ui blue button right floated" href="index.php?addticket">Ticket erstellen</a>
+    <a class="ui blue button right floated" href="{link url="addticket"}">Ticket erstellen</a>
   {/if}
 </div>
 </div>
@@ -46,8 +46,8 @@
     {foreach from=$tickets item="ticket"}
     <tr>
       <td data-label="ID">{$ticket->ticketID}</td>
-      <td data-label="Titel"><a href="index.php?ticket-{$ticket->ticketID}">{$ticket->getTitle()}</a></td>
-      <td data-label="Kategorie">{$ticket->getCategory()}</a></td>
+      <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
+      <td data-label="Kategorie"><span class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</span></td>
       <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
       <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
     </tr>

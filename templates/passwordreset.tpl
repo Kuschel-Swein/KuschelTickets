@@ -2,7 +2,7 @@
 <div class="ui grid container">
   <div class="column centered">
     {if !$token}
-    <form class="ui form{if $errors['email'] !== false || $errors['recaptcha'] !== false} error{/if}{if $result !== false} success{/if}" action="index.php?passwordreset" method="post">
+    <form class="ui form{if $errors['email'] !== false || $errors['recaptcha'] !== false} error{/if}{if $result !== false} success{/if}" action="{link url="passwordreset"}" method="post">
       <div class="field required{if $errors['email'] !== false} error{/if}">
         <label>E-Mail Adresse</label>
         <div class="ui input">
@@ -33,7 +33,7 @@
     </form>
     {else}
       {if $errors['token'] == false}
-        <form class="ui form{if $errors['password'] !== false || $errors['password_confirm'] !== false || $errors['recaptcha'] !== false} error{/if}{if $result !== false} success{/if}" action="index.php?passwordreset/token-{$tokenkey}" method="post">
+        <form class="ui form{if $errors['password'] !== false || $errors['password_confirm'] !== false || $errors['recaptcha'] !== false} error{/if}{if $result !== false} success{/if}" action="{link url="passwordreset/token-{$tokenkey}"}" method="post">
           <div class="field required{if $errors['password'] !== false} error{/if}">
             <label>neues Passwort</label>
             <div class="ui input">
@@ -84,8 +84,8 @@
         Oder
       </div>
       <div class="ui horizontal bulleted list">
-        <a class="item" href="index.php?register">Registrieren</a>
-        <a class="item" href="index.php?login">Einloggen</a>
+        <a class="item" href="{link url="register"}">Registrieren</a>
+        <a class="item" href="{link url="login"}">Einloggen</a>
       </div>
     </div>
   </div>

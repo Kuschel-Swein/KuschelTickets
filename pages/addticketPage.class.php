@@ -1,9 +1,12 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\system\Notification;
+use KuschelTickets\lib\Exceptions\AccessDeniedException;
 use KuschelTickets\lib\system\TicketCategory;
 use KuschelTickets\lib\recaptcha;
 
@@ -32,7 +35,6 @@ class addticketpage extends Page {
         }
 
         if(isset($parameters['submit'])) {
-           
             if(recaptcha::validate("addticket")) {
                 if(isset($parameters['CRSF']) && !empty($parameters['CRSF'])) {
                     if(CRSF::validate($parameters['CRSF'])) {
@@ -62,21 +64,40 @@ class addticketpage extends Page {
                                         if($category_exists) {
                                             $text = Utils::purify($parameters['text']);
                                             $customfields = "";
-                                            foreach($result['results'] as $response) {
-                                                $customfields = $customfields.$response;
+                                            if(isset($result['results'])) {
+                                                foreach($result['results'] as $response) {
+                                                    $customfields = $customfields.$response;
+                                                }
                                             }
-                                            if(!empty($text)) {
+                                            if(!empty($text) && $text !== "<p></p>") {
                                                     $text = $customfields.$text;
                                                     $title = strip_tags($parameters['title']);
                                                     $category = $cat->getName();
-                                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_tickets(`creator`, `title`, `category`, `content`, `state`, `time`) VALUES (?, ?, ?, ? , 1, ?)");
+                                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_tickets(`creator`, `title`, `category`, `content`, `state`, `time`, `color`) VALUES (?, ?, ?, ? , 1, ?, ?)");
                                                     $time = time();
-                                                    $stmt->execute([$user->userID, $title, $category, $text, $time]);
+                                                    $color = $cat->getColor();
+                                                    $stmt->execute([$user->userID, $title, $category, $text, $time, $color]);
                                                     $this->success = true;
                                                     $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? AND time = ? LIMIT 1");
                                                     $stmt->execute([$user->userID, $time]);
-                                                    $row = $stmt->fetch();
-                                                    Utils::redirect("index.php?ticket-".$row['ticketID']);
+                                                    $r = $stmt->fetch();
+
+                                                    $nonotify = false;
+                                                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
+                                                    $stmt->execute();
+                                                    while($row = $stmt->fetch()) {
+                                                        $account = new User((int) $row['userID']);
+                                                        if($account->hasPermission("mod.view.tickets.list")) {
+                                                            Notification::create("notification_ticket_new", "Es wurde ein neues Ticket von ".$user->getUserName()." in der Kategorie ".$cat->getName()." erstellt.", "ticket-".$r['ticketID'], $account);
+                                                            if($account->userID == $user->userID) {
+                                                                $nonotify = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if(!$nonotify) {
+                                                        Notification::create("notification_ticket_new", "Es wurde ein neues Ticket von ".$user->getUserName()." in der Kategorie ".$cat->getName()." erstellt.", "ticket-".$r['ticketID'], $user);
+                                                    }
+                                                    Utils::redirect(Link::get("ticket-".$r['ticketID']));
                                             } else {
                                                 $this->errors['text'] = "Bitte gib einen Text an.";
                                             }

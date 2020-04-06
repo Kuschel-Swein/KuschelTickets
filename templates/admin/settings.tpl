@@ -4,7 +4,7 @@
         {assign var="errors" value="true"}
     {/if}
 {/foreach}
-<form class="ui form{if $errors == "true"} error{/if} {if $site['success'] !== false} success{/if}" action="index.php?admin/settings" method="post">
+<form class="ui form{if $errors == "true"} error{/if} {if $site['success'] !== false} success{/if}" action="{link url="admin/settings"}" method="post" enctype="multipart/form-data">
     <div class="ui tabmenu secondary pointing menu">
   <a class="active item" data-tab="first">
     Allgemeines
@@ -65,7 +65,74 @@
         </div>
         </div>
     </div>
-
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['seourls']} checked{/if} name="seourls">
+            <label>SEO freundliche URLs verwenden</label>
+        </div>
+        <br>
+        <small class="helper">dein <b>APACHE</b> Webserver muss das <i>rewrite</i> Modul unterstützen</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['emailnotifications']} checked{/if} name="emailnotifications">
+            <label>E-Mail Benachrichtigungen erlauben</label>
+        </div>
+        <br>
+        <small class="helper">Wenn du dies deaktivierst, können Benutzer nurnoch Benachrichtigungen über das eingebaute Benachrichtigungsystem erhalten.</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['externalURLFavicons']} checked{/if} name="externalURLFavicons">
+            <label>Favicon externer Links anzeigen</label>
+        </div>
+        <br>
+        <small class="helper">Hier wird der Favicon Dienst von <a href="https://www.google.com/s2/favicons?domain=google.com" target="_blank">Google</a> verwendet, und das Bild über den internen Bilder Proxy eingebungen.<br>
+        Bei vielen externen Links kann dieses Feature zu längeren Ladezeiten führen.</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['useDesktopNotification']} checked{/if} name="useDesktopNotification">
+            <label>Desktop Benachrichtigungen verwenden</label>
+        </div>
+        <br>
+        <small class="helper">Dieses Feature wird nicht auf allen Browsern unterstützt, speziell bei Mobilen Browsern ist dieses Feature weniger verfügbar.</small>
+    </div>
+    <div class="field{if $site['errors']['favicon'] !== false} error{/if}">
+        <label>Favicon der Website</label>
+        <div class="ui labeled input">
+            <div class="ui label" data-tooltip="aktuelles Favicon">
+                <img src="{$__KT['mainurl']}data/favicon.{$site['config']['faviconextension']}" style="width: 15px!important; height:16px!important;">
+            </div>
+            <input type="text" placeholder="Klicke um eine Datei zu wählen..." readonly>
+            <input type="file" accept="image/*" name="favicon">
+        </div>
+        <small>Lädst du hier eine Datei hoch, wird das aktuelle Favicon permanent überschrieben.<br>
+        Dieses Bild wird auch, wenn aktiviert als Icon für Desktiop Benachrichtigungen verwendet.</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['externalURLTitle']} checked{/if} name="externalURLTitle">
+            <label>Titel externer Links statt URL anzeigen</label>
+        </div>
+        <br>
+        <small class="helper">Dieses Feature kann bei vielen Links zu einem erhöhten Traffic und zu längeren Seiteladezeiten führen.<br>
+        Dieses Feature hat leider keine 100%-tige Erfolgswahrscheinlichkeit.</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['proxyAllImages']} checked{/if} name="proxyAllImages">
+            <label>externe Bilder über den internen Bilder Proxy anzeigen</label>
+        </div>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['externalURLWarning']} checked{/if} name="externalURLWarning">
+            <label>auf externe Links hinweisen</label>
+        </div>
+        <br>
+        <small>Bevor der Benutzer deine Website verlässt, wird ihm ein Fenster angezeigt, in welchem er bestätigen muss, dass er deine Website verlassen möchte.</small>
+    </div>
 </div>
 <div class="ui tab" data-tab="second">
     <div class="field required{if $site['errors']['databasedatabase'] !== false} error{/if}">
@@ -207,6 +274,14 @@
 {/if}
 </form>
 <script>
+$("input:text").click(function() {
+    $(this).parent().find("input:file").click();
+});
+    
+$('input:file', '.ui.labeled.input').on('change', function(e) {
+    var name = e.target.files[0].name;
+    $('input:text', $(e.target).parent()).val(name);
+});
 $('.menu .item').tab();
 $('.ui.selection.dropdown.states.closecolor').dropdown({
     values: [
@@ -309,6 +384,20 @@ $('.ui.selection.dropdown.recaptchacases').dropdown({
             {/if}
             name: "Accountverwaltung",
             value: "accountmanagement"
+        },
+        {
+            {if "notificationsettings"|in_array:$site['config']['recaptcha']['cases']}
+            selected: true,
+            {/if}
+            name: "Benachrichtigunseinstellungen",
+            value: "notificationsettings"
+        },
+        {
+            {if "editortemplates"|in_array:$site['config']['recaptcha']['cases']}
+            selected: true,
+            {/if}
+            name: "Editorvorlagen",
+            value: "editortemplates"
         }
     ],
 });

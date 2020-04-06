@@ -1,5 +1,5 @@
 {include file="header.tpl" title="Account Verwaltung"}
-<form class="ui form{if $errors['password'] !== false || $errors['username'] !== false || $errors['email'] !== false || $errors['password_new'] !== false || $errors['password_new_confirm'] !== false} error{/if}{if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false} success{/if}" action="index.php?accountmanagement" method="post">
+<form class="ui form{if $errors['password'] !== false || $errors['username'] !== false || $errors['email'] !== false || $errors['password_new'] !== false || $errors['password_new_confirm'] !== false} error{/if}{if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false} success{/if}" action="{link url="accountmanagement"}" method="post">
     <div class="field required{if $errors['password'] !== false} error{/if}">
         <label>Passwort</label>
         <div class="ui input">

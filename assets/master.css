@@ -1,0 +1,125 @@
+html {
+    scroll-behavior: smooth;
+}
+#content {
+    margin: 5px;
+}
+.bbcodetable > tbody > tr > td {
+    padding: 5px;
+}
+.bbcodetable > tbody > tr > td > i {
+    font-style: italic!important;
+}
+[data-tooltip]:after {
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.12);
+    border-radius: 2px;
+    color: rgba(255, 255, 255,1);
+    padding: 5px 10px;
+}
+[data-tooltip]:hover:before {
+    display: none!important;
+}
+.block {
+    display: block !important;
+}
+.float-right {
+    float: right;
+}
+.groupBadge {
+    margin-right: 5px !important;
+}
+.ticketanswer {
+    margin-top: 30px;
+}
+.ticketspacer {
+    margin-top: 30px;
+}
+body {
+    min-height: 2000px;
+    padding-top: 54px;
+}
+.ui.menu {
+    box-shadow: none;
+    flex-wrap: wrap;
+    padding-left: 0;
+    padding-right: 0;
+}
+.ui.menu .header.item {
+    font-size: 18px;
+    font-weight: 400;
+}
+.ui.mobile.only.grid .ui.menu .ui.vertical.menu {
+    display: none;
+}
+.ui.mobile.only.grid .ui.vertical.menu .dropdown.icon {
+    float: unset;
+}
+.ui.mobile.only.grid .ui.vertical.menu .dropdown.icon:before {
+    content: "\f0d7";
+}
+.ui.mobile.only.grid .ui.vertical.menu .ui.dropdown.item .menu {
+    position: static;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+}
+.ui.mobile.only.grid .ui.vertical.menu .ui.dropdown.item .menu {
+    margin-top: 6px;
+}
+.rightmenu {
+    position: relative;
+    right: 0;
+}
+.display-none {
+    display: none;
+}
+.ui.form .required.field > .checkbox:after {
+    content: '';
+}
+.field.error small.helper {
+    color: #9F3A38 !important;
+}
+.ui.menu.fixed {
+    z-index: 100;
+}
+.display-block {
+    display: block !important;
+}
+blockquote {
+    border-left: 3px solid #ccc;
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.customInputListEntry {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.g-recaptcha iframe {
+    max-width: 100%;
+}
+.notificationsheader {
+    padding-left: 50px!important;
+    padding-right: 50px!important;
+}
+.notificationslistbutton {
+    width: 100%;
+}
+.pointer {
+    cursor: pointer;
+}
+.notificationbadge {
+    padding: 2px 3px!important;
+    top: 10px!important;
+    left: 47px!important;
+}
+.notificationbadgehandler {
+    display: none;
+}
+.overflow-x-auto {
+    overflow-x: auto!important;
+}
+.ui.labeled.input input[type="file"] {
+    display: none;
+}

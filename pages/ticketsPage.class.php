@@ -4,6 +4,7 @@ use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\Ticket;
 use KuschelTickets\lib\Exceptions\AccessDeniedException;
+use KuschelTickets\lib\system\TicketCategory;
 
 class ticketsPage extends Page {
 
@@ -25,7 +26,7 @@ class ticketsPage extends Page {
         while($row = $stmt->fetch()) {
             array_push($tickets, new Ticket((int) $row['ticketID']));
         }
-        $this->tickets = $user->getTickets();
+        $this->tickets = $tickets;
     }
 
     public function assign() {

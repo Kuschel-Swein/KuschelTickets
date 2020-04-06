@@ -2,6 +2,7 @@
 namespace KuschelTickets\lib\system;
 use KuschelTickets\lib\system\Ticket;
 use KuschelTickets\lib\system\Group;
+use KuschelTickets\lib\system\Notification;
 
 class User {
 
@@ -97,7 +98,7 @@ class User {
     public function getTickets() {
         global $config;
 
-        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ?");
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? ORDER BY ticketID DESC");
         $stmt->execute([$this->userID]);
         $tickets = [];
         while($row = $stmt->fetch()) {
@@ -107,6 +108,52 @@ class User {
         return $tickets;
     }
 
+    public function getEditorTemplates() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ?");
+        $stmt->execute([$this->userID]);
+        $templates = [];
+        while($row = $stmt->fetch()) {
+            array_push($templates, $row);
+        }
+        return $templates;
+    }
+
+    public function getNotifications(bool $onlyNotDone = false) {
+        global $config;
+
+        if(!$onlyNotDone) {
+            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_notifications WHERE userID = ?");
+        } else {
+            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_notifications WHERE userID = ? AND done = 0");
+        }
+        $stmt->execute([$this->userID]);
+        $notifications = [];
+        while($row = $stmt->fetch()) {
+            array_push($notifications, new Notification((int) $row['notificationID']));
+        }
+        return $notifications;
+    }
+
+    public function getNotificationType(String $identifier) {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts WHERE userID = ?");
+        $stmt->execute([$this->userID]);
+        $row = $stmt->fetch();
+        if($row['notificationsettings'] !== "") {
+            $data = json_decode($row['notificationsettings'], true);
+            $result = $data[$identifier];
+            if($result == null) {
+                $result = "normal";
+            }
+        } else {
+            $result = "normal";
+        }
+        return $result;
+    }
+
     public function exists() {
         global $config;
 
@@ -114,5 +161,9 @@ class User {
         $stmt->execute([$this->userID]);
         $row = $stmt->fetch();
         return $row !== false;
+    }
+
+    public function getTicketCount() {
+        return count($this->getTickets());
     }
 }

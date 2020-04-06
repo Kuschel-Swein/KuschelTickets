@@ -18,6 +18,15 @@ class TicketCategory {
         return $row['categoryName'];
     }
 
+    public function getColor() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryID = ?");
+        $stmt->execute([$this->categoryID]);
+        $row = $stmt->fetch();
+        return $row['color'];
+    }
+
     public function getInputJSON() {
         global $config;
 

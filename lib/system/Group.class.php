@@ -69,4 +69,16 @@ class Group {
         }
         return $permissions;
     }
+
+    public static function getAllGroups() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups");
+        $stmt->execute();
+        $groups = [];
+        while($row = $stmt->fetch()) {
+            array_push($groups, new Group($row['groupID']));
+        }
+        return $groups;
+    }
 }

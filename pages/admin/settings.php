@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-$validrecaptchauasecase = ['login', 'registration', 'passwordreset', 'addticket', 'ticketanswer', 'accountmanagement'];
+$validrecaptchauasecase = ['login', 'registration', 'passwordreset', 'addticket', 'ticketanswer', 'accountmanagement', 'notificationsettings', 'editortemplates'];
 
 $errors = array(
     "pagetitle" => false,
@@ -30,7 +30,8 @@ $errors = array(
     "recaptchapublic" => false,
     "recaptchaprivate" => false,
     "recaptchacases" => false,
-    "token" => false
+    "token" => false,
+    "favicon" => false
 );
 
 $success = false;
@@ -152,7 +153,41 @@ if(isset($parameters['submit'])) {
                                                                                                             $errors['recaptchaversion'] = "Bitte wähle die reCaptcha Version";
                                                                                                         }
                                                                                                     }
-                                                                                                    if($validrecaptcha) {
+                                                                                                    $validfavicon = false;
+                                                                                                    $faviconextension = "";
+                                                                                                    if(!empty($_FILES['favicon']['name'])) {
+                                                                                                        $check = getimagesize($_FILES['favicon']['tmp_name']);
+                                                                                                        if($check !== false) {
+                                                                                                            $extensions = ['png', 'jpg', 'jpeg', 'ico'];
+                                                                                                            $extension = strtolower(pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION));
+                                                                                                            if(in_array($extension, $extensions)) {
+                                                                                                                if(file_exists("./data/favicon.".$config['faviconextension'])) {
+                                                                                                                    unlink("./data/favicon.".$config['faviconextension']);
+                                                                                                                }
+                                                                                                                move_uploaded_file($_FILES['favicon']['tmp_name'], "./data/favicon.".$extension);
+                                                                                                                $faviconextension = $extension;
+                                                                                                                $faviconmime = $check['mime'];
+                                                                                                                $validfavicon = true;
+                                                                                                            } else {
+                                                                                                                $extensionserror = "";
+                                                                                                                for($i = 0; $i < count($extensions); $i++) {
+                                                                                                                    if($i == 0) {
+                                                                                                                        $extensionserror = ".".$extensions[$i];
+                                                                                                                    } else {
+                                                                                                                        $extensionserror = $extensionserror.", .".$extensions[$i];
+                                                                                                                    }
+                                                                                                                }
+                                                                                                                $errors['favicon'] = "Dein Favicon muss ein Bild sein. Es sind nur ".$extensionserror;
+                                                                                                            }
+                                                                                                        } else {
+                                                                                                            $errors['favicon'] = "Dein Favicon muss ein Bild sein.";
+                                                                                                        }
+                                                                                                    } else {
+                                                                                                        $validfavicon = true;
+                                                                                                        $faviconextension = $config['faviconextension'];
+                                                                                                        $faviconmime = $config['faviconmime'];
+                                                                                                    }
+                                                                                                    if($validrecaptcha && $validfavicon) {
                                                                                                         // SAVE THE CONFIG FILE
                                                                                                         $recaptchacases = explode(",", $parameters['recaptchacases']);
                                                                                                         $count = count($recaptchacases);
@@ -164,8 +199,84 @@ if(isset($parameters['submit'])) {
                                                                                                                 $recaptchacases_ready = $recaptchacases_ready."'".$recaptchacases[$i]."'";
                                                                                                             }
                                                                                                         }
-                                                                                                        $smtpauth = ($parameters['smtpauth'] == "on") ? "true" : "false";
-                                                                                                        $recaptchause = ($parameters['recaptchause'] == "on") ? "true" : "false";
+                                                                                                        if(isset($parameters['smtpauth'])) {
+                                                                                                            $smtpauth = ($parameters['smtpauth'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $smtpauth = "false";
+                                                                                                        }
+                                                                                                        if(isset($parameters['recaptchause'])) {
+                                                                                                            $recaptchause = ($parameters['recaptchause'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $recaptchause = "false";
+                                                                                                        }
+                                                                                                        
+                                                                                                        if(isset($parameters['seourls'])) {
+                                                                                                            $seourls = ($parameters['seourls'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $seourls = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['externalURLFavicons'])) {
+                                                                                                            $externalURLFavicons = ($parameters['externalURLFavicons'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $externalURLFavicons = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['emailnotifications'])) {
+                                                                                                            $emailnotifications = ($parameters['emailnotifications'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $emailnotifications = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['useDesktopNotification'])) {
+                                                                                                            $useDesktopNotification = ($parameters['useDesktopNotification'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $useDesktopNotification = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['externalURLTitle'])) {
+                                                                                                            $externalURLTitle = ($parameters['externalURLTitle'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $externalURLTitle = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['proxyAllImages'])) {
+                                                                                                            $proxyAllImages = ($parameters['proxyAllImages'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $proxyAllImages = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['externalURLWarning'])) {
+                                                                                                            $externalURLWarning = ($parameters['externalURLWarning'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $externalURLWarning = "false";
+                                                                                                        }
+
+                                                                                                        $htcode = PHP_EOL.
+                                                                                                        '# KuschelTickets SEO Rewrite'.PHP_EOL.
+                                                                                                        '<IfModule mod_rewrite.c>'.PHP_EOL.
+                                                                                                        'RewriteEngine on'.PHP_EOL.
+                                                                                                        'RewriteCond %{SCRIPT_FILENAME} !-d'.PHP_EOL.
+                                                                                                        'RewriteCond %{SCRIPT_FILENAME} !-f'.PHP_EOL.
+                                                                                                        'RewriteRule ^(.*)$ index.php?$1 [L,QSA]'.PHP_EOL.
+                                                                                                        '</IfModule>'.PHP_EOL.
+                                                                                                        ''.PHP_EOL;
+                                                                                                        if($seourls == "true") {
+                                                                                                            $htaccess = fopen(".htaccess", "w");
+                                                                                                            $content = file_get_contents(".htaccess", true);
+                                                                                                            if(strpos($content, $htcode) === false) {
+                                                                                                                fwrite($htaccess, $content.$htcode);
+                                                                                                            }
+                                                                                                            fclose($htaccess);
+                                                                                                        } else {
+                                                                                                            $htaccess = fopen(".htaccess", "w");
+                                                                                                            $content = file_get_contents(".htaccess", true);
+                                                                                                            if(strpos($content, $htcode) !== false) {
+                                                                                                                $content = str_replace($htcode, "", $content);
+                                                                                                                fwrite($htaccess, $content);
+                                                                                                            }
+                                                                                                            fclose($htaccess);
+                                                                                                        }
                                                                                                         $file = fopen("config.php", "w");
                                                                                                         fwrite($file, '<?php' . PHP_EOL . '  /*' . PHP_EOL . '      Automatisch erstellte Config-Datei    ' . PHP_EOL . '      Erstellt am ' . date('d.m.Y  H:i:s') . '    ' . PHP_EOL . '  */'.PHP_EOL.
                                                                                                         '$database = array('.PHP_EOL.
@@ -187,6 +298,15 @@ if(isset($parameters['submit'])) {
                                                                                                         '        "database" => false'.PHP_EOL.
                                                                                                         '    ),'.PHP_EOL.
                                                                                                         '    "cookie" => "'.$parameters['cookie'].'",'.PHP_EOL.
+                                                                                                        '    "seourls" => '.$seourls.','.PHP_EOL.
+                                                                                                        '    "faviconextension" => "'.$faviconextension.'",'.PHP_EOL.
+                                                                                                        '    "externalURLTitle" => '.$externalURLTitle.','.PHP_EOL.
+                                                                                                        '    "faviconmime" => "'.$faviconmime.'",'.PHP_EOL.
+                                                                                                        '    "proxyAllImages" => '.$proxyAllImages.','.PHP_EOL.
+                                                                                                        '    "externalURLFavicons" => '.$externalURLFavicons.','.PHP_EOL.
+                                                                                                        '    "externalURLWarning" => '.$externalURLWarning.','.PHP_EOL.
+                                                                                                        '    "useDesktopNotification" => '.$useDesktopNotification.','.PHP_EOL.
+                                                                                                        '    "emailnotifications" => '.$emailnotifications.','.PHP_EOL.
                                                                                                         '    "adminmail" => "'.$parameters['adminmail'].'",'.PHP_EOL.
                                                                                                         '    "mail" => array('.PHP_EOL.
                                                                                                         '        "host" => "'.$parameters['smtphost'].'",'.PHP_EOL.

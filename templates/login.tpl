@@ -1,7 +1,7 @@
 {include file="header.tpl" title="Login"}
 <div class="ui grid container">
   <div class="column centered">
-    <form class="ui form{if $errors['username'] !== false || $errors['password'] !== false || $errors['token'] !== false} error{/if}" action="index.php?login" method="post">
+    <form class="ui form{if $errors['username'] !== false || $errors['password'] !== false || $errors['token'] !== false} error{/if}" action="{link url="login"}" method="post">
       <div class="field required{if $errors['username'] !== false} error{/if}">
         <label>Benutzername</label>
         <div class="ui left input">
@@ -37,8 +37,8 @@
         Oder
       </div>
       <div class="ui horizontal bulleted list">
-        <a class="item" href="index.php?register">Registrieren</a>
-        <a class="item" href="index.php?passwordreset">Passwort vergessen</a>
+        <a class="item" href="{link url="register"}">Registrieren</a>
+        <a class="item" href="{link url="passwordreset"}">Passwort vergessen</a>
       </div>
     </div>
   </div>

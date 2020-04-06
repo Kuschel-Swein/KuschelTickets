@@ -1,0 +1,8 @@
+<Files ~ "\.txt$">  
+Order Allow,Deny
+Deny from All
+</Files>
+<Files ~ "\.php$">  
+Order Allow,Deny
+Deny from All
+</Files>

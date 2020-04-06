@@ -24,7 +24,7 @@
       </div>
       <div class="four wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/accounts/add">Account erstellen</a>
+        <a class="ui blue button right floated" href="{link url="admin/accounts/add"}">Account erstellen</a>
       </div>
     </div>
     
@@ -37,6 +37,7 @@
             <th>Benutzername</th>
             <th>E-Mail</th>
             <th>Benutzergruppe</th>
+            <th>Tickets</th>
             <th>Gesperrt</th>
             <th>Aktion</th>
         </tr>
@@ -48,20 +49,24 @@
         <td data-label="Benutzername">{$account->getUserName()}</a></td>
         <td data-label="E-Mail"><a href="mailto:{$account->getEmail()}">{$account->getEmail()}</a></td>
         <td data-label="Benutzergruppe">{$account->getGroup()->getGroupName()}</td>
+        <td data-label="Tickets">{$account->getTicketCount()}</td>
         <td data-label="Gesperrt">{if $account->isBanned()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</td>
         <td data-label="Aktion">
           {if !$account->hasPermission("admin.bypass.bannable")}
-            <a href="index.php?admin/accounts/ban-{$account->userID}" data-tooltip="Sperrung verwalten"><i class="icon ban"></i></a>
+            <a href="{link url="admin/accounts/ban-{$account->userID}"}" data-tooltip="Sperrung verwalten"><i class="icon ban"></i></a>
           {/if}
           {if !$account->hasPermission("admin.bypass.delete") && $account->userID !== $__KT['user']->userID}
             <a href="javascript:deleteUser({$account->userID});" data-tooltip="Löschen"><i class="icon times"></i></a>
           {/if}
-            <a href="index.php?admin/accounts/edit-{$account->userID}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+          {if !$__KT['user']->hasPermission("admin.login.other") && $account->userID !== $__KT['user']->userID && !$account->hasPermission("admin.bypass.login.other")}
+            <a href="javascript:loginAs({$account->userID});" data-tooltip="als dieser Benutzer einloggen"><i class="icon lock"></i></a>
+          {/if}
+            <a href="{link url="admin/accounts/edit-{$account->userID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
         <tr>
-            <td colspan="6">
+            <td colspan="7">
                 <div class="ui info message">
                     <ul class="list">
                         <li>Es wurden noch keine Benutzer erstellt. Dieser Fehler sollte nicht auftreten.</li>
@@ -77,33 +82,38 @@
             modal.confirm("Möchtest du diesen Account wirklich löschen. Dies kann nicht rückgängig gemacht werden.", function() {
                 var data = ajax.call(10, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#accountentry" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="7"><div class="ui info message"><ul class="list"><li>Es wurden noch keine Benutzer erstellt. Dieser Fehler sollte nicht auftreten.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#accountentry" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
+        }
+        function loginAs(id) {
+          modal.confirm("Möchtest du dich wirklich als dieser Benutzer einloggen? Du musst dich erst wieder ausloggen und einloggen um wieder in deinen Account zu gelangen.", function() {
+            var data = ajax.call(4, id);
+                if(data['success'] !== undefined) {
+                    toast.create(data['title'], data['message'], "success");
+                } else {
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
+                }
+          });
         }
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "ban"}
-<a class="ui blue button right floated" href="index.php?admin/accounts">Accounts Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/accounts"}">Accounts Auflisten</a>
 <br>
 <br>
 {if $site['banuser']->userID == $__KT['user']->userID}
@@ -113,7 +123,7 @@
   </ul>
 </div>
 {/if}
-<form class="ui form{if $site['errors']['reason'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/accounts/ban-{$site['banuser']->userID}" method="post">
+<form class="ui form{if $site['errors']['reason'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/accounts/ban-{$site['banuser']->userID}"}" method="post">
     {if $site['banuser']->isBanned()}
     <div class="field">
       <label>Sperrungsgrund</label>
@@ -161,10 +171,10 @@
   </form>
   {include file="wysiwyg.tpl" selector="#text"}
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/accounts">Accounts Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/accounts"}">Accounts Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['username'] !== false || $site['errors']['email'] !== false || $site['errors']['group'] !== false || $site['errors']['password'] !== false || $site['errors']['password_confirm'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] == true} success{/if}" action="index.php?admin/accounts/add" method="post">
+<form class="ui form{if $site['errors']['username'] !== false || $site['errors']['email'] !== false || $site['errors']['group'] !== false || $site['errors']['password'] !== false || $site['errors']['password_confirm'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] == true} success{/if}" action="{link url="admin/accounts/add"}" method="post">
 <div class="field required{if $site['errors']['username'] !== false} error{/if}">
   <label>Benutzername</label>
   <div class="ui input">
@@ -251,7 +261,7 @@ $('.ui.selection.dropdown.usergroup').dropdown({
 </script>
 </form>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/accounts">Accounts Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/accounts"}">Accounts Auflisten</a>
 <br>
 <br>
 {if $site['edituser']->userID == $__KT['user']->userID}
@@ -261,7 +271,7 @@ $('.ui.selection.dropdown.usergroup').dropdown({
   </ul>
 </div>
 {/if}
-<form class="ui form{if $site['errors']['username'] !== false || $site['errors']['email'] !== false || $site['errors']['group'] !== false || $site['errors']['password'] !== false || $site['errors']['password_confirm'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] == true} success{/if}" action="index.php?admin/accounts/edit-{$site['edituser']->userID}" method="post">
+<form class="ui form{if $site['errors']['username'] !== false || $site['errors']['email'] !== false || $site['errors']['group'] !== false || $site['errors']['password'] !== false || $site['errors']['password_confirm'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] == true} success{/if}" action="{link url="admin/accounts/edit-{$site['edituser']->userID}"}" method="post">
 <div class="field required{if $site['errors']['username'] !== false} error{/if}">
   <label>Benutzername</label>
   <div class="ui input">

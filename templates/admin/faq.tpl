@@ -23,7 +23,7 @@
       </div>
       <div class="four wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/faq/add">FAQ erstellen</a>
+        <a class="ui blue button right floated" href="{link url="admin/faq/add"}">FAQ erstellen</a>
       </div>
     </div>
     
@@ -46,7 +46,7 @@
         <td data-label="Kategorie">{$faq->getCategoryName()}</td>
         <td data-label="Aktion">
             <a href="javascript:deleteFAQ({$faq->faqID});" data-tooltip="Löschen"><i class="icon times"></i></a>
-            <a href="index.php?admin/faq/edit-{$faq->faqID}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="{link url="admin/faq/edit-{$faq->faqID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
             <a href="javascript:showFAQ({$faq->faqID});" data-tooltip="Ansehen"><i class="icon eye"></i></a>
             <div id="faqanswer{$faq->faqID}" data-question="{$faq->getQuestion()}" class="display-none">{$faq->getAnswer()}</div>
         </td>
@@ -69,26 +69,21 @@
             modal.confirm("Möchtest du diesen Eintrag wirklich löschen. Dies kann nicht rückgängig gemacht werden.", function() {
                 var data = ajax.call(7, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#faqentry" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="4"><div class="ui info message"><ul class="list"><li>Es wurden noch keine FAQs eingetragen.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#faqentry" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
         }
@@ -104,10 +99,10 @@
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/faq">FAQs Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/faq"}">FAQs Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['category'] !== false || $site['errors']['question'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/faq/add" method="post">
+<form class="ui form{if $site['errors']['category'] !== false || $site['errors']['question'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faq/add"}" method="post">
     <div class="field required{if $site['errors']['category'] !== false} error{/if}">
         <label>Kategorie</label>
         <div class="ui selection dropdown category">
@@ -156,7 +151,7 @@
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text"}
+{include file="wysiwyg.tpl" template="false" selector="#text"}
 <script>
 $('.ui.selection.dropdown.category').dropdown({
     values: [
@@ -175,10 +170,10 @@ $('.ui.selection.dropdown.category').dropdown({
 });
 </script>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/faq">FAQs Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/faq"}">FAQs Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['category'] !== false || $site['errors']['question'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/faq/edit-{$site['faq']->faqID}" method="post">
+<form class="ui form{if $site['errors']['category'] !== false || $site['errors']['question'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faq/edit-{$site['faq']->faqID}"}" method="post">
     <div class="field required{if $site['errors']['category'] !== false} error{/if}">
         <label>Kategorie</label>
         <div class="ui selection dropdown category">
@@ -227,7 +222,7 @@ $('.ui.selection.dropdown.category').dropdown({
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text"}
+{include file="wysiwyg.tpl" template="false" selector="#text"}
 <script>
 $('.ui.selection.dropdown.category').dropdown({
     values: [

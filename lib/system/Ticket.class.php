@@ -1,5 +1,6 @@
 <?php
 namespace KuschelTickets\lib\system;
+use KuschelTickets\lib\system\TicketCategory;
 
 class Ticket {
 
@@ -16,6 +17,15 @@ class Ticket {
         $stmt->execute([$this->ticketID]);
         $row = $stmt->fetch();
         return $row['title'];
+    }
+
+    public function getColor() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE ticketID = ?");
+        $stmt->execute([$this->ticketID]);
+        $row = $stmt->fetch();
+        return $row['color'];
     }
 
     public function getCreator() {
@@ -87,6 +97,15 @@ class Ticket {
         $stmt->execute([$this->ticketID]);
         $row = $stmt->fetch();
         return $row['category'];
+    }
+
+    public function getCategoryObject() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
+        $stmt->execute([$this->getCategory()]);
+        $row = $stmt->fetch();
+        return new TicketCategory((int) $row['categoryID']);
     }
 
     public function exists() {

@@ -2,6 +2,7 @@
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\system\Group;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\Exceptions\AccessDeniedException;
@@ -65,6 +66,18 @@ class adminPage extends Page {
                 "link" => "ticketcategories",
                 "file" => "ticketcategories",
                 "title" => "Ticket Kategorien"
+            ),
+            array(
+                "permission" => "cleanup",
+                "link" => "cleanup",
+                "file" => "cleanup",
+                "title" => "Aufräumarbeiten"
+            ),
+            array(
+                "permission" => "errors",
+                "link" => "errors",
+                "file" => "errors",
+                "title" => "Fehler"
             )
         ];
 
@@ -79,11 +92,15 @@ class adminPage extends Page {
             }
         }
         // use get here because we only want the index page
-        if((isset($_GET['admin']) || isset($_GET['admin/'])) && $actualpage == null && $user->hasPermission("admin.acp.page.dashboard")) {
-            $actualpage = array(
-                "file" => "index",
-                "title" => "Dashboard"
-            );
+        if((isset($_GET['admin']) || isset($_GET['admin/'])) && $actualpage == null) {
+            if($user->hasPermission("admin.acp.page.dashboard")) {
+                $actualpage = array(
+                    "file" => "index",
+                    "title" => "Dashboard"
+                );
+            } else {
+                throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
+            }
         } 
         if($actualpage == null) {
             throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");

@@ -1,19 +1,30 @@
 {include file="header.tpl" title="Ticket"}
 <div class="column">
     <div class="ui middle attached segment">
-        <div class="ui blue ribbon label">{$ticket->getCategory()}</div>
+        <div class="ui {$ticket->getColor()} ribbon label">{$ticket->getCategory()}</div>
         {$ticket->getTitle()}
-        <div class="ui dropdown float-right">
-            <div class="text"><i class="cogs icon"></i></div>
-            <div class="menu">
-                {if $ticket->getState() == 1}
-                    <div class="item" data-value="1">Ticket schließen</div>
-                    <div class="item" data-value="3">Ticket als erledigt markieren</div>
-                {else}
-                    <div class="item" data-value="2">Ticket erneut öffnen</div>
-                {/if}
+        {if ($__KT['user']->hasPermission("mod.tickets.close") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.close.own"))) ||
+            ($__KT['user']->hasPermission("mod.tickets.done") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.done.own"))) ||
+            ($__KT['user']->hasPermission("mod.tickets.reopen") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.reopen.own")))
+        }
+            <div class="ui dropdown top right pointing settings float-right">
+                <div class="text" data-tooltip="Einstellungen"><i class="cogs icon"></i></div>
+                <div class="menu">
+                    {if $ticket->getState() == 1}
+                        {if $__KT['user']->hasPermission("mod.tickets.close") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.close.own"))}
+                            <div class="item" data-value="1">Ticket schließen</div>
+                        {/if}
+                        {if $__KT['user']->hasPermission("mod.tickets.done") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.done.own"))}
+                            <div class="item" data-value="3">Ticket als erledigt markieren</div>
+                        {/if}
+                    {else}
+                        {if $__KT['user']->hasPermission("mod.tickets.reopen") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.reopen.own"))}
+                            <div class="item" data-value="2">Ticket erneut öffnen</div>
+                        {/if}
+                    {/if}
+                </div>
             </div>
-        </div>
+        {/if}
     </div>
 </div>
 <br>
@@ -26,16 +37,47 @@
             <div class="six wide column right aligned">
                 {$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr
             </div>
-            <div class="three wide column right aligned">
-                {if $__KT['user']->hasPermission("general.tickets.deletemessage.own") && $ticket->getCreator()->userID == $__KT['user']->userID}
-            <a class="ui label deletebutton" data-id="{$ticket->ticketID}" data-type="6"><i class="icon trash"></i>Löschen</a>
-        {else if $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
-            <a class="ui label deletebutton" data-id="{$ticket->ticketID}" data-type="6"><i class="icon trash"></i>Löschen</a>
-        {/if}
+            <div class="column right aligned">
+                {if (($__KT['user']->hasPermission("general.tickets.delete.own") && $ticket->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("mod.tickets.delete")) || $__KT['user']->hasPermission("general.tickets.quote")}
+                    <div class="ui right aligned grid mobile only">
+                        <div class="column right aligned">
+                            <div class="ui small icon buttons">
+                                <div class="ui top right pointing dropdown button answeractions">
+                                    <i class="settings icon"></i>
+                                    <div class="menu">
+                                        {if ($__KT['user']->hasPermission("general.tickets.delete.own") && $ticket->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("mod.tickets.delete")}
+                                            <div class="item deletebutton" data-id="{$ticket->ticketID}" data-type="6">Löschen</div>
+                                        {/if}
+                                        {if $__KT['user']->hasPermission("general.tickets.quote")}
+                                            <div class="item quotebutton" data-username="{$ticket->getCreator()->getUserName()}" data-id="{$ticket->ticketID}" data-type="ticket">Zitieren</div>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
             </div>
         </div>
     </h4>
-    <div class="ui bottom attached segment">{$ticket->getContent()}</div>    
+    <div class="ui middle attached clearing segment">
+        <span id="ticketcontent{$ticket->ticketID}">
+            {$ticket->getContent()}
+        </span>
+        <br>
+        <div class="ui computer and tablet only grid">
+            <div class="column right aligned">
+                <div class="ui small icon buttons">
+                    {if ($__KT['user']->hasPermission("general.tickets.delete.own") && $ticket->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("mod.tickets.delete")}
+                        <button class="ui button deletebutton" data-tooltip="Löschen" data-id="{$ticket->ticketID}" data-type="6"><i class="icon trash"></i></button>
+                    {/if}
+                    {if $__KT['user']->hasPermission("general.tickets.quote")}
+                        <button class="ui button quotebutton" data-username="{$ticket->getCreator()->getUserName()}" data-id="{$ticket->ticketID}" data-type="ticket" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {foreach from=$ticket->getAnswers() item="answer"}
@@ -66,16 +108,47 @@
                 <div class="six wide column right aligned">
                     {$answer['time']|date_format:"%d.%m.%Y"}, {$answer['time']|date_format:"%H:%M"} Uhr
                 </div>
-                <div class="three wide column right aligned">
-                {if $__KT['user']->hasPermission("general.tickets.deletemessage.own") && $ticket->getCreator()->userID == $__KT['user']->userID}
-                    <a class="ui label deletebutton" data-id="{$answer['id']}" data-type="5"><i class="icon trash"></i>Löschen</a>
-                {else if $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
-                    <a class="ui label deletebutton" data-id="{$answer['id']}" data-type="5"><i class="icon trash"></i>Löschen</a>
-                {/if}
+                <div class="column right aligned">
+                    {if (($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")) || $__KT['user']->hasPermission("general.tickets.quote")}
+                        <div class="ui right aligned grid mobile only">
+                            <div class="column right aligned">
+                                <div class="ui small icon buttons">
+                                    <div class="ui top right pointing dropdown button answeractions">
+                                        <i class="settings icon"></i>
+                                        <div class="menu">
+                                            {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
+                                                <div class="item deletebutton" data-id="{$answer['id']}" data-type="5">Löschen</div>
+                                            {/if}
+                                            {if $__KT['user']->hasPermission("general.tickets.quote")}
+                                                <div class="item quotebutton" data-username="{$answer['creator']->getUserName()}" data-id="{$answer['id']}" data-type="answer">Zitieren</div>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                 </div>
             </div>
         </h4>
-        <div class="ui bottom attached segment">{$answer['content']}</div>
+        <div class="ui middle attached clearing segment">
+            <span id="ticketanswercontent{$answer['id']}">
+                {$answer['content']}
+            </span>
+            <br>
+            <div class="ui computer and tablet only grid">
+                <div class="column right aligned">
+                    <div class="ui small icon buttons">
+                        {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
+                            <button class="ui button deletebutton" data-tooltip="Löschen" data-id="{$answer['id']}" data-type="5"><i class="icon trash"></i></button>
+                        {/if}
+                        {if $__KT['user']->hasPermission("general.tickets.quote")}
+                            <button class="ui button quotebutton" data-username="{$answer['creator']->getUserName()}" data-id="{$answer['id']}" data-type="answer" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {/if}
 {/foreach}
@@ -84,7 +157,7 @@
 <div class="ticketspacer"></div>
 {if $__KT['user']->hasPermission("general.tickets.answer")}
     {if $ticket->getState() == 1}
-    <form id="addform" class="ui form{if $errors['text'] !== false || $errors['token'] !== false} error{/if}{if $success} success{/if}" action="index.php?ticket-{$ticket->ticketID}" method="post">
+    <form id="addform" class="ui form{if $errors['text'] !== false || $errors['token'] !== false} error{/if}{if $success} success{/if}" action="{link url="ticket-{$ticket->ticketID}"}" method="post">
         <div class="field{if $errors['text'] !== false} error{/if}">
             <label>Antwort</label>
             <textarea id="text" name="text">{if isset($tpl['post']['text']) && !$success}{$tpl['post']['text']}{/if}</textarea>
@@ -129,21 +202,13 @@
 {/if}
 {include file="wysiwyg.tpl" selector="#text"}
 <script>
-$(".ui.dropdown").dropdown({
+$(".ui.dropdown.settings").dropdown({
     action: 'select'
 });
-$('.ui.dropdown').dropdown('setting', 'onChange', function(value, text, $choice){
+$('.ui.dropdown.settings').dropdown('setting', 'onChange', function(value, text, $choice){
     var data = ajax.call(value, {$ticket->ticketID});
     if(data['success'] !== undefined) {
-        $.uiAlert({
-            textHead: data['title'],
-            text: data['message'],
-            bgcolor: "#21ba45",
-            textcolor: "#fff",
-            position: "top-right",
-            icon: 'check',
-            time: 3
-        });
+        toast.create(data['title'], data['message'], "success");
         if(tinymce.editors[0] !== undefined) {
             tinymce.remove(tinymce.editors[0]);
             document.getElementById("addform").remove();
@@ -152,15 +217,7 @@ $('.ui.dropdown').dropdown('setting', 'onChange', function(value, text, $choice)
             window.location.reload();
         }, 3000)
     } else {
-        $.uiAlert({
-            textHead: "Fehler",
-            text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-            bgcolor: "#d01919",
-            textcolor: "#fff",
-            position: "top-right",
-            icon: 'times',
-            time: 3
-        });
+        toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
     }
 });
 $(".deletebutton").click(function() {
@@ -169,15 +226,7 @@ $(".deletebutton").click(function() {
     modal.confirm("Möchtest du diesen Eintrag wirklich löschen. Dies kann nicht rückgängig gemacht werden.", function() {
         var data = ajax.call(type, id);
             if(data['success'] !== undefined) {
-                $.uiAlert({
-                    textHead: data['title'],
-                    text: data['message'],
-                    bgcolor: "#21ba45",
-                    textcolor: "#fff",
-                    position: "top-right",
-                    icon: 'check',
-                    time: 3
-                });
+                toast.create(data['title'], data['message'], "success");
                 if(type == 5) {
                     $("#ticketanswer" + id).fadeOut();
                 }
@@ -186,21 +235,32 @@ $(".deletebutton").click(function() {
                     if(type == 5) {
                         window.location.reload();
                     } else {
-                        window.location.replace("index.php");
+                        window.location.replace("{link url=""}");
                     }
                 }, 3000)
             } else {
-                $.uiAlert({
-                    textHead: "Fehler",
-                    text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                    bgcolor: "#d01919",
-                    textcolor: "#fff",
-                    position: "top-right",
-                    icon: 'times',
-                    time: 3
-                });
+                toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
             }
     });
 });
+$(".quotebutton").click(function() {
+    quote($(this)[0]);
+});
+$(".answeractions").dropdown();
+
+function quote(elem) {
+    var type = elem.dataset.type;
+    var id = elem.dataset.id;
+    var username = elem.dataset.username;
+    var content = null;
+    if(type == "answer") {
+        content = document.getElementById("ticketanswercontent" + id).innerHTML;
+    } else if(type == "ticket") {
+        content = document.getElementById("ticketcontent" + id).innerHTML;
+    }
+
+    var quote = '<blockquote contenteditable="false" data-name="Zitat"><div contenteditable="true">' + content + '</div><p><span style="font-size: 8pt;"><em><a href="#ticketanswer' + id + '">von ' + username + '</a></em></span></p></blockquote>';
+    tinymce.editors[0].insertContent(quote);
+}
 </script>
 {include file="footer.tpl"}

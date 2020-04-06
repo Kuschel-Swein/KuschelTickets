@@ -2,6 +2,7 @@
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
+use KuschelTickets\lib\system\TicketCategory;
 use KuschelTickets\lib\Exceptions\AccessDeniedException;
 
 class myticketsPage extends Page {

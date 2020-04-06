@@ -1,7 +1,7 @@
 {include file="header.tpl" title="Registrierung"}
 <div class="ui grid container">
   <div class="column centered">
-    <form class="ui form{if $errors['username'] !== false || $errors['email'] !== false || $errors['password'] !== false || $errors['password_confirm'] !== false || $errors['legal_notice'] !== false || $errors['token'] !== false} error{/if}{if $success == true} success{/if}" action="index.php?register" method="post">
+    <form class="ui form{if $errors['username'] !== false || $errors['email'] !== false || $errors['password'] !== false || $errors['password_confirm'] !== false || $errors['legal_notice'] !== false || $errors['token'] !== false} error{/if}{if $success == true} success{/if}" action="{link url="register"}" method="post">
       <div class="field required{if $errors['username'] !== false} error{/if}">
         <label>Benutzername</label>
         <div class="ui input">
@@ -72,8 +72,8 @@
         Oder
       </div>
       <div class="ui horizontal bulleted list">
-        <a class="item" href="index.php?passwordreset">Passwort vergessen</a>
-        <a class="item" href="index.php?login">Einloggen</a>
+        <a class="item" href="{link url="passwordreset"}">Passwort vergessen</a>
+        <a class="item" href="{link url="login"}">Einloggen</a>
       </div>
     </div>
   </div>

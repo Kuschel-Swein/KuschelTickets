@@ -4,14 +4,40 @@
         <title>{$title} - {$__KT['pagetitle']}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="{$__KT['faviconmime']}" href="{$__KT['mainurl']}data/favicon.{$__KT['faviconextension']}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap">
-        <link rel="stylesheet" href="assets/semantic.min.css">
-        <link rel="stylesheet" href="assets/toast.css">     
-        <link rel="stylesheet" href="assets/master.css">    
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/semantic.min.css">
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/toast.css">     
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/master.css">    
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-        <script src="assets/semantic.min.js" type="text/javascript"></script>
-        <script src="assets/toast.js" type="text/javascript"></script>
-        <script src="assets/master.js" type="text/javascript"></script>
+        <script src="{$__KT['mainurl']}assets/semantic.min.js" type="text/javascript"></script>
+        <script src="{$__KT['mainurl']}assets/toast.js" type="text/javascript"></script>
+        <script>
+            const kuscheltickets_version = "{$__KT['version']}";
+            const notifications_link = "{link url="notifications"}";
+            const KT = {
+                {if $__KT['user'] == null}
+                userID: null,
+                {else}
+                userID: {$__KT['user']->userID},
+                {/if}
+                mainurl: "{$__KT['mainurl']}",
+                seourls: {$__KT['seourls']},
+                externalURLFavicons: {$__KT['externalURLFavicons']},
+                externalURLWarning: {$__KT['externalURLWarning']},
+                pushNotificationsAvailable: false,
+                localStorage: null,
+                pagetitle: "{$__KT['pagetitle']}",
+                faviconextension: "{$__KT['faviconextension']}",
+                externalURLTitle: {$__KT['externalURLTitle']},
+                proxyAllImages: {$__KT['proxyAllImages']},
+                useDesktopNotification: {$__KT['useDesktopNotification']}
+            };
+        </script>
+        <script src="{$__KT['mainurl']}/assets/master.js" type="text/javascript"></script>
+        <script>
+            KT.userTemplates = ajax.call(19, 1)['message'];
+        </script>
     </head>
     <body id="main"> 
         <div class="ui mobile only padded grid">
@@ -29,17 +55,20 @@
                         {if $link['permission'] !== null}
                             {if $__KT['user'] !== null}
                                 {if $__KT['user']->hasPermission($link['permission'])}
-                                    <a href="index.php?{$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
+                                    <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
                                 {/if}
                             {/if}
                         {else}
-                            <a href="index.php?{$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
+                            <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
                         {/if}
                     {/foreach}
+                    {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
+                        <a href="{link url="notifications"}" class="item">Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
+                    {/if}
                     {if $__KT['user'] !== null}
-                        <a href="index.php?logout/token-{$__KT['CRSF']}" class="item">Logout</a>
+                        <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="item">Logout</a>
                     {else}
-                        <a href="index.php?login" class="item{if $__KT['activepage'] =="login"} active{/if}">Login</a>
+                        <a href="{link url="login"}" class="item{if $__KT['activepage'] =="login"} active{/if}">Login</a>
                     {/if}
                 </div>
             </div>
@@ -52,20 +81,28 @@
                 {if $link['permission'] !== null}
                     {if $__KT['user'] !== null}
                         {if $__KT['user']->hasPermission($link['permission'])}
-                            <a href="index.php?{$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
+                            <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
                         {/if}
                     {/if}
                 {else}
-                    <a href="index.php?{$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
+                    <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
                 {/if}
             {/foreach}
-            {if $__KT['user'] !== null}
+            {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
                 <div class="item right">
-                    <a href="index.php?logout/token-{$__KT['CRSF']}" class="ui blue button">Logout</a>
+                    <div id="notificationsbell" class="pointer" data-position="bottom center">
+                        <i class="icon bell"></i>
+                        <div class="floating ui tiny red label notificationbadge notificationbadgehandler"></div>
+                    </div>
+                </div>
+            {/if}
+            {if $__KT['user'] !== null}
+                <div class="item right" {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}style="margin-left: 0!important"{/if}>
+                    <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="ui blue button">Logout</a>
                 </div>
             {else}
                 <div class="item right">
-                    <a href="index.php?login" class="ui blue button{if $__KT['activepage'] =="login"} active{/if}">Login</a>
+                    <a href="{link url="login"}" class="ui blue button{if $__KT['activepage'] =="login"} active{/if}">Login</a>
                 </div>
             {/if}
         </div>

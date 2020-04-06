@@ -12,6 +12,10 @@ use KuschelTickets\lib\Exceptions\PageNotFoundException;
 
 $permissions = [
     array(
+        "name" => "general_tickets_quote",
+        "display" => "kann Zitieren"
+    ),
+    array(
         "name" => "mod_view_tickets",
         "display" => "alle Tickets sehen"
     ),
@@ -32,7 +36,7 @@ $permissions = [
         "display" => "eigenes Ticket sehen"
     ),
     array(
-        "name" => "general_view_ticket_all",
+        "name" => "mod_view_ticket_all",
         "display" => "alle Tickets sehen"
     ),
     array(
@@ -57,11 +61,11 @@ $permissions = [
     ),
     array(
         "name" => "mod_tickets_done",
-        "display" => "alle Tickets als abgeschlossen markieren"
+        "display" => "alle Tickets als erledigt markieren"
     ),
     array(
         "name" => "general_tickets_done_own",
-        "display" => "eigene Tickets als abgeschlossen markieren"
+        "display" => "eigene Tickets als erledigt markieren"
     ),
     array(
         "name" => "mod_tickets_reopen",
@@ -98,10 +102,6 @@ $permissions = [
     array(
         "name" => "general_view_faq",
         "display" => "FAQ sehen"
-    ),
-    array(
-        "name" => "general_view_pages",
-        "display" => "eigene Seiten mit Zugangsbeschränkung sehen"
     ),
     array(
         "name" => "general_account_manage",
@@ -150,6 +150,34 @@ $permissions = [
     array(
         "name" => "admin_acp_page_ticketcategories",
         "display" => "ACP Ticketkategorien verwalten"
+    ),
+    array(
+        "name" => "admin_login_other",
+        "display" => "kann sich im ACP als anderer Benutzer einloggen"
+    ),
+    array(
+        "name" => "admin_bypass_login_other",
+        "display" => "kein Benutzer kann sich über das ACP als dieser Benutzer anmelden"
+    ),
+    array(
+        "name" => "general_notifications_view",
+        "display" => "kann Benachrichtigungen sehen"
+    ),
+    array(
+        "name" => "general_notifications_settings",
+        "display" => "kann Benachrichtigungseinstellungen nutzen"
+    ),
+    array(
+        "name" => "admin_acp_page_cleanup",
+        "display" => "kann die Datenbank über das ACP aufräumen"
+    ),
+    array(
+        "name" => "admin_acp_page_errors",
+        "display" => "kann Fehler Protokolle über das ACP verwalten"
+    ),
+    array(
+        "name" => "general_editor_templates",
+        "display" => "kann Editorvorlagen erstellen und verwenden"
     )
 ];
 

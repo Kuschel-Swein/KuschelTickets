@@ -23,7 +23,7 @@
       </div>
       <div class="five wide column right floated">
         <br>
-        <a class="ui blue button right floated" href="index.php?admin/groups/add">Gruppe erstellen</a>
+        <a class="ui blue button right floated" href="{link url="admin/groups/add"}">Gruppe erstellen</a>
       </div>
     </div>
     <br>
@@ -49,7 +49,7 @@
           {if !$group->isSystem()}
             <a href="javascript:deleteGroup({$group->groupID});" data-tooltip="Löschen"><i class="icon times"></i></a>
           {/if}
-            <a href="index.php?admin/groups/edit-{$group->groupID}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="{link url="admin/groups/edit-{$group->groupID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
@@ -70,36 +70,31 @@
             modal.confirm("Möchtest du diese Gruppe wirklich löschen. Dies kann nicht rückgängig gemacht werden.<br><b>Beachte:</b> alle Nutzer welche diese Gruppe gesetzt haben, werden in die Standartgruppe verschoben.", function() {
                 var data = ajax.call(11, id);
                 if(data['success'] !== undefined) {
-                    $.uiAlert({
-                        textHead: data['title'],
-                        text: data['message'],
-                        bgcolor: "#21ba45",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'check',
-                        time: 3
+                    toast.create(data['title'], data['message'], "success");
+                    $("#groupentry" + id).fadeOut(function() {
+                      var elems = document.getElementById("search_list").getElementsByTagName("tr");
+                      var found = 0;
+                      for(var i = 0; i < elems.length; i++) {
+                        if(elems[i].style.display !== "none") {
+                          found++;
+                        }
+                      }
+                      if(found == 0) {
+                        document.getElementById("search_list").innerHTML = '<tr><td colspan="5"><div class="ui info message"><ul class="list"><li>Es wurden noch keine Gruppen erstellt, dieser Fehler sollte nicht auftreten.</li></ul></div></td></tr>';
+                      }
                     });
-                    $("#groupentry" + id).fadeOut();
                 } else {
-                    $.uiAlert({
-                        textHead: "Fehler",
-                        text: "Es ist ein Fehler aufgetreten, bitte versuche es erneut.",
-                        bgcolor: "#d01919",
-                        textcolor: "#fff",
-                        position: "top-right",
-                        icon: 'times',
-                        time: 3
-                    });
+                    toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
                 }
             });
         }
         $('.ui.selection.dropdown').dropdown();
     </script>
 {else if $site['site'] == "add"}
-<a class="ui blue button right floated" href="index.php?admin/groups">Gruppen Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/groups"}">Gruppen Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['badge'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/groups/add" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['badge'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/groups/add"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
@@ -120,14 +115,53 @@
     <div class="field">
       <label>Berechtigungen</label>
     </div>
-    {foreach from=$site['permissions'] item="permission"}
-    <div class="field">
-      <div class="ui checkbox">
-        <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']|replace:'.':'_']) && !$site['success']} checked{/if}>
-        <label>{$permission['display']}</label>
-      </div>
+    <div class="ui tabmenu secondary pointing menu">
+      <a class="active item" data-tab="first">
+        Allgemeine Berechtigungen
+      </a>
+      <a class="item" data-tab="second">
+        Moderative Berechtigungen
+      </a>
+      <a class="item" data-tab="third">
+        Administrative Berechtigungen
+      </a>
     </div>
-    {/foreach}
+    <div class="ui tab active" data-tab="first">
+      {foreach from=$site['permissions'] item="permission"}
+        {if $permission['name']|strpos:'general_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
+      {/foreach}
+    </div>
+    <div class="ui tab" data-tab="second">
+      {foreach from=$site['permissions'] item="permission"}
+        {if $permission['name']|strpos:'mod_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
+      {/foreach}
+    </div>
+    <div class="ui tab" data-tab="third">
+      {foreach from=$site['permissions'] item="permission"}
+        {if $permission['name']|strpos:'admin_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
+      {/foreach}
+    </div>
     <br>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
@@ -155,6 +189,7 @@
     {/if}
 </form>
 <script>
+$('.menu .item').tab();
 function preview(elem) {
   var value = elem.value;
   if(value == "") {
@@ -169,10 +204,10 @@ function preview(elem) {
 }
 </script>
 {else if $site['site'] == "edit"}
-<a class="ui blue button right floated" href="index.php?admin/groups">Gruppen Auflisten</a>
+<a class="ui blue button right floated" href="{link url="admin/groups"}">Gruppen Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['badge'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="index.php?admin/groups/edit-{$site['editgroup']->groupID}" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['badge'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/groups/edit-{$site['editgroup']->groupID}"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
@@ -194,14 +229,53 @@ function preview(elem) {
       <div class="field">
         <label>Berechtigungen</label>
       </div>
+      <div class="ui tabmenu secondary pointing menu">
+      <a class="active item" data-tab="first">
+        Allgemeine Berechtigungen
+      </a>
+      <a class="item" data-tab="second">
+        Moderative Berechtigungen
+      </a>
+      <a class="item" data-tab="third">
+        Administrative Berechtigungen
+      </a>
+    </div>
+    <div class="ui tab active" data-tab="first">
       {foreach from=$site['permissions'] item="permission"}
-      <div class="field">
-        <div class="ui checkbox">
-          <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
-          <label>{$permission['display']}</label>
-        </div>
-      </div>
+        {if $permission['name']|strpos:'general_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
       {/foreach}
+    </div>
+    <div class="ui tab" data-tab="second">
+      {foreach from=$site['permissions'] item="permission"}
+        {if $permission['name']|strpos:'mod_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
+      {/foreach}
+    </div>
+    <div class="ui tab" data-tab="third">
+      {foreach from=$site['permissions'] item="permission"}
+        {if $permission['name']|strpos:'admin_' === 0}
+          <div class="field">
+            <div class="ui checkbox">
+              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <label>{$permission['display']}</label>
+            </div>
+          </div>
+        {/if}
+      {/foreach}
+    </div>
       <br>
     {else}
       <div class="ui warning message display-block">
@@ -236,6 +310,7 @@ function preview(elem) {
     {/if}
 </form>
 <script>
+$('.menu .item').tab();
 function preview(elem) {
   var value = elem.value;
   if(value == "") {

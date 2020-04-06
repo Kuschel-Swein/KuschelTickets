@@ -1,6 +1,7 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Mailer;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\Exceptions\AccessDeniedException;
 use KuschelTickets\lib\recaptcha;
@@ -37,12 +38,11 @@ class passwordresetPage extends Page {
                             $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts WHERE email = ?");
                             $stmt->execute([$parameters['email']]);
                             $row = $stmt->fetch();
-                            $mainurl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? "https" : "http") . "://".$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'];
                             $mail = new Mailer($row['email'], $config['pagetitle']." - Passwortzurücksetzung", $row['username']);
                             $message = "<p>Hey ".$row['username'].",</p>
                             <p>Für deinen Account bei ".$config['pagetitle'].". wurde eine Passwortzurücksetzung angefordert. Um dein Passwort zu ändern folge innerhalb der nächsten <b>15 Minuten</b> dem folgenden Link, solltest du diese Zurücksetzung nicht angefordert haben,
                             kannst du diese E-Mail ignorieren.</p>
-                            <p><b>Link:</b> <a href='".$mainurl."?passwordreset/token-".$row['token']."'>".$mainurl."?passwordreset/token-".$row['token']."</a></p>
+                            <p><b>Link:</b> <a href='".Link::get("passwordreset/token-".$row['token'])."'>".Link::get("passwordreset/token-".$row['token'])."</a></p>
                             <p></p>
                             <p><hr></p>
                             <p>Mit freundlichen Grüßen,</p>

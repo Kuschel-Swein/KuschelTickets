@@ -1,5 +1,6 @@
 <?php
 namespace KuschelTickets\lib;
+use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
@@ -44,6 +45,7 @@ class Page {
         } else {
             $kt['user'] = null;
         }
+        $kt['mainurl'] = Link::mainurl();
         $data = DATA;
         $kt['topnavigation'] = $data['topnavigation'];
         $kt['CRSF'] = CRSF::get();

@@ -18,7 +18,7 @@
             <a class="item" href="https://github.com/Kuschel-Swein/KuschelTickets" target="_blank" rel="nofollow">
                 Software: KuschelTickets von Kuschel_Swein
             </a>
-            <a class="item floated right" href="index.php?page/legal-notice">
+            <a class="item floated right" href="{link url="page/legal-notice"}">
                 Datenschutzerklärung
             </a>
         </div>

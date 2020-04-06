@@ -4,12 +4,17 @@ use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\Group;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\Ticket;
+use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\system\Notification;
 use KuschelTickets\lib\system\TicketCategory;
 
 class ajaxPage extends Page {
 
     public function readParameters(Array $parameters) {
         global $config;
+
+        // set the error reporting to nothing in any case
+        error_reporting(0);
 
         header("Content-Type: application/json");
         $result = array(
@@ -21,7 +26,7 @@ class ajaxPage extends Page {
          * 1 => close ticket
          * 2 => reopen ticket
          * 3 => mark ticket as done
-         * 4 => debuging helper
+         * 4 => [ADMIN] log in as user
          * 5 => delete answer
          * 6 => delete ticket
          * 7 => [ADMIN] delete faq
@@ -29,6 +34,15 @@ class ajaxPage extends Page {
          * 9 => [ADMIN] delete page
          * 10 => [ADMIN] delete user
          * 11 => [ADMIN] delete group
+         * 12 => [ADMIN] delete ticketcategory
+         * 13 => mark notification done
+         * 14 => get all not done notifications
+         * 15 => [ADMIN] watch error
+         * 16 => [ADMIN] delete error
+         * 17 => delete editor template
+         * 18 => watch editor template
+         * 19 => get all editor templates from active user
+         * 20 => get title of an given website
          */
         if($type == 1) {
             if(UserUtils::isLoggedIn()) {
@@ -134,13 +148,20 @@ class ajaxPage extends Page {
             }
         } else if($type == 4) {
             if(UserUtils::isLoggedIn()) {
-                $result = array(
-                    "version" => $config['version'],
-                    "debugging" => $config['debugging'],
-                    "software" => "KuschelTickets",
-                    "creator" => "Kuschel_Swein",
-                    "link" => "https://github.com/Kuschel-Swein"
-                );
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    $account = new User($parameters['object']);
+                    if($user->hasPermission("admin.login.other") && $parameters['object'] !== $user->userID) {
+                        if(!$account->hasPermission("admin.bypass.login.other")) {
+                            UserUtils::loginAs($account, $account->getHash());
+                            $result = array(
+                                "success" => true,
+                                "message" => "Du wurdest erfolgreich als ".$account->getUserName()." eingeloggt. Lade die Seite neu damit die Änderungen sichtbar werden.",
+                                "title" => "als Benutzer eingeloggt"
+                            );
+                        }
+                    }
+                }
             } else {
                 $result = array(
                     "code" => "403",
@@ -366,6 +387,203 @@ class ajaxPage extends Page {
                     "code" => "403",
                     "message" => "access denied"
                 );
+            }
+        } else if($type == 13) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.notifications.view")) {
+                        $notification = new Notification($parameters['object']);
+                        if($notification->exists()) {
+                            if($notification->getUser()->userID == $user->userID && !$notification->isDone()) {
+                                $notification->markAsDone();
+                                $result = array(
+                                    "success" => true,
+                                    "message" => "Diese Benachrichtigung wurde als abgeschlossen markiert.",
+                                    "title" => "Benachrichtigung abgeschlossen"
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 14) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User($parameters['object']);
+                    if($user->exists()) {
+                        if($user->userID == UserUtils::getUserID()) {
+                            if($user->hasPermission("general.notifications.view")) {
+                                $result = array(
+                                    "success" => true,
+                                    "message" => $user->getNotifications(true),
+                                    "title" => null
+                                );
+                            } else {
+                                $result = array(
+                                    "code" => "403",
+                                    "message" => "access denied"
+                                ); 
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 15) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("admin.acp.page.errors")) {
+                        if(file_exists("./data/logs/".$parameters['object'].".txt")) {
+                            $content = file_get_contents("./data/logs/".$parameters['object'].".txt");
+                            $result = array(
+                                "success" => true,
+                                "message" => $content,
+                                "title" => null
+                            );
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 16) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("admin.acp.page.errors")) {
+                        if(file_exists("./data/logs/".$parameters['object'].".txt")) {
+                            unlink("./data/logs/".$parameters['object'].".txt");
+                            $result = array(
+                                "success" => true,
+                                "message" => "Dieses Fehler Protokoll wurde erfolgreich gelöscht.",
+                                "title" => "Fehlerprotokoll gelöscht"
+                            );
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 17) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.editor.templates")) {
+                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
+                        $stmt->execute([$user->userID, $parameters['object']]);
+                        $row = $stmt->fetch();
+                        if($row !== false) {
+                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_editortemplates WHERE templateID = ?");
+                            $stmt->execute([$parameters['object']]);
+                            $result = array(
+                                "success" => true,
+                                "message" => "Diese Editorvorlage wurde erfolgreich gelöscht.",
+                                "title" => "Editorvorlage gelöscht"
+                            );
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 18) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.editor.templates")) {
+                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
+                        $stmt->execute([$user->userID, $parameters['object']]);
+                        $row = $stmt->fetch();
+                        if($row !== false) {
+                            $result = array(
+                                "success" => true,
+                                "message" => $row['content'],
+                                "title" => null
+                            );
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 19) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.editor.templates")) {
+                        $editortemplates = $user->getEditorTemplates();
+                        $out = [];
+                        foreach($editortemplates as $editortpl) {
+                            $data = array(
+                                "title" => $editortpl['title'],
+                                "description" => $editortpl['description'],
+                                "content" => $editortpl['content']
+                            );
+                            array_push($out, $data);
+                        }
+                        $result = array(
+                            "success" => true,
+                            "message" => $out,
+                            "title" => null
+                        );
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 20) {
+            if(isset($parameters['object']) && !empty($parameters['object']) && $config['externalURLTitle']) {
+                $url = Utils::fromASCI($parameters['object']);
+                if(preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url)) {
+                    $title = $url;
+                    $opts = [
+                        "http" => [
+                            "method" => "GET",
+                            "header" => [
+                                "User-Agent: PHP"
+                            ]
+                        ]
+                    ];
+                    $context = stream_context_create($opts);
+                    try {
+                        $data = file_get_contents($url, false, $context);
+                        preg_match("/<title>(.*)<\/title>/i", $data, $matches);
+                        $title = $matches[1];
+                    } catch(Exception $e) {
+                        $title = $url;
+                    }
+                    $result = array(
+                        "success" => true,
+                        "message" => $title,
+                        "title" => null
+                    );
+                }
             }
         }
 
