@@ -49,6 +49,8 @@ if($config['debugging']['database']) {
 
 $templateengine = new Smarty();
 
+session_name($config['cookie']);
+session_start();
 if(UserUtils::isLoggedIn()) {
     $user = new User($_SESSION['userID']);
     $user->validateHash();

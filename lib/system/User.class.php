@@ -90,7 +90,7 @@ class User {
         $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts WHERE userID = ?");
         $stmt->execute([$this->userID]);
         $row = $stmt->fetch();
-        if($_SESSION['hash'] !== $hash) {
+        if($_SESSION['hash'] !== $row['password']) {
             session_destroy();
         }
     }

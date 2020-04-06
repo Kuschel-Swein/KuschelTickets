@@ -8,8 +8,6 @@ class PageHandler {
         global $config;
         // prepare parameters
 
-        session_name($config['cookie']);
-        session_start();
         $querystring = $_SERVER['QUERY_STRING'];
         $parameters = explode("/", $querystring);
         $parameters = array_reverse($parameters);

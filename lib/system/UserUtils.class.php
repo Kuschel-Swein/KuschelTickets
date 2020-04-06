@@ -6,10 +6,6 @@ use KuschelTickets\lib\Utils;
 
 class UserUtils {
     public static function loginAs(User $user, String $hash) {
-        global $config;
-        
-        session_name($config['cookie']);
-        session_start();
         $_SESSION['userID'] = $user->userID;
         $_SESSION['hash'] = $hash;
     }
