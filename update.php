@@ -16,7 +16,9 @@ if(isset($_POST['submit'])) {
     $pdo = $config['db'];
 
     $permissions = ['general.tickets.quote', 'admin.login.other', 'admin.bypass.login.other', 'general.notifications.view', 'general.notifications.settings', 'admin.acp.page.cleanup', 'admin.acp.page.errors', 'general.editor.templates'];
-    foreach($pdo->query("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1") as $row) {
+    $stmt = $pdo->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1");
+    $stmt->execute();
+    while($row = $stmt->fetch()) {
         foreach($permissions as $perm) {
             $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (?, ? , 0)");
             $stmt->execute([$row['groupID'], $perm]);
@@ -129,7 +131,7 @@ if(isset($_POST['submit'])) {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Schritt <?php echo STEP; ?> - Installation - KuschelTickets</title>
+        <title>Aktualisierung - KuschelTickets</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap">
@@ -146,7 +148,7 @@ if(isset($_POST['submit'])) {
                 <p>Hier kannst du KuschelTickets aktualisieren, dieser Updater wird KuschelTickets auf die Version <b><?php echo UPDATERTOVERSION; ?></b> bringen.</p>
                 <p>Nach dem start der Aktualisierung, kann es etwas dauern bis diese fertig ist.</p>
                 <form action="update.php" method="post">
-                    <button class="ui blue button" type="submit">Jetzt aktualisieren!</a> 
+                    <button class="ui blue button" name="submit" type="submit">Jetzt aktualisieren!</a> 
                 </form>
             </div>
         </div>

@@ -11,7 +11,6 @@ const ajax = {
     call: function (value, object) {
         var xmlHttp = null;
         xmlHttp = new XMLHttpRequest();
-        console.log(link("ajax-" + value + "/object-" + object));
         xmlHttp.open("GET", link("ajax-" + value + "/object-" + object), false);
         xmlHttp.send(null);
         return JSON.parse(xmlHttp.responseText);

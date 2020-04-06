@@ -22,16 +22,16 @@
                 userID: {$__KT['user']->userID},
                 {/if}
                 mainurl: "{$__KT['mainurl']}",
-                seourls: {$__KT['seourls']},
-                externalURLFavicons: {$__KT['externalURLFavicons']},
-                externalURLWarning: {$__KT['externalURLWarning']},
+                seourls: {if $__KT['seourls']}true{else}false{/if},
+                externalURLFavicons: {if $__KT['externalURLFavicons']}true{else}false{/if},
+                externalURLWarning: {if $__KT['externalURLWarning']}true{else}false{/if},
                 pushNotificationsAvailable: false,
                 localStorage: null,
                 pagetitle: "{$__KT['pagetitle']}",
                 faviconextension: "{$__KT['faviconextension']}",
-                externalURLTitle: {$__KT['externalURLTitle']},
-                proxyAllImages: {$__KT['proxyAllImages']},
-                useDesktopNotification: {$__KT['useDesktopNotification']}
+                externalURLTitle: {if $__KT['externalURLTitle']}true{else}false{/if},
+                proxyAllImages: {if $__KT['proxyAllImages']}true{else}false{/if},
+                useDesktopNotification: {if $__KT['useDesktopNotification']}true{else}false{/if}
             };
         </script>
         <script src="{$__KT['mainurl']}/assets/master.js" type="text/javascript"></script>
