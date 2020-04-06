@@ -5,7 +5,7 @@ KuschelTickets ist ein auf PHP basierendes Ticketsystem.
 
 Solltest du KuschelTickets vor dem Download ausprobieren wollen, kannst du dies in der [URL='https://demo.kuschel-swein.eu/KuschelTickets']Demo[/URL] tun. Diese Demo wird jeden Tag um 23 Uhr zurückgesetzt.
 
-**_Warum sollte ich KuschelTickets verwenden?_**
+## Warum sollte ich KuschelTickets verwenden?
 
 - eingebautes FAQ mit direktlink Funktionalität
 - komplett selbst installierend (kein Import einer SQL Datei nötig)
@@ -37,11 +37,11 @@ Solltest du KuschelTickets vor dem Download ausprobieren wollen, kannst du dies 
 - mehrere Installationen in einer Datenbank möglich
 
 
-**_Wie installiere ich KuschelTickets?_**
+## Wie installiere ich KuschelTickets?
 öffne hierzu einfach die Seite auf welcher du KuschelTickets hochgeladen hast, du wirst automatisch auf den Installer weitergeleitet
 
 
-**_Wie aktualisiere ich KuschelTickets?_**
+## Wie aktualisiere ich KuschelTickets?
 Um KuschelTickets zu aktualisieren, lade die auf deine Version folgende Version (*bsp:* v2.0 => v2.1) herunter, entpacke diese im Installationsverzeichnis von KuschelTickets und ersetze mit alle alten Dateien damit (Zip entpacken => *vorhandene Dateien ersetzen*). Nachdem nun alle Dateien aktualisiert sind, musst du noch deine Datenbank aktualisieren. Öffne hierzu die **update.php** in einem Browser deiner wahl. Damit du diese öffnen kannst, musst du die Datei **INSTALLED** im Verzeichnis **data** löschen. Folge nun den Anweisungen der **update.php** Datei, bist du damit fertig, hast du KuschelTickets erfolgreich aktualisert.
 
 
@@ -50,5 +50,5 @@ Ich werde jegliche Vorschläge von euch zeitnah umsetzen!
 
 Du benötigst bei irgendwas Hilfe? Wende dich an mich, ob in den Kommentaren, auf GitHub oder sonst wo, ich helfe immer!
 
-_**Du verwendest KuschelTickets?**_
+### Du verwendest KuschelTickets?
 Dann lass doch bitte eine Bewertung mit deinem Feedback da!
