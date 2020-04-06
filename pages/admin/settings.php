@@ -252,6 +252,12 @@ if(isset($parameters['submit'])) {
                                                                                                             $externalURLWarning = "false";
                                                                                                         }
 
+                                                                                                        if(isset($parameters['cookienotice'])) {
+                                                                                                            $cookienotice = ($parameters['cookienotice'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $cookienotice = "false";
+                                                                                                        }
+
                                                                                                         $htcode = PHP_EOL.
                                                                                                         '# KuschelTickets SEO Rewrite'.PHP_EOL.
                                                                                                         '<IfModule mod_rewrite.c>'.PHP_EOL.
@@ -305,6 +311,7 @@ if(isset($parameters['submit'])) {
                                                                                                         '    "proxyAllImages" => '.$proxyAllImages.','.PHP_EOL.
                                                                                                         '    "externalURLFavicons" => '.$externalURLFavicons.','.PHP_EOL.
                                                                                                         '    "externalURLWarning" => '.$externalURLWarning.','.PHP_EOL.
+                                                                                                        '    "cookienotice" => '.$cookienotice.','.PHP_EOL.
                                                                                                         '    "useDesktopNotification" => '.$useDesktopNotification.','.PHP_EOL.
                                                                                                         '    "emailnotifications" => '.$emailnotifications.','.PHP_EOL.
                                                                                                         '    "adminmail" => "'.$parameters['adminmail'].'",'.PHP_EOL.

@@ -133,6 +133,12 @@
         <br>
         <small>Bevor der Benutzer deine Website verlässt, wird ihm ein Fenster angezeigt, in welchem er bestätigen muss, dass er deine Website verlassen möchte.</small>
     </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['cookienotice']} checked{/if} name="cookienotice">
+            <label>Cookie Hinweis anzeigen</label>
+        </div>
+    </div>
 </div>
 <div class="ui tab" data-tab="second">
     <div class="field required{if $site['errors']['databasedatabase'] !== false} error{/if}">

@@ -5,11 +5,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" type="{$__KT['faviconmime']}" href="{$__KT['mainurl']}data/favicon.{$__KT['faviconextension']}">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap" crossorigin="anonymous">
         <link rel="stylesheet" href="{$__KT['mainurl']}assets/semantic.min.css">
         <link rel="stylesheet" href="{$__KT['mainurl']}assets/toast.css">     
         <link rel="stylesheet" href="{$__KT['mainurl']}assets/master.css">    
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
         <script src="{$__KT['mainurl']}assets/semantic.min.js" type="text/javascript"></script>
         <script src="{$__KT['mainurl']}assets/toast.js" type="text/javascript"></script>
         <script>
