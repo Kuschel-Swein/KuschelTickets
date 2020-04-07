@@ -123,3 +123,6 @@ blockquote {
 .ui.labeled.input input[type="file"] {
     display: none;
 }
+table {
+    overflow-x: auto!important;
+}
