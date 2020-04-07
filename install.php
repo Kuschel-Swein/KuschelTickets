@@ -127,7 +127,8 @@ if(STEP == 2 && isset($_POST['submit'])) {
             `content` text NOT NULL,
             `userID` int(11) NOT NULL,
             `time` int(11) NOT NULL,
-            `done` int(1) NOT NULL
+            `done` int(1) NOT NULL,
+            `sent` int(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
         // alter the tables with the (primary) keys

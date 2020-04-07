@@ -26,7 +26,6 @@
                 externalURLFavicons: {if $__KT['externalURLFavicons']}true{else}false{/if},
                 externalURLWarning: {if $__KT['externalURLWarning']}true{else}false{/if},
                 pushNotificationsAvailable: false,
-                localStorage: null,
                 pagetitle: "{$__KT['pagetitle']}",
                 faviconextension: "{$__KT['faviconextension']}",
                 externalURLTitle: {if $__KT['externalURLTitle']}true{else}false{/if},

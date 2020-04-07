@@ -70,6 +70,22 @@ class Notification {
         $stmt->execute([$this->notificationID]);
     }
 
+    public function isSent() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_notifications WHERE notificationID = ?");
+        $stmt->execute([$this->notificationID]);
+        $row = $stmt->fetch();
+        return $row['sent'] == "1";
+    }
+
+    public function markAsSent() {
+        global $config;
+
+        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_notifications SET `sent`=1 WHERE notificationID = ?");
+        $stmt->execute([$this->notificationID]);
+    }
+
     public function getUser() {
         global $config;
 
@@ -100,8 +116,13 @@ class Notification {
                 $mail->setMessage($message);
                 $mail->send();
             }
-            $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_notifications(`linkIdentifier`, `content`, `userID`, `time`, `done`) VALUES (?, ?, ?, ?, 0)");
-            $stmt->execute([$link, $content, $user->userID, $time]);
+            if($config['useDesktopNotification']) {
+                $sent = 0;
+            } else {
+                $sent = 1;
+            }
+            $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_notifications(`linkIdentifier`, `content`, `userID`, `time`, `done`, `sent`) VALUES (?, ?, ?, ?, 0, ?)");
+            $stmt->execute([$link, $content, $user->userID, $time, $sent]);
         }
     }
 }

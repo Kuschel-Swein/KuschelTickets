@@ -940,25 +940,6 @@ const notifications = {
                 KT.pushNotificationsAvailable = false;
                 console.log("[DEBUG] Dein Browser blockiert Benachrichtigungen.");
             }
-            try {
-                localStorage.setItem("debug", "debug");
-                localStorage.removeItem("debug");
-            } catch(e) {
-                KT.localStorage = false;
-                console.log("[DEBUG] Dein Browser unterstützt die LocalStorage nicht.")
-            }
-            if(KT.localStorage !== false) {
-                KT.localStorage = true;
-            }
-
-            if(KT.localStorage) {
-                var gotNotifications = localStorage.getItem("notifications_got");
-                if(gotNotifications === null) {
-                    gotNotifications = [];
-                } else {
-                    gotNotifications = JSON.parse(gotNotifications);
-                }
-            }
 
             notifications_content = notifications_content['message'];
             var result = "<i>Es gibt keine neuen Benachrichtigungen.</i><div class='ui divider'></div>";
@@ -968,12 +949,13 @@ const notifications = {
                 notifications_content.forEach(function(notification) {
                     result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + notification['link'] + '"  data-tooltip="' + notification['time'] + '">' + notification['message'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
-                    if(KT.localStorage) {
-                        if(!gotNotifications.includes(notification['notificationID'])) {
+                    var data = ajax.call(22, notification['notificationID']);
+                    if(data['success']) {
+                        if(!data['message']) {
                             if(KT.pushNotificationsAvailable) {
                                 notifications.desktopNotification(notification);
                             }
-                            gotNotifications.push(notification['notificationID']);
+                            ajax.call(23, notification['notificationID']);
                         }
                     }
                 });
@@ -984,10 +966,7 @@ const notifications = {
             } else {
                 $(".notificationbadgehandler").css("display","none");
             }
-            if(KT.localStorage) {
-                gotNotifications = JSON.stringify(gotNotifications);
-                localStorage.setItem("notifications_got", gotNotifications);
-            }
+
             $('#notificationsbell').popup({
                 inline : true,
                 on : 'click',
@@ -1002,33 +981,24 @@ const notifications = {
             notifications_content = notifications_content['message'];
             var result = "<i>Es gibt keine neuen Benachrichtigungen.</i><div class='ui divider'></div>";
             var ncounter = 0;
-            if(KT.localStorage) {
-                var gotNotifications = localStorage.getItem("notifications_got");
-                if(gotNotifications === null) {
-                    gotNotifications = [];
-                } else {
-                    gotNotifications = JSON.parse(gotNotifications);
-                }
-            }
+            
             if(notifications_content.length > 0) {
                 result = "";
                 notifications_content.forEach(function(notification) {
                     result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + notification['link'] + '"  data-tooltip="' + notification['time'] + '">' + notification['message'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
-                    if(KT.localStorage) {
-                        if(!gotNotifications.includes(notification['notificationID'])) {
+                    var data = ajax.call(22, notification['notificationID']);
+                    if(data['success']) {
+                        if(!data['message']) {
                             if(KT.pushNotificationsAvailable) {
                                 notifications.desktopNotification(notification);
                             }
-                            gotNotifications.push(notification['notificationID']);
+                            ajax.call(23, notification['notificationID']);
                         }
                     }
                 });
             }
-            if(KT.localStorage) {
-                gotNotifications = JSON.stringify(gotNotifications);
-                localStorage.setItem("notifications_got", gotNotifications);
-            }
+
             if(ncounter > 0) {
                 $(".notificationbadgehandler").html(ncounter);
                 $(".notificationbadgehandler").css("display","block");

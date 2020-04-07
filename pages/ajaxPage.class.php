@@ -45,6 +45,8 @@ class ajaxPage extends Page {
          * 19 => get all editor templates from active user
          * 20 => get title of an given website
          * 21 => get faq content of given id
+         * 22 => check if notification was sent
+         * 23 => mark notification as sent
          */
         if($type == 1) {
             if(UserUtils::isLoggedIn()) {
@@ -602,6 +604,53 @@ class ajaxPage extends Page {
                         }
                     }
                 }
+            }
+        } else if($type == 22) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.notifications.view")) {
+                        $notification = new Notification($parameters['object']);
+                        if($notification->exists()) {
+                            if($notification->getUser()->userID == $user->userID) {
+                                $result = array(
+                                    "success" => true,
+                                    "message" => $notification->isSent(),
+                                    "title" => null
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 23) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.notifications.view")) {
+                        $notification = new Notification($parameters['object']);
+                        if($notification->exists()) {
+                            if($notification->getUser()->userID == $user->userID && !$notification->isSent()) {
+                                $notification->markAsSent();
+                                $result = array(
+                                    "success" => true,
+                                    "message" => true,
+                                    "title" => null
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
             }
         }
 
