@@ -44,7 +44,7 @@
       <td data-label="ID">{$ticket->ticketID}</td>
       <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
       <td data-label="Ersteller">{$ticket->getCreator()->getUserName()}</td>
-      <td data-label="Kategorie"><span class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</span></td>
+      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 6);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
       <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
       <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
     </tr>

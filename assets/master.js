@@ -52,7 +52,7 @@ const utils = {
     search: function (table, input, type, colspan) {
         var filter, tr, td, i, txtValue, result, helper;
         helper = table.getElementsByClassName("search_info");
-        if (helper[0]) {
+        if (helper[0] !== undefined) {
             helper[0].remove();
         }
         filter = input.value.toUpperCase();
@@ -86,6 +86,11 @@ const utils = {
         if (result == 0) {
             table.innerHTML += "<tr class='search_info'><td colspan='" + colspan + "'><div class='ui info message'><ul class='list'><li>Zu dieser Suche wurde kein Ergebnis gefunden.</li></ul></div></td></tr>";
         }
+    },
+    setSearch: function(dropdownelemid, searchelemid, index, value, colspan) {
+        $('#' + dropdownelemid).parent().dropdown('set selected', index);
+        $('#' + searchelemid).val(value);
+        utils.search(document.querySelector('#search_list'), document.querySelector('#' + searchelemid), document.querySelector('#' + dropdownelemid), colspan);
     }
 };
 
@@ -1072,14 +1077,20 @@ const externalpage = {
         if(KT.externalURLFavicons) {
             var elems = document.getElementsByTagName("a");
             for(var i = 0; i < elems.length; i++) {
-                if(!elems[i].href.startsWith(KT.mainurl)) {
-                    if(!elems[i].href.startsWith("javascript:")) {
-                        if(!elems[i].classList.contains('item')) {
-                            var image = "https://www.google.com/s2/favicons?domain=" + elems[i].href;
-                            image = externalpage.toASCI(image);
-                            elems[i].style.backgroundImage = 'url("' + link("imageproxy/url-" + image) + '")';
-                            elems[i].style.backgroundRepeat = 'no-repeat';
-                            elems[i].style.paddingLeft = '20px';
+                if(elems[i].href !== undefined) {
+                    if(elems[i].href !== "") {
+                        if(!elems[i].href.startsWith(KT.mainurl)) {
+                            if(!elems[i].href.startsWith("javascript:")) {
+                                if(!elems[i].classList.contains('item')) {
+                                    if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
+                                        var image = "https://www.google.com/s2/favicons?domain=" + elems[i].href;
+                                        image = externalpage.toASCI(image);
+                                        elems[i].style.backgroundImage = 'url("' + link("imageproxy/url-" + image) + '")';
+                                        elems[i].style.backgroundRepeat = 'no-repeat';
+                                        elems[i].style.paddingLeft = '20px';
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1088,20 +1099,26 @@ const externalpage = {
         if(KT.externalURLTitle) {
             var elems = document.getElementsByTagName("a");
             for(var i = 0; i < elems.length; i++) {
-                if(!elems[i].href.startsWith(KT.mainurl)) {
-                    if(!elems[i].href.startsWith("javascript:")) {
-                        if(!elems[i].classList.contains('item')) {
-                            var url = elems[i].href;
-                            if(url.includes(elems[i].innerText) && elems[i].dataset.titlechanged !== true) {
-                                url = externalpage.toASCI(url);
-                                var data = ajax.call(20, url);
-                                if(data['success']) {
-                                    var title = data['message'];
-                                    if(title == null) {
-                                        title = elems[i].href;
+                if(elems[i].href !== undefined) {
+                    if(elems[i].href !== "") {
+                        if(!elems[i].href.startsWith(KT.mainurl)) {
+                            if(!elems[i].href.startsWith("javascript:")) {
+                                if(!elems[i].classList.contains('item')) {
+                                    if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
+                                        var url = elems[i].href;
+                                        if(url.includes(elems[i].innerText) && elems[i].dataset.titlechanged !== true) {
+                                            url = externalpage.toASCI(url);
+                                            var data = ajax.call(20, url);
+                                            if(data['success']) {
+                                                var title = data['message'];
+                                                if(title == null) {
+                                                    title = elems[i].href;
+                                                }
+                                                elems[i].innerText = title;
+                                                elems[i].dataset.titlechanged = true;
+                                            }
+                                        }
                                     }
-                                    elems[i].innerText = title;
-                                    elems[i].dataset.titlechanged = true;
                                 }
                             }
                         }
@@ -1112,13 +1129,19 @@ const externalpage = {
         if(KT.proxyAllImages) {
             var elems = document.getElementsByTagName("img");
             for(var i = 0; i < elems.length; i++) {
-                if(!elems[i].src.startsWith(KT.mainurl)) {
-                    var url = elems[i].src;
-                    if(elems[i].dataset.srcchanged !== true) {
-                        url = externalpage.toASCI(url);
-                        url = link("imageproxy/url-" + url);
-                        elems[i].src = url;
-                        elems[i].dataset.srcchanged = true;
+                if(elems[i].src !== undefined) {
+                    if(elems[i].src !== "") {
+                        if(!elems[i].src.startsWith(KT.mainurl)) {
+                            if(elems[i].src.startsWith("http") || elems[i].src.startsWith("//")) {
+                                var url = elems[i].src;
+                                if(elems[i].dataset.srcchanged !== true) {
+                                    url = externalpage.toASCI(url);
+                                    url = link("imageproxy/url-" + url);
+                                    elems[i].src = url;
+                                    elems[i].dataset.srcchanged = true;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1126,17 +1149,21 @@ const externalpage = {
         if(KT.externalURLWarning) {
             var elems = document.getElementsByTagName("a");
             for(var i = 0; i < elems.length; i++) {
-                if(!elems[i].href.startsWith(KT.mainurl)) {
-                    if(!elems[i].href.startsWith("javascript:")) {
-                        if(elems[i].href.startsWith("http")) {
-                            elems[i].addEventListener("click", function (e) {
-                                e.preventDefault();
-                                var url = this.href;
-                                modal.confirm("<p>Bitte beachte, dass du nun auf eine Webseite geleitet wirst, für deren Inhalt wir nicht verantwortlich sind und auf die unsere Datenschutzbestimmungen keine Anwendung finden.</p>" + 
-                                "<p>Bitte bestätige dass du auf diese Website weitergeleitet werden möchtest.</p>", function() {
-                                    window.open(url, "_blank");
-                                });
-                            });
+                if(elems[i].href !== undefined) {
+                    if(elems[i].href !== "") {
+                        if(!elems[i].href.startsWith(KT.mainurl)) {
+                            if(!elems[i].href.startsWith("javascript:")) {
+                                if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
+                                    elems[i].addEventListener("click", function (e) {
+                                        e.preventDefault();
+                                        var url = this.href;
+                                        modal.confirm("<p>Bitte beachte, dass du nun auf eine Webseite geleitet wirst, für deren Inhalt wir nicht verantwortlich sind und auf die unsere Datenschutzbestimmungen keine Anwendung finden.</p>" + 
+                                        "<p>Bitte bestätige dass du auf diese Website weitergeleitet werden möchtest.</p>", function() {
+                                            window.open(url, "_blank");
+                                        });
+                                    });
+                                }
+                            }
                         }
                     }
                 }

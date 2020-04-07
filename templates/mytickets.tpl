@@ -42,12 +42,12 @@
         <th>Status</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="search_list">
     {foreach from=$tickets item="ticket"}
     <tr>
       <td data-label="ID">{$ticket->ticketID}</td>
       <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
-      <td data-label="Kategorie"><span class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</span></td>
+      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 2, this.innerText, 5);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
       <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
       <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
     </tr>
