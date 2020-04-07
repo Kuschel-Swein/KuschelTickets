@@ -98,20 +98,26 @@
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Badge');" onkeyup="utils.previewText(this, 'Badge');" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
         </div>
     </div>
     <div class="field{if $site['errors']['badge'] !== false} error{/if}">
       <label>Badge</label>
     </div>
-    {foreach from=$site['colors'] item="color"}
-    <div class="field">
-      <div class="ui radio checkbox">
-        <input type="radio" value="{$color}" name="badge"{if isset($tpl['post']['badge']) && !$site['success']}{if $tpl['post']['badge'] == $color} checked{/if}{/if}>
-        <label><div class="ui {$color} label preview">Badge</div></label>
+    <div class="ui grid stackable container">
+      {foreach from=$site['colors'] item="color"}
+      <div class="five wide column overflow-x-auto">
+        <div class="field">
+          <div class="ui radio checkbox">
+            <input type="radio" value="{$color}" name="badge"{if isset($tpl['post']['badge']) && !$site['success']}{if $tpl['post']['badge'] == $color} checked{/if}{/if}>
+            <label><div class="ui {$color} label preview">Badge</div></label>
+          </div>
+        </div>
       </div>
+      {/foreach}
     </div>
-    {/foreach}
+    <br>
+    <br>
     <div class="field">
       <label>Berechtigungen</label>
     </div>
@@ -189,19 +195,7 @@
     {/if}
 </form>
 <script>
-$('.menu .item').tab();
-function preview(elem) {
-  var value = elem.value;
-  if(value == "") {
-    value = "Bage";
-  }
-  value = value.replace(/</, "&lt;");
-  value = value.replace(/>/, "&gt;");
-  var elems = document.getElementsByClassName("preview");
-  for(var i = 0; i < elems.length; i++) {
-    elems[i].innerHTML = value;
-  }
-}
+  $('.menu .item').tab();
 </script>
 {else if $site['site'] == "edit"}
 <a class="ui blue button right floated" href="{link url="admin/groups"}">Gruppen Auflisten</a>
@@ -211,20 +205,26 @@ function preview(elem) {
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{$site['editgroup']->getGroupname()}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Badge');" onkeyup="utils.previewText(this, 'Badge');" value="{$site['editgroup']->getGroupname()}">
         </div>
     </div>
     <div class="field{if $site['errors']['badge'] !== false} error{/if}">
       <label>Badge</label>
     </div>
-    {foreach from=$site['colors'] item="color"}
-    <div class="field">
-      <div class="ui radio checkbox">
-        <input type="radio" value="{$color}" name="badge"{if $site['badge'] == $color} checked{/if}>
-        <label><div class="ui {$color} label preview">{$site['editgroup']->getGroupname()}</div></label>
-      </div>
+    <div class="ui grid stackable container">
+      {foreach from=$site['colors'] item="color"}
+        <div class="five wide column overflow-x-auto">
+          <div class="field">
+            <div class="ui radio checkbox">
+              <input type="radio" value="{$color}" name="badge"{if $site['badge'] == $color} checked{/if}>
+              <label><div class="ui {$color} label preview">{$site['editgroup']->getGroupname()}</div></label>
+            </div>
+          </div>
+        </div>
+      {/foreach}
     </div>
-    {/foreach}
+    <br>
+    <br>
     {if $site['editgroup']->groupID !== 1}
       <div class="field">
         <label>Berechtigungen</label>
@@ -310,18 +310,6 @@ function preview(elem) {
     {/if}
 </form>
 <script>
-$('.menu .item').tab();
-function preview(elem) {
-  var value = elem.value;
-  if(value == "") {
-    value = "Bage";
-  }
-  value = value.replace(/</, "&lt;");
-  value = value.replace(/>/, "&gt;");
-  var elems = document.getElementsByClassName("preview");
-  for(var i = 0; i < elems.length; i++) {
-    elems[i].innerHTML = value;
-  }
-}
+  $('.menu .item').tab();
 </script>
 {/if}

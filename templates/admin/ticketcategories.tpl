@@ -96,20 +96,24 @@
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Farbe');" onkeyup="utils.previewText(this, 'Farbe');" value="{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{/if}">
         </div>
     </div>
     <div class="field{if $site['errors']['color'] !== false} error{/if}">
       <label>Farbe</label>
     </div>
-    {foreach from=$site['colors'] item="color"}
-    <div class="field">
-      <div class="ui radio checkbox">
-        <input type="radio" value="{$color}" name="color"{if isset($tpl['post']['color']) && !$site['success']}{if $tpl['post']['color'] == $color} checked{/if}{/if}>
-        <label><div class="ui {$color} label preview">{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{else}Farbe{/if}</div></label>
-      </div>
+    <div class="ui grid stackable container">
+      {foreach from=$site['colors'] item="color"}
+        <div class="five wide column overflow-x-auto">
+          <div class="field">
+            <div class="ui radio checkbox">
+              <input type="radio" value="{$color}" name="color"{if isset($tpl['post']['color']) && !$site['success']}{if $tpl['post']['color'] == $color} checked{/if}{/if}>
+              <label><div class="ui {$color} label preview">{if isset($tpl['post']['text']) && !$site['success']}{$tpl['post']['text']}{else}Farbe{/if}</div></label>
+            </div>
+          </div>
+        </div>
+      {/foreach}
     </div>
-    {/foreach}
     <div class="ui divider"></div>
     <button class="ui button float-right" type="button" onClick="custominput.addField()">Eingabefeld hinzufügen</button>
     <br>
@@ -168,20 +172,6 @@
         </div>
     {/if}
 </form>
-<script>
-function preview(elem) {
-  var value = elem.value;
-  if(value == "") {
-    value = "Farbe";
-  }
-  value = value.replace(/</, "&lt;");
-  value = value.replace(/>/, "&gt;");
-  var elems = document.getElementsByClassName("preview");
-  for(var i = 0; i < elems.length; i++) {
-    elems[i].innerHTML = value;
-  }
-}
-</script>
 {else if $site['site'] == "edit"}
 <a class="ui blue button right floated" href="{link url="admin/ticketcategories"}">Ticket Kategorien Auflisten</a>
 <br>
@@ -190,20 +180,24 @@ function preview(elem) {
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="preview(this)" onkeyup="preview(this)" value="{$site['ticketcategory']->getName()}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Farbe');" onkeyup="utils.previewText(this, 'Farbe');" value="{$site['ticketcategory']->getName()}">
         </div>
     </div>
     <div class="field{if $site['errors']['color'] !== false} error{/if}">
       <label>Farbe</label>
     </div>
-    {foreach from=$site['colors'] item="color"}
-    <div class="field">
-      <div class="ui radio checkbox">
-        <input type="radio" value="{$color}" name="color"{if $site['ticketcategory']->getColor() == $color} checked{/if}>
-        <label><div class="ui {$color} label preview">{$site['ticketcategory']->getName()}</div></label>
-      </div>
+    <div class="ui grid stackable container">
+      {foreach from=$site['colors'] item="color"}
+        <div class="five wide column overflow-x-auto">
+          <div class="field">
+            <div class="ui radio checkbox">
+              <input type="radio" value="{$color}" name="color"{if $site['ticketcategory']->getColor() == $color} checked{/if}>
+              <label><div class="ui {$color} label preview">{$site['ticketcategory']->getName()}</div></label>
+            </div>
+          </div>
+        </div>
+      {/foreach}
     </div>
-    {/foreach}
     <div class="ui divider"></div>
     <button class="ui button float-right" type="button" onClick="custominput.addField()">Eingabefeld hinzufügen</button>
     <br>
@@ -258,18 +252,4 @@ function preview(elem) {
         </div>
     {/if}
 </form>
-<script>
-function preview(elem) {
-  var value = elem.value;
-  if(value == "") {
-    value = "Farbe";
-  }
-  value = value.replace(/</, "&lt;");
-  value = value.replace(/>/, "&gt;");
-  var elems = document.getElementsByClassName("preview");
-  for(var i = 0; i < elems.length; i++) {
-    elems[i].innerHTML = value;
-  }
-}
-</script>
 {/if}

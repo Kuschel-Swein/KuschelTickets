@@ -91,6 +91,18 @@ const utils = {
         $('#' + dropdownelemid).parent().dropdown('set selected', index);
         $('#' + searchelemid).val(value);
         utils.search(document.querySelector('#search_list'), document.querySelector('#' + searchelemid), document.querySelector('#' + dropdownelemid), colspan);
+    },
+    previewText: function(elem, defaultvalue, previewclass = "preview") {
+        var value = elem.value;
+        if(value == "") {
+            value = defaultvalue;
+        }
+        value = value.replace(/</, "&lt;");
+        value = value.replace(/>/, "&gt;");
+        var elems = document.getElementsByClassName(previewclass);
+        for(var i = 0; i < elems.length; i++) {
+            elems[i].innerHTML = value;
+        }
     }
 };
 
