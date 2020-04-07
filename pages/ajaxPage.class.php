@@ -5,6 +5,7 @@ use KuschelTickets\lib\system\Group;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\Ticket;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\system\FAQ;
 use KuschelTickets\lib\system\Notification;
 use KuschelTickets\lib\system\TicketCategory;
 
@@ -43,6 +44,7 @@ class ajaxPage extends Page {
          * 18 => watch editor template
          * 19 => get all editor templates from active user
          * 20 => get title of an given website
+         * 21 => get faq content of given id
          */
         if($type == 1) {
             if(UserUtils::isLoggedIn()) {
@@ -583,6 +585,22 @@ class ajaxPage extends Page {
                         "message" => $title,
                         "title" => null
                     );
+                }
+            }
+        } else if($type == 21) {
+            if(isset($parameters['object']) && !empty($parameters['object']) && $config['externalURLTitle']) {
+                if(UserUtils::isLoggedIn()) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.view.faq")) {
+                        $faq = new FAQ($parameters['object']);
+                        if($faq->exists()) {
+                            $result = array(
+                                "success" => true,
+                                "message" => $faq->getAnswer(),
+                                "title" => null
+                            );
+                        }
+                    }
                 }
             }
         }

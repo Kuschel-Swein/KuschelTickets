@@ -11,13 +11,17 @@
             <p>
                 <ul class="ui list">
                     {foreach from=$category['faqs'] item="faq"}
-                        <a class="item" id="faq{$faq->faqID}"href="#{$faq->faqID}">{$faq->getQuestion()}<div class="answer display-none">{$faq->getAnswer()}</div></a>
+                        <a class="item" id="faq{$faq->faqID}" href="#{$faq->faqID}">{$faq->getQuestion()}</a>
                     {foreachelse}
                         <i class="item">In dieser Kategorie sind keine FAQs eingetragen.</i>
                     {/foreach}
                 </ul>
             </p>
         </div>
+        {foreachelse}
+            <div class="content">
+                <i>Es wurde noch keine FAQ Kategorie erstellt.</i>
+            </div>
         {/foreach}
         </div>
     </div>
@@ -42,10 +46,16 @@ window.onhashchange = function() {
     var elem = document.getElementById("faq" + hash);
     if(elem) {
         if(!isNaN(hash)) {
-            var answer = elem.getElementsByClassName("answer")[0].innerHTML;
-            var question = elem.innerHTML;
-            document.getElementById("faqtitle").innerHTML = question;
-            document.getElementById("faqanswer").innerHTML = answer;
+            var answer = ajax.call(21, hash);
+            if(answer['success']) {
+                answer = answer['message'];
+                var question = elem.innerHTML;
+                document.getElementById("faqtitle").innerHTML = question;
+                document.getElementById("faqanswer").innerHTML = answer;
+            } else {
+                document.getElementById("faqtitle").innerHTML = "Fehler";
+                document.getElementById("faqanswer").innerHTML = "<p>Es ist ein Fehler bei der AJAX Anfrage aufgetreten.</p>";
+            }
         }
     }
 }
