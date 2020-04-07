@@ -132,16 +132,16 @@ if(STEP == 2 && isset($_POST['submit'])) {
 
         // alter the tables with the (primary) keys
         $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD PRIMARY KEY (`userID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq ADD PRIMARY KEY (`faqID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD PRIMARY KEY (`templateID`), ADD KEY `userID` (`userID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq ADD PRIMARY KEY (`faqID`), ADD KEY `category` (`category`);");
         $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq_categorys ADD PRIMARY KEY (`categoryID`);");
         $pdo->query("ALTER TABLE kuscheltickets".KT_N."_groups ADD PRIMARY KEY (`groupID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_group_permissions ADD PRIMARY KEY (`permissionID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages ADD PRIMARY KEY (`pageID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD PRIMARY KEY (`ticketID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_answers ADD PRIMARY KEY (`answerID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys ADD PRIMARY KEY (`categoryID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_group_permissions ADD PRIMARY KEY (`permissionID`), ADD KEY `groupID` (`groupID`);");
         $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD PRIMARY KEY (`notificationID`), ADD KEY `userID` (`userID`);");
-        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD PRIMARY KEY (`templateID`), ADD KEY `userID` (`userID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages ADD PRIMARY KEY (`pageID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD PRIMARY KEY (`ticketID`), ADD KEY `creator` (`creator`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_answers ADD PRIMARY KEY (`answerID`), ADD KEY `ticketID` (`ticketID`);");
+        $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys ADD PRIMARY KEY (`categoryID`);");
         
         
         // alter the tables with auto increment
@@ -228,6 +228,7 @@ if(STEP == 3 && isset($_POST['submit'])) {
         '        "database" => false'.PHP_EOL.
         '    ),'.PHP_EOL.
         '    "cookie" => "KuschelTickets",'.PHP_EOL.
+        '    "cookienotice" => true,'.PHP_EOL.
         '    "seourls" => false,'.PHP_EOL.
         '    "faviconextension" => "png",'.PHP_EOL.
         '    "externalURLTitle" => true,'.PHP_EOL.
