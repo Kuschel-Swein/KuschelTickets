@@ -46,11 +46,11 @@ Solltest du KuschelTickets vor dem Download ausprobieren wollen, kannst du dies 
 
 
 ## Wie installiere ich KuschelTickets?
-öffne hierzu einfach die Seite auf welcher du KuschelTickets hochgeladen hast, du wirst automatisch auf den Installer weitergeleitet
+Informationen zur Installation findest du im [Wiki](https://github.com/Kuschel-Swein/KuschelTickets/wiki/Wie-installiere-ich-KuschelTickets%3F).
 
 
 ## Wie aktualisiere ich KuschelTickets?
-Um KuschelTickets zu aktualisieren, lade die auf deine Version folgende Version (*bsp:* v2.0 => v2.1) herunter, entpacke diese im Installationsverzeichnis von KuschelTickets und ersetze mit alle alten Dateien damit (Zip entpacken => *vorhandene Dateien ersetzen*). Nachdem nun alle Dateien aktualisiert sind, musst du noch deine Datenbank aktualisieren. Öffne hierzu die **update.php** in einem Browser deiner wahl. Damit du diese öffnen kannst, musst du die Datei **INSTALLED** im Verzeichnis **data** löschen. Folge nun den Anweisungen der **update.php** Datei, bist du damit fertig, hast du KuschelTickets erfolgreich aktualisert.
+Informationen zur Aktualisierung findest du im [Wiki](https://github.com/Kuschel-Swein/KuschelTickets/wiki/Wie-aktualisiere-ich-KuschelTickets%3F).
 
 
 
