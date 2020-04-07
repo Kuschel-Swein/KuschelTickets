@@ -66,11 +66,11 @@ class ticketPage extends Page {
                                             $account = new User((int) $row['userID']);
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
                                                 if($account->userID == $creator->userID) {
-                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategoryObject()->getName()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
                                                     array_push($already, $account->userID);
                                                 }
                                             } else {
-                                                Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategoryObject()->getName()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
                                                 array_push($already, $account->userID);
                                             }
                                         }
@@ -81,12 +81,12 @@ class ticketPage extends Page {
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
                                                 if($account->userID == $creator->userID) {
                                                     if(!in_array($account->userID, $already)) {
-                                                        Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategoryObject()->getName()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                        Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
                                                     }
                                                 }
                                             } else {
                                                 if(!in_array($account->userID, $already)) {
-                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategoryObject()->getName()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
                                                 }
                                             }
                                         }

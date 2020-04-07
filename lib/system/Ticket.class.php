@@ -99,15 +99,6 @@ class Ticket {
         return $row['category'];
     }
 
-    public function getCategoryObject() {
-        global $config;
-
-        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
-        $stmt->execute([$this->getCategory()]);
-        $row = $stmt->fetch();
-        return new TicketCategory((int) $row['categoryID']);
-    }
-
     public function exists() {
         global $config;
 
