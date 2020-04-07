@@ -1143,7 +1143,7 @@ const externalpage = {
             }
         }
     }
-}
+};
 
 function clean(input) {
     return input.replace(/</, "&lt;").replace(/>/, "&gt;");
