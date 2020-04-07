@@ -317,7 +317,7 @@ $('.ui.selection.dropdown.groups').dropdown({
     </div>
     <div class="field required{if $site['errors']['url'] !== false} error{/if}">
     <label>URL</label>
-        <div class="ui input disabled">
+        <div class="ui input{if $site['page']['system'] == "1"} disabled{/if}">
             <input type="text" {if $site['page']['system'] == "1"}readonly{/if} name="url" value="{$site['page']['url']}">
         </div>
     </div>

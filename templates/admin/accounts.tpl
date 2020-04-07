@@ -169,7 +169,7 @@
         </div>
     {/if}
   </form>
-  {include file="wysiwyg.tpl" selector="#text"}
+  {include file="wysiwyg.tpl" selector="#text" templates="false"}
 {else if $site['site'] == "add"}
 <a class="ui blue button right floated" href="{link url="admin/accounts"}">Accounts Auflisten</a>
 <br>
