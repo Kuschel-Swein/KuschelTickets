@@ -46,7 +46,7 @@
       <td data-label="Ersteller">{$ticket->getCreator()->getUserName()}</td>
       <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 6);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
       <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
-      <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
+      <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status {$ticket->getFormattedState("name")} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 6);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
     </tr>
     {foreachelse}
     <tr>
