@@ -18,6 +18,9 @@
               <div class="item" data-value="1">Benutzername</div>
               <div class="item" data-value="2">E-Mail</div>
               <div class="item" data-value="3">Benutzergruppe</div>
+              {if $__KT['oauth']['google']['use'] || $__KT['oauth']['github']['use']}
+                <div class="item" data-value="4">Loginanbieter</div>
+              {/if}
             </div>
           </div>
         </div>
@@ -30,53 +33,61 @@
     
     <br>
     <br>
-    <table class="ui celled table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Benutzername</th>
-            <th>E-Mail</th>
-            <th>Benutzergruppe</th>
-            <th>Tickets</th>
-            <th>Gesperrt</th>
-            <th>Aktion</th>
-        </tr>
-    </thead>
-    <tbody id="search_list">
-        {foreach from=$site['accounts'] item="account"}
-        <tr id="accountentry{$account->userID}">
-        <td data-label="ID">{$account->userID}</td>
-        <td data-label="Benutzername">{$account->getUserName()}</a></td>
-        <td data-label="E-Mail"><a href="mailto:{$account->getEmail()}">{$account->getEmail()}</a></td>
-        <td data-label="Benutzergruppe">{$account->getGroup()->getGroupName()}</td>
-        <td data-label="Tickets">{$account->getTicketCount()}</td>
-        <td data-label="Gesperrt">{if $account->isBanned()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</td>
-        <td data-label="Aktion">
-          {if !$account->hasPermission("admin.bypass.bannable")}
-            <a href="{link url="admin/accounts/ban-{$account->userID}"}" data-tooltip="Sperrung verwalten"><i class="icon ban"></i></a>
+    <div class="overflow-x-auto">
+      <table class="ui celled table">
+      <thead>
+          <tr>
+              <th>ID</th>
+              <th>Benutzername</th>
+              <th>E-Mail</th>
+              <th>Benutzergruppe</th>
+              {if $__KT['oauth']['google']['use'] || $__KT['oauth']['github']['use']}
+                <th>Loginanbieter</th>
+              {/if}
+              <th>Tickets</th>
+              <th>Gesperrt</th>
+              <th>Aktion</th>
+          </tr>
+      </thead>
+      <tbody id="search_list">
+          {foreach from=$site['accounts'] item="account"}
+          <tr id="accountentry{$account->userID}">
+          <td data-label="ID">{$account->userID}</td>
+          <td data-label="Benutzername">{$account->getUserName()}</a></td>
+          <td data-label="E-Mail"><a href="mailto:{$account->getEmail()}">{$account->getEmail()}</a></td>
+          <td data-label="Benutzergruppe">{$account->getGroup()->getGroupName()}</td>
+          {if $__KT['oauth']['google']['use'] || $__KT['oauth']['github']['use']}
+            <td data-label="Loginanbieter">{$account->getAuthProvider()}</td>
           {/if}
-          {if !$account->hasPermission("admin.bypass.delete") && $account->userID !== $__KT['user']->userID}
-            <a href="javascript:deleteUser({$account->userID});" data-tooltip="Löschen"><i class="icon times"></i></a>
-          {/if}
-          {if !$__KT['user']->hasPermission("admin.login.other") && $account->userID !== $__KT['user']->userID && !$account->hasPermission("admin.bypass.login.other")}
-            <a href="javascript:loginAs({$account->userID});" data-tooltip="als dieser Benutzer einloggen"><i class="icon lock"></i></a>
-          {/if}
-            <a href="{link url="admin/accounts/edit-{$account->userID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
-        </td>
-        </tr>
-        {foreachelse}
-        <tr>
-            <td colspan="7">
-                <div class="ui info message">
-                    <ul class="list">
-                        <li>Es wurden noch keine Benutzer erstellt. Dieser Fehler sollte nicht auftreten.</li>
-                    </ul>
-                </div>
-            </td>
-        </tr>
-        {/foreach}
-    </tbody>
-    </table>
+          <td data-label="Tickets">{$account->getTicketCount()}</td>
+          <td data-label="Gesperrt">{if $account->isBanned()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</td>
+          <td data-label="Aktion">
+            {if !$account->hasPermission("admin.bypass.bannable")}
+              <a href="{link url="admin/accounts/ban-{$account->userID}"}" data-tooltip="Sperrung verwalten"><i class="icon ban"></i></a>
+            {/if}
+            {if !$account->hasPermission("admin.bypass.delete") && $account->userID !== $__KT['user']->userID}
+              <a href="javascript:deleteUser({$account->userID});" data-tooltip="Löschen"><i class="icon times"></i></a>
+            {/if}
+            {if !$__KT['user']->hasPermission("admin.login.other") && $account->userID !== $__KT['user']->userID && !$account->hasPermission("admin.bypass.login.other")}
+              <a href="javascript:loginAs({$account->userID});" data-tooltip="als dieser Benutzer einloggen"><i class="icon lock"></i></a>
+            {/if}
+              <a href="{link url="admin/accounts/edit-{$account->userID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+          </td>
+          </tr>
+          {foreachelse}
+          <tr>
+              <td colspan="7">
+                  <div class="ui info message">
+                      <ul class="list">
+                          <li>Es wurden noch keine Benutzer erstellt. Dieser Fehler sollte nicht auftreten.</li>
+                      </ul>
+                  </div>
+              </td>
+          </tr>
+          {/foreach}
+      </tbody>
+      </table>
+    </div>
     <script>
         function deleteUser(id) {
             modal.confirm("Möchtest du diesen Account wirklich löschen. Dies kann nicht rückgängig gemacht werden.", function() {

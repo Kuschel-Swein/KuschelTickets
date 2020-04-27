@@ -78,6 +78,12 @@ class adminPage extends Page {
                 "link" => "errors",
                 "file" => "errors",
                 "title" => "Fehler"
+            ),
+            array(
+                "permission" => "menuentries",
+                "link" => "menuentries",
+                "file" => "menuentries",
+                "title" => "Menüeinträge"
             )
         ];
 

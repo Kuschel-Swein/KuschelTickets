@@ -126,3 +126,41 @@ blockquote {
 table {
     overflow-x: auto!important;
 }
+#chatSection_answer_field {
+    width: 100%;
+}
+#chatSection_answer {
+    width: 85%;
+}
+#chatSection_answer_submit {
+    width: auto;
+}
+#chatSection_list {
+    max-height: 500px;
+    height: 500px;
+    overflow-y: auto;
+}
+#chatSection {
+    margin-left: auto;
+    margin-right: auto
+}
+.ui.menu .visualactive.item {
+    background: rgba(0,0,0,.05);
+    color: rgba(0,0,0,.95);
+    font-weight: 400;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.ui.menu a.menuLink[href] {
+    color: rgba(0,0,0,.87);
+}
+.ui.menu .dropdown.child.visualactive.navigation {
+    font-weight: bold!important;
+}
+.ui.table thead th.no-sort {
+    cursor: auto!important;
+    background: #f9fafb!important;
+}
+.jsSortable tr {
+    cursor: move;
+}

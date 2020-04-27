@@ -15,6 +15,9 @@
   <a class="item" data-tab="third">
     Sicherheit
   </a>
+  <a class="item" data-tab="fourth">
+    Benutzer
+  </a>
 </div>
 <div class="ui tab active" data-tab="first">
     <div class="field required{if $site['errors']['pagetitle'] !== false} error{/if}">
@@ -87,7 +90,7 @@
             <label>Favicon externer Links anzeigen</label>
         </div>
         <br>
-        <small class="helper">Hier wird der Favicon Dienst von <a href="https://www.google.com/s2/favicons?domain=google.com" target="_blank">Google</a> verwendet, und das Bild über den internen Bilder Proxy eingebungen.<br>
+        <small class="helper">Hier wird der Favicon Dienst von <a href="https://www.google.com/s2/favicons?domain=google.com" data-no-favicon="true" target="_blank">Google</a> verwendet, und das Bild über den internen Bilder Proxy eingebungen.<br>
         Bei vielen externen Links kann dieses Feature zu längeren Ladezeiten führen.</small>
     </div>
     <div class="field">
@@ -254,6 +257,58 @@
                 <div class="menu">
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<div class="ui tab" data-tab="fourth">
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['oauth']['google']['use']} checked{/if} name="oauth_google" onchange="if(this.checked) { document.getElementById('oauth_google').style.display = 'block'; } else { document.getElementById('oauth_google').style.display = 'none'; }">
+            <label>Google Drittanbieter Login</label>
+        </div>
+        <small><br>Du benötigst hierfür einen Google API Schlüssel, weitere Informationen findest du <a href="https://code.google.com/apis/console/" data-no-favicon="true" target="_blank" rel="noreferer">hier</a>.<br>Die Redirect-URL lautet <span data-tooltip="Klicke zum kopieren"><code onclick="utils.copy(this.innerText)" class="pointer">{link url="oauth-1"}</code></span></small>
+    </div>
+    <div id="oauth_google"{if !$site['config']['oauth']['google']['use']} style="display: none;"{/if}>
+        <div class="field required{if $site['errors']['oauth_google_clientid'] !== false} error{/if}">
+        <label>Google Client ID</label>
+            <div class="ui input">
+                <input type="text" name="oauth_google_clientid" value="{$site['config']['oauth']['google']['clientid']}">
+            </div>
+        </div>
+        <div class="field required{if $site['errors']['oauth_google_clientsecret'] !== false} error{/if}">
+        <label>Google Client Secret</label>
+            <div class="ui input">
+                <input type="text" name="oauth_google_clientsecret" value="{$site['config']['oauth']['google']['clientsecret']}">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['oauth']['github']['use']} checked{/if} name="oauth_github" onchange="if(this.checked) { document.getElementById('oauth_github').style.display = 'block'; } else { document.getElementById('oauth_github').style.display = 'none'; }">
+            <label>GitHub Drittanbieter Login</label>
+        </div>
+        <small><br>Du benötigst hierfür einen GitHub API Schlüssel, weitere Informationen findest du <a href="https://github.com/settings/developers" data-no-favicon="true" target="_blank" rel="noreferer">hier</a>.<br>Die Redirect-URL lautet <span data-tooltip="Klicke zum kopieren"><code onclick="utils.copy(this.innerText)" class="pointer">{link url="oauth-2"}</code></span></small>
+    </div>
+    <div id="oauth_github"{if !$site['config']['oauth']['github']['use']} style="display: none;"{/if}>
+        <div class="field required{if $site['errors']['oauth_github_clientid'] !== false} error{/if}">
+        <label>GitHub Client ID</label>
+            <div class="ui input">
+                <input type="text" name="oauth_github_clientid" value="{$site['config']['oauth']['github']['clientid']}">
+            </div>
+        </div>
+        <div class="field required{if $site['errors']['oauth_github_clientsecret'] !== false} error{/if}">
+        <label>GitHub Client Secret</label>
+            <div class="ui input">
+                <input type="text" name="oauth_github_clientsecret" value="{$site['config']['oauth']['github']['clientsecret']}">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['pdfexport']} checked{/if} name="pdfexport">
+            <label>Ticket PDF Export</label>
         </div>
     </div>
 </div>

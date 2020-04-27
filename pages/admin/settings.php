@@ -31,7 +31,11 @@ $errors = array(
     "recaptchaprivate" => false,
     "recaptchacases" => false,
     "token" => false,
-    "favicon" => false
+    "favicon" => false,
+    "oauth_google_clientid" => false,
+    "oauth_google_clientsecret" => false,
+    "oauth_github_clientid" => false,
+    "oauth_github_clientsecret" => false
 );
 
 $success = false;
@@ -187,7 +191,34 @@ if(isset($parameters['submit'])) {
                                                                                                         $faviconextension = $config['faviconextension'];
                                                                                                         $faviconmime = $config['faviconmime'];
                                                                                                     }
-                                                                                                    if($validrecaptcha && $validfavicon) {
+                                                                                                    $validoauth = true;
+                                                                                                    if(isset($parameters['oauth_google'])) {
+                                                                                                        if(isset($parameters['oauth_google_clientid']) && !empty($parameters['oauth_google_clientid'])) {
+                                                                                                            if(isset($parameters['oauth_google_clientsecret']) && !empty($parameters['oauth_google_clientsecret'])) {
+
+                                                                                                            } else {
+                                                                                                                $errors['oauth_google_clientsecret'] = "Bitte gib ein Google Client Secret an.";
+                                                                                                                $validoauth = false;
+                                                                                                            }
+                                                                                                        } else {
+                                                                                                            $errors['oauth_google_clientid'] = "Bitte gib eine Google Client ID an.";
+                                                                                                            $validoauth = false;
+                                                                                                        }
+                                                                                                    }
+                                                                                                    if(isset($parameters['oauth_github'])) {
+                                                                                                        if(isset($parameters['oauth_github_clientid']) && !empty($parameters['oauth_github_clientid'])) {
+                                                                                                            if(isset($parameters['oauth_github_clientsecret']) && !empty($parameters['oauth_github_clientsecret'])) {
+
+                                                                                                            } else {
+                                                                                                                $errors['oauth_github_clientsecret'] = "Bitte gib ein GitHub Client Secret an.";
+                                                                                                                $validoauth = false;
+                                                                                                            }
+                                                                                                        } else {
+                                                                                                            $errors['oauth_github_clientid'] = "Bitte gib eine GitHub Client ID an.";
+                                                                                                            $validoauth = false;
+                                                                                                        }
+                                                                                                    }
+                                                                                                    if($validrecaptcha && $validfavicon && $validoauth) {
                                                                                                         // SAVE THE CONFIG FILE
                                                                                                         $recaptchacases = explode(",", $parameters['recaptchacases']);
                                                                                                         $count = count($recaptchacases);
@@ -203,6 +234,22 @@ if(isset($parameters['submit'])) {
                                                                                                             $smtpauth = ($parameters['smtpauth'] == "on") ? "true" : "false";
                                                                                                         } else {
                                                                                                             $smtpauth = "false";
+                                                                                                        }
+                                                                                                        $oauth_google = "false";
+                                                                                                        $oauth_google_clientid = "";
+                                                                                                        $oauth_google_clientsecret = "";
+                                                                                                        if(isset($parameters['oauth_google'])) {
+                                                                                                            $oauth_google = "true";
+                                                                                                            $oauth_google_clientid = $parameters['oauth_google_clientid'];
+                                                                                                            $oauth_google_clientsecret = $parameters['oauth_google_clientsecret'];
+                                                                                                        }
+                                                                                                        $oauth_github = "false";
+                                                                                                        $oauth_github_clientid = "";
+                                                                                                        $oauth_github_clientsecret = "";
+                                                                                                        if(isset($parameters['oauth_github'])) {
+                                                                                                            $oauth_github = "true";
+                                                                                                            $oauth_github_clientid = $parameters['oauth_github_clientid'];
+                                                                                                            $oauth_github_clientsecret = $parameters['oauth_github_clientsecret'];
                                                                                                         }
                                                                                                         if(isset($parameters['recaptchause'])) {
                                                                                                             $recaptchause = ($parameters['recaptchause'] == "on") ? "true" : "false";
@@ -238,6 +285,12 @@ if(isset($parameters['submit'])) {
                                                                                                             $externalURLTitle = ($parameters['externalURLTitle'] == "on") ? "true" : "false";
                                                                                                         } else {
                                                                                                             $externalURLTitle = "false";
+                                                                                                        }
+
+                                                                                                        if(isset($parameters['pdfexport'])) {
+                                                                                                            $pdfexport = ($parameters['pdfexport'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $pdfexport = "false";
                                                                                                         }
 
                                                                                                         if(isset($parameters['proxyAllImages'])) {
@@ -305,6 +358,7 @@ if(isset($parameters['submit'])) {
                                                                                                         '    ),'.PHP_EOL.
                                                                                                         '    "cookie" => "'.$parameters['cookie'].'",'.PHP_EOL.
                                                                                                         '    "seourls" => '.$seourls.','.PHP_EOL.
+                                                                                                        '    "pdfexport" => '.$pdfexport.','.PHP_EOL.
                                                                                                         '    "faviconextension" => "'.$faviconextension.'",'.PHP_EOL.
                                                                                                         '    "externalURLTitle" => '.$externalURLTitle.','.PHP_EOL.
                                                                                                         '    "faviconmime" => "'.$faviconmime.'",'.PHP_EOL.
@@ -315,6 +369,18 @@ if(isset($parameters['submit'])) {
                                                                                                         '    "useDesktopNotification" => '.$useDesktopNotification.','.PHP_EOL.
                                                                                                         '    "emailnotifications" => '.$emailnotifications.','.PHP_EOL.
                                                                                                         '    "adminmail" => "'.$parameters['adminmail'].'",'.PHP_EOL.
+                                                                                                        '    "oauth" => array('.PHP_EOL.
+                                                                                                        '        "google" => array('.PHP_EOL.
+                                                                                                        '            "use" => '.$oauth_google.','.PHP_EOL.
+                                                                                                        '            "clientid" => "'.$oauth_google_clientid.'",'.PHP_EOL.
+                                                                                                        '            "clientsecret" => "'.$oauth_google_clientsecret.'"'.PHP_EOL.
+                                                                                                        '        ),'.PHP_EOL.
+                                                                                                        '        "github" => array('.PHP_EOL.
+                                                                                                        '            "use" => '.$oauth_github.','.PHP_EOL.
+                                                                                                        '            "clientid" => "'.$oauth_github_clientid.'",'.PHP_EOL.
+                                                                                                        '            "clientsecret" => "'.$oauth_github_clientsecret.'"'.PHP_EOL.
+                                                                                                        '        ),'.PHP_EOL.
+                                                                                                        '    ),'.PHP_EOL.
                                                                                                         '    "mail" => array('.PHP_EOL.
                                                                                                         '        "host" => "'.$parameters['smtphost'].'",'.PHP_EOL.
                                                                                                         '        "auth" => '.$smtpauth.','.PHP_EOL.

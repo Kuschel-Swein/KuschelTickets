@@ -176,8 +176,28 @@ $permissions = [
         "display" => "kann Fehler Protokolle über das ACP verwalten"
     ),
     array(
-        "name" => "general_editor_templates",
-        "display" => "kann Editorvorlagen erstellen und verwenden"
+        "name" => "general_supportchat_view",
+        "display" => "kann den SupportChat sehen"
+    ),
+    array(
+        "name" => "general_supportchat_join",
+        "display" => "kann einem SupportChat beitreten"
+    ),
+    array(
+        "name" => "general_supportchat_use",
+        "display" => "kann in SupportChats Nachrichten versenden"
+    ),
+    array(
+        "name" => "mod_supportchat_create",
+        "display" => "kann Supportchats öffnen"
+    ),
+    array(
+        "name" => "admin_acp_page_menuentries",
+        "display" => "kann das Menü verwalten"
+    ),
+    array(
+        "name" => "general_ticket_export_pdf",
+        "display" => "kann Tickets als PDF exportieren"
     )
 ];
 

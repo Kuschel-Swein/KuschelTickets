@@ -9,6 +9,7 @@ class PageHandler {
         // prepare parameters
 
         $querystring = $_SERVER['QUERY_STRING'];
+        $querystring = str_replace("%2F", "/", $querystring);
         $parameters = explode("/", $querystring);
         $parameters = array_reverse($parameters);
         $page = null;
@@ -36,6 +37,7 @@ class PageHandler {
             }
             
         }
+
         if($page == "") {
             $page = "Index";
         }

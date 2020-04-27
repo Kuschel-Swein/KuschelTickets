@@ -6,6 +6,9 @@ class Link {
     public static function get(String $url) {
         global $config;
 
+        if(filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
         if($url !== "") {
             $mainurl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? "https" : "http") . "://".$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'];
             if($config['seourls']) {

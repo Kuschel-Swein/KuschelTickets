@@ -5,11 +5,13 @@ use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\Utils;
 
+require("lib/KuschelTickets.class.php");
 require("lib/PageHandler.class.php");
 require("lib/Page.class.php");
 require("lib/Mailer.class.php");
 require("lib/Utils.class.php");
 require("lib/Link.class.php");
+require("lib/dompdfAdapter.class.php");
 require("lib/recaptcha.class.php");
 require("lib/system/User.class.php");
 require("lib/system/Group.class.php");
@@ -20,6 +22,10 @@ require("lib/system/Notification.class.php");
 require("lib/system/PageContent.class.php");
 require("lib/system/Ticket.class.php");
 require("lib/system/TicketCategory.class.php");
+require("lib/system/Oauth.class.php");
+require("lib/system/GitHubOauth.class.php");
+require("lib/system/SupportChat.class.php");
+require("lib/system/MenuEntry.class.php");
 
 require("lib/exceptions/AccessDeniedException.class.php");
 require("lib/exceptions/PageNotFoundException.class.php");
@@ -46,6 +52,7 @@ if($config['debugging']['php']) {
 if($config['debugging']['database']) {
     $config['db']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }
+
 
 $templateengine = new Smarty();
 

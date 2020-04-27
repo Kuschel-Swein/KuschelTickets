@@ -41,6 +41,16 @@ class Utils {
         return $text;
     }
 
+    public static function randomString($length = 50) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!?/()[]#+-<>';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
     public static function httpPost($url, $data) {
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_POST, true);
@@ -101,5 +111,9 @@ class Utils {
             $string .= chr($number);
         }
         return $string;
+    }
+
+    public static function makeClickableLinks(String $s) {
+        return preg_replace('@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)@', '<a href="$1" target="_blank">$1</a>', $s);
     }
 }

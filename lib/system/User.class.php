@@ -3,6 +3,7 @@ namespace KuschelTickets\lib\system;
 use KuschelTickets\lib\system\Ticket;
 use KuschelTickets\lib\system\Group;
 use KuschelTickets\lib\system\Notification;
+use KuschelTickets\lib\system\Oauth;
 
 class User {
 
@@ -63,6 +64,13 @@ class User {
         $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_group_permissions WHERE groupID = ? AND name = ?");
         $stmt->execute([$this->getGroup()->groupID, $permission]);
         $row = $stmt->fetch();
+        if($row == false) {
+            if($this->getGroup()->groupID == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
         return $row['value'] == "1";
     }
 
@@ -82,6 +90,14 @@ class User {
         $stmt->execute([$this->userID]);
         $row = $stmt->fetch();
         return $row['banreason'];
+    }
+
+    public function getAuthProvider() {
+        global $config;
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts WHERE userID = ?");
+        $stmt->execute([$this->userID]);
+        $row = $stmt->fetch();
+        return Oauth::getProvider($row['oauth']);
     }
 
     public function validateHash() {

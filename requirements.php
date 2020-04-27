@@ -72,8 +72,8 @@ function formatBytes(float $bytes) {
 function resultEnd() {
     global $error;
     
-    $error = 13 + $error;
-    if($error == 13) {
+    $error = 14 + $error;
+    if($error == 14) {
         return '<div class="final result success">KuschelTickets wird vollständig unterstützt</div>';
     } else if($error > 10) {
         return '<div class="final result warning">KuschelTickets könnte unterstützt werden, jedoch konnten einige Überprüfungen nicht ausgeführt werden</div>';
@@ -186,6 +186,7 @@ function resultEnd() {
             <?php echo resultDisk(); ?>
             <?php echo resultExtension("Core"); ?>
             <?php echo resultExtension("date"); ?>
+            <?php echo resultExtension("curl"); ?>
             <?php echo resultExtension("filter"); ?>
             <?php echo resultExtension("json"); ?>
             <?php echo resultExtension("session"); ?>

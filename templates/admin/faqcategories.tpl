@@ -17,7 +17,6 @@
               <div class="item" data-value="0">ID</div>
               <div class="item" data-value="1">Name</div>
               <div class="item" data-value="2">FAQs</div>
-              <div class="item" data-value="3">Kategorie</div>
             </div>
           </div>
         </div>

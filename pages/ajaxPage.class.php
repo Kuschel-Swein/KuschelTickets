@@ -6,8 +6,11 @@ use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\Ticket;
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\system\FAQ;
+use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\system\Notification;
 use KuschelTickets\lib\system\TicketCategory;
+use KuschelTickets\lib\system\SupportChat;
+use KuschelTickets\lib\system\MenuEntry;
 
 class ajaxPage extends Page {
 
@@ -47,6 +50,14 @@ class ajaxPage extends Page {
          * 21 => get faq content of given id
          * 22 => check if notification was sent
          * 23 => mark notification as sent
+         * 24 => get all open chats
+         * 25 => join chat (user)
+         * 26 => load chat messages
+         * 27 => create chat message
+         * 28 => leave chat
+         * 29 => open chat
+         * 30 => [ADMIN] delete menuentry
+         * 31 => [ADMIN] sort menuentries
          */
         if($type == 1) {
             if(UserUtils::isLoggedIn()) {
@@ -644,6 +655,233 @@ class ajaxPage extends Page {
                                 );
                             }
                         }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 24) {
+            if(UserUtils::isLoggedIn()) {
+                $user = new User(UserUtils::getUserID());
+                if($user->hasPermission("general.supportchat.view")) {
+                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 0 AND NOT creator = ?");
+                    $stmt->execute([$user->userID]);
+                    $data = [];
+                    while($row = $stmt->fetch()) {
+                        $creator = new User($row['creator']);
+                        $content = array(
+                            "creatorName" => $creator->getUserName(),
+                            "time" => date("d.m.Y", $row['time']).", ".date("H:i", $row['time'])." Uhr",
+                            "chatID" => $row['chatID']
+                        );
+                        array_push($data, $content);
+                    }
+                    $result = array(
+                        "success" => "true",
+                        "message" => $data,
+                        "title" => null
+                    );
+                }
+            }
+        } else if($type == 25) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.supportchat.join")) {
+                        $chat = new SupportChat((int) $parameters['object']);
+                        if($chat->exists()) {
+                            if($chat->getCreator()->userID !== $user->userID) {
+                                if($chat->isJoinable()) {
+                                    $chat->join($user);
+                                    $result = array(
+                                        "success" => "true",
+                                        "message" => "Du bist erfolgreich dem Supportchat von ".$chat->getCreator()->getUserName()." beigetreten.",
+                                        "title" => "Supportchat beigetreten"
+                                    );
+                                } else {
+                                    $result = array(
+                                        "success" => "false",
+                                        "message" => "Dieser Supportchat ist leider bereits besetzt.",
+                                        "title" => "Supportchat besetzt"
+                                    );
+                                }
+                            } else {
+                                $result = array(
+                                    "success" => "false",
+                                    "message" => "Du kannst nicht deinem eigenen Supportchat beitreten.",
+                                    "title" => "Supportchat nicht betretbar"
+                                );
+                            }
+                        }
+                    } else {
+                        $result = array(
+                            "success" => "false",
+                            "message" => "Du hast nicht die erforderliche Berechtigung um diese Aktion auszuführen.",
+                            "title" => "Zugriff verweigert"
+                        );
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 26) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.supportchat.use")) {
+                        $chat = new SupportChat((int) $parameters['object']);
+                        if($chat->exists()) {
+                            if($chat->getCreator()->userID == $user->userID) {
+                                $result = array(
+                                    "success" => "true",
+                                    "message" => $chat->getMessages(),
+                                    "title" => null
+                                );
+                            } else if($chat->getUser() !== null) {
+                                if($chat->getUser()->userID == $user->userID) {
+                                    $result = array(
+                                        "success" => "true",
+                                        "message" => $chat->getMessages(),
+                                        "title" => null
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 27) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.supportchat.use")) {
+                        $chatID = null;
+                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE user = ? AND NOT state = 2  ORDER BY chatID DESC LIMIT 1");
+                        $stmt->execute([$user->userID]);
+                        $row = $stmt->fetch();
+                        if($row !== false) {
+                            $chatID = $row['chatID'];
+                        } else {
+                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE creator = ? AND NOT state = 2 ORDER BY chatID DESC LIMIT 1");
+                            $stmt->execute([$user->userID]);
+                            $row = $stmt->fetch();
+                            if($row !== false) {
+                                $chatID = $row['chatID'];
+                            }
+                        }
+                        if($chatID !== null) {
+                            $chat = new SupportChat((int) $chatID);
+                            if($chat->exists()) {
+                                $chat->createMessage($user, Utils::fromASCI($parameters['object']));
+                                $result = array(
+                                    "success" => "true",
+                                    "message" => null,
+                                    "title" => null
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 28) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.supportchat.use")) {
+                        $chat = new SupportChat($parameters['object']);
+                        if($chat->exists()) {
+                            if($chat->getUser()->userID == $user->userID) {
+                                $chat->createSystemMessage("Der Benutzer ".$chat->getUser()->getUserName()." hat den Chat verlassen.");
+                                $chat->createSystemMessage("Dieser Chat wird nun geschlossen.");
+                                $chat->close();
+                            } else if($chat->getCreator()->userID == $user->userID) {
+                                $chat->createSystemMessage("Der Benutzer ".$chat->getCreator()->getUserName()." hat den Chat verlassen.");
+                                $chat->createSystemMessage("Dieser Chat wird nun geschlossen.");
+                                $chat->close();
+                            }
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 29) {
+            if(UserUtils::isLoggedIn()) {
+                $user = new User(UserUtils::getUserID());
+                if($user->hasPermission("mod.supportchat.create")) {
+                    $chat = SupportChat::create($user);
+                    $result = array(
+                        "success" => "true",
+                        "message" => "Dein Supportchat wurde erfolgreich geöffnet.",
+                        "title" => "Supportchat geöffnet",
+                        "chatID" => $chat->chatID
+                    );
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 30) {
+            if(UserUtils::isLoggedIn()) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("admin.acp.page.menuentries")) {
+                        $entry = new MenuEntry($parameters['object']);
+                        if(!$entry->isSystem()) {
+                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `parent`=NULL WHERE parent = ?");
+                            $stmt->execute([$parameters['object']]);
+                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_menu WHERE menuID = ?");
+                            $stmt->execute([$parameters['object']]);
+                            $result = array(
+                                "success" => "true",
+                                "message" => "Dieser Menüeintrag wurde erfolgreich gelöscht.",
+                                "title" => "Menüeintrag gelöscht"
+                            );
+                        }
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 31) {
+            if(UserUtils::isLoggedIn()) {
+                $user = new User(UserUtils::getUserID());
+                if($user->hasPermission("admin.acp.page.menuentries")) {
+                    if(isset($_POST['json']) && !empty($_POST['json'])) {
+                        $json = json_decode($_POST['json']);
+                        foreach($json as $key => $value) {
+                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `sorting`=? WHERE menuID = ?");
+                            $stmt->execute([$key, $value]);
+                        }
+                        $result = array(
+                            "success" => "true",
+                            "message" => null,
+                            "title" => null
+                        );
                     }
                 }
             } else {

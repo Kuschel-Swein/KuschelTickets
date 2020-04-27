@@ -32,6 +32,17 @@ if(isset($parameters['submit'])) {
                     $stmt->execute();
                     $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
                 }
+                if(isset($parameters['supportchat'])) {
+                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
+                    $stmt->execute();
+                    while($row = $stmt->fetch()) {
+                        $statement = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
+                        $statement->execute([$row['chatID']]);
+                        $statement = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat WHERE chatID = ?");
+                        $statement->execute([$row['chatID']]);
+                    }
+                    $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
+                }
                 if(isset($parameters['errorlogs'])) {
                     $errorfiles = glob("./data/logs/*.txt");
                     foreach($errorfiles as $file) {
@@ -88,6 +99,20 @@ $stmt->execute();
 $row = $stmt->fetch();
 $bannedusers = $row['bannedusers'];
 
+$supportchats = 0;
+$stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
+$stmt->execute();
+while($row = $stmt->fetch()) {
+    $supportchats++;
+    $statement = $config['db']->prepare("SELECT COUNT(*) AS trashAnswers FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
+    $statement->execute([$row['chatID']]);
+    $messages = 0;
+    if(isset($row['trashAnswers'])) {
+        $messages = (int) $row['trashAnswers'];
+    }
+    $supportchats = $supportchats + $messages;
+}
+
 $errorlogs = glob("./data/logs/*.txt");
 $errorlogs = count($errorlogs);
 
@@ -103,5 +128,6 @@ $site = array(
     "closeanswers" => $closeanswers,
     "bannedusers" => $bannedusers,
     "errorlogs" => $errorlogs,
+    "supportchats" => $supportchats,
     "templatescompiled" => $templatescompiled
 );

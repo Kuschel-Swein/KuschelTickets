@@ -29,6 +29,13 @@
 </div>
 <div class="field">
     <div class="ui checkbox">
+        <input type="checkbox" name="supportchat"{if isset($tpl['post']['supportchat']) && !$site['success']} checked{/if}>
+        <label>alle geschlossenen SupportChats und deren Nachrichten löschen.</label>
+        <small class="helper">ca. {$site['supportchats']} Datensätz(e)</small>
+    </div>
+</div>
+<div class="field">
+    <div class="ui checkbox">
         <input type="checkbox" name="errorlogs"{if isset($tpl['post']['errorlogs']) && !$site['success']} checked{/if}>
         <label>alle Fehler Protokolle löschen.</label>
         <small class="helper">ca. {$site['errorlogs']} Datei(en)</small>

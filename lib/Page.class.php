@@ -4,6 +4,9 @@ use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
+use KuschelTickets\lib\system\Oauth;
+use KuschelTickets\lib\system\MenuEntry;
+use KuschelTickets\lib\KuschelTickets;
 
 class Page {
 
@@ -46,8 +49,9 @@ class Page {
             $kt['user'] = null;
         }
         $kt['mainurl'] = Link::mainurl();
-        $data = DATA;
-        $kt['topnavigation'] = $data['topnavigation'];
+        $kt['google_auth_uri'] = Oauth::getGoogleURL();
+        $kt['github_auth_uri'] = Oauth::getGitHubURL();
+        $kt['topnavigation'] = KuschelTickets::buildMenu($this->identifier);
         $kt['CRSF'] = CRSF::get();
         $kt['activepage'] = $this->identifier;
         $templateengine->assign("__KT", $kt, true);

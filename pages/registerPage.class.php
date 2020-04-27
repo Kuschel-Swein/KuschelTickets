@@ -35,9 +35,12 @@ class registerPage extends Page {
                                 if(isset($parameters['password_confirm']) && !empty($parameters['password_confirm'])) {
                                     if($parameters['password'] == $parameters['password_confirm']) {
                                         if(isset($parameters['legal_notice']) && !empty($parameters['legal_notice'])) {
-                                            if(!UserUtils::exists($parameters['username'], "username")) {
+                                            $username = $parameters['username'];
+                                            $username = str_replace(" ", "", $username);
+                                            $username = preg_replace("/\r|\n/", "", $username);
+                                            if(!UserUtils::exists($username, "username")) {
                                                 if(!UserUtils::exists($parameters['email'], "email")) {
-                                                    UserUtils::create($parameters['username'], $parameters['email'], $parameters['password']);
+                                                    UserUtils::create($username, $parameters['email'], $parameters['password']);
                                                     $this->success = true;
                                                 } else {
                                                     $this->errors['email'] = "Diese E-Mail Adresse ist bereits vergeben.";

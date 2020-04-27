@@ -40,6 +40,9 @@
                         {if $__KT['user']->hasPermission("admin.acp.page.pages")}
                             <a class="item" href="{link url="admin/pages"}">Seiten</a>
                         {/if}
+                        {if $__KT['user']->hasPermission("admin.acp.page.menu")}
+                            <a class="item" href="{link url="admin/menuentries"}">Menüeinträge</a>
+                        {/if}
                         {if $__KT['user']->hasPermission("admin.acp.page.ticketcategories")}
                             <a class="item" href="{link url="admin/ticketcategories"}">Ticket Kategorien</a>
                         {/if}

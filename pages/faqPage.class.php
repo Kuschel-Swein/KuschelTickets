@@ -3,6 +3,7 @@ use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\FAQ;
+use KuschelTickets\lib\Exceptions\AccessDeniedException;
 
 class faqPage extends Page {
 

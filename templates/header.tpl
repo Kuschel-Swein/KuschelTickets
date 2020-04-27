@@ -6,12 +6,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" type="{$__KT['faviconmime']}" href="{$__KT['mainurl']}data/favicon.{$__KT['faviconextension']}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato&display=swap" crossorigin="anonymous">
-        <link rel="stylesheet" href="{$__KT['mainurl']}assets/semantic.min.css">
-        <link rel="stylesheet" href="{$__KT['mainurl']}assets/toast.css">     
-        <link rel="stylesheet" href="{$__KT['mainurl']}assets/master.css">    
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/semantic.min.css?v={$__KT['version']}">
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/toast.css?v={$__KT['version']}">     
+        <link rel="stylesheet" href="{$__KT['mainurl']}assets/master.css?v={$__KT['version']}">    
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
-        <script src="{$__KT['mainurl']}assets/semantic.min.js" type="text/javascript"></script>
-        <script src="{$__KT['mainurl']}assets/toast.js" type="text/javascript"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" crossorigin="anonymous"></script>
+        <script src="{$__KT['mainurl']}assets/semantic.min.js?v={$__KT['version']}" type="text/javascript"></script>
+        <script src="{$__KT['mainurl']}assets/toast.js?v={$__KT['version']}" type="text/javascript"></script>
         <script>
             const kuscheltickets_version = "{$__KT['version']}";
             const notifications_link = "{link url="notifications"}";
@@ -26,6 +27,8 @@
                 externalURLFavicons: {if $__KT['externalURLFavicons']}true{else}false{/if},
                 externalURLWarning: {if $__KT['externalURLWarning']}true{else}false{/if},
                 pushNotificationsAvailable: false,
+                canJoinChat: {if $__KT['user'] !== null}{$__KT['user']->hasPermission("general.supportchat.join")}{else}false{/if},
+                canOpenSupportchat: {if $__KT['user'] !== null}{$__KT['user']->hasPermission("mod.supportchat.create")}{else}false{/if},
                 pagetitle: "{$__KT['pagetitle']}",
                 faviconextension: "{$__KT['faviconextension']}",
                 externalURLTitle: {if $__KT['externalURLTitle']}true{else}false{/if},
@@ -33,13 +36,13 @@
                 useDesktopNotification: {if $__KT['useDesktopNotification']}true{else}false{/if}
             };
         </script>
-        <script src="{$__KT['mainurl']}/assets/master.js" type="text/javascript"></script>
+        <script src="{$__KT['mainurl']}/assets/master.js?v={$__KT['version']}" type="text/javascript"></script>
         <script>
             KT.userTemplates = ajax.call(19, 1)['message'];
         </script>
     </head>
     <body id="main"> 
-        <div class="ui mobile only padded grid">
+        <div class="ui mobile tablet only padded grid">
             <div class="ui top fixed huge fluid menu">
                 <div class="header item">{$__KT['pagetitle']}</div>
                     <div class="right menu">
@@ -50,17 +53,7 @@
                         </div>
                     </div>
                     <div class="ui vertical fluid menu">
-                    {foreach from=$__KT['topnavigation'] item="link"}
-                        {if $link['permission'] !== null}
-                            {if $__KT['user'] !== null}
-                                {if $__KT['user']->hasPermission($link['permission'])}
-                                    <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
-                                {/if}
-                            {/if}
-                        {else}
-                            <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
-                        {/if}
-                    {/foreach}
+                    {$__KT['topnavigation']}
                     {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
                         <a href="{link url="notifications"}" class="item">Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
                     {/if}
@@ -72,21 +65,11 @@
                 </div>
             </div>
         </div>
-        <div class="ui tablet computer only grid menu top fixed">
+        <div class="ui computer only grid menu top fixed">
             <div class="item">
                 <h2>{$__KT['pagetitle']}</h2>
             </div>
-            {foreach from=$__KT['topnavigation'] item="link"}
-                {if $link['permission'] !== null}
-                    {if $__KT['user'] !== null}
-                        {if $__KT['user']->hasPermission($link['permission'])}
-                            <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
-                        {/if}
-                    {/if}
-                {else}
-                    <a href="{link url=$link['href']}" class="item{if $__KT['activepage'] == $link['identifier']} active{/if}{if $link['right']} right{/if}">{$link['text']}</a>
-                {/if}
-            {/foreach}
+            {$__KT['topnavigation']}
             {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
                 <div class="item right">
                     <div id="notificationsbell" class="pointer" data-position="bottom center">

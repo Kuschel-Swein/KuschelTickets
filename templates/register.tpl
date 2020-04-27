@@ -75,6 +75,7 @@
         <a class="item" href="{link url="passwordreset"}">Passwort vergessen</a>
         <a class="item" href="{link url="login"}">Einloggen</a>
       </div>
+      {include file="oauth_providers.tpl"}
     </div>
   </div>
 </div>

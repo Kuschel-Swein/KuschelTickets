@@ -3,8 +3,43 @@ $(document).ready(function () {
         $(".mobile.only.grid .ui.vertical.menu").toggle(100);
     });
       
+    $(".ui.dropdown.navigation").dropdown(
+        {
+            on: "click"
+        }
+    );
+    var elems = document.querySelectorAll("a.menuLink[href]");
+    for(var i = 0; i < elems.length; i++) {
+        elems[i].addEventListener("click", function(e) {
+            window.location.href = this.href;
+        });
+    }
+    elems = document.querySelectorAll(".ui.dropdown.child .menu > .item.visualactive");
+    for(var i = 0; i < elems.length; i++) {
+        var elem = elems[i].parentElement.parentElement;
+        while(elem.classList.contains("child") && !elem.classList.contains("visualactive")) {
+            elem.classList.add("visualactive");
+            elem = elem.parentElement.parentElement;
+        }
+    }
+    elems = document.querySelectorAll(".ui.dropdown.child .menu > .item.active");
+    for(var i = 0; i < elems.length; i++) {
+        var elem = elems[i].parentElement.parentElement;
+        while(elem.classList.contains("child") && !elem.classList.contains("visualactive")) {
+            elem.classList.add("visualactive");
+            elem = elem.parentElement.parentElement;
+        }
+    }
     notifications.init();
     externalpage.init();
+    $('table').addClass("sortable");
+    var elems = document.querySelectorAll('table > thead > tr > th');
+    for(var i = 0; i < elems.length; i++) {
+        if(elems[i].innerHTML == "Aktion") {
+            elems[i].classList.add("no-sort");
+        }
+    }
+    $('table').tablesort()
 });
 
 const ajax = {
@@ -14,8 +49,20 @@ const ajax = {
         xmlHttp.open("GET", link("ajax-" + value + "/object-" + object), false);
         xmlHttp.send(null);
         return JSON.parse(xmlHttp.responseText);
+    },
+    fetch: function (value, object) {
+        fetch(link("ajax-" + value + "/object-" + object)).then(function(response) {
+            return JSON.parse(response);
+        });
+    },
+    post: function (value, object, parameters) {
+        var xmlHttp = null;
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", link("ajax-" + value + "/object-" + object), false);
+        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlHttp.send(parameters);
+        return JSON.parse(xmlHttp.responseText);
     }
-
 };
 
 const modal = {
@@ -49,6 +96,20 @@ const modal = {
     }
 }
 const utils = {
+    toASCI: function(string) {
+        return string.replace(/./g, function(c) {
+            return ('00' + c.charCodeAt(0)).slice(-3);
+        });
+    },
+    copy: function(text) {
+        var textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 9999999999);
+        document.execCommand("copy");
+        textarea.remove();
+    },
     search: function (table, input, type, colspan) {
         var filter, tr, td, i, txtValue, result, helper;
         helper = table.getElementsByClassName("search_info");
@@ -1041,7 +1102,7 @@ const notifications = {
     },
     desktopNotification: function(notification) {
         if(KT.useDesktopNotification) {
-            var notify = new Notification(KT.pagetitle + "Benachrichtigung", notifications.options(notification));
+            var notify = new Notification(KT.pagetitle + " Benachrichtigung", notifications.options(notification));
             notify.onclick = function() {
                 window.open(notification['link'], "_blank");
             }
@@ -1063,9 +1124,13 @@ const externalpage = {
                     if(elems[i].href !== "") {
                         if(!elems[i].href.startsWith(KT.mainurl)) {
                             if(!elems[i].href.startsWith("javascript:")) {
-                                if(!elems[i].classList.contains('item')) {
+                                if(!elems[i].classList.contains("item") && !elems[i].classList.contains("button") && elems[i].dataset.noFavicon == undefined) {
                                     if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
-                                        var image = "https://www.google.com/s2/favicons?domain=" + elems[i].href;
+                                        var href = elems[i].href;
+                                        if(href.endsWith("/")) {
+                                            href = href.substring(0, href.length - 1);
+                                        }
+                                        var image = "https://www.google.com/s2/favicons?domain=" + href;
                                         image = externalpage.toASCI(image);
                                         elems[i].style.backgroundImage = 'url("' + link("imageproxy/url-" + image) + '")';
                                         elems[i].style.backgroundRepeat = 'no-repeat';
@@ -1133,7 +1198,7 @@ const externalpage = {
             for(var i = 0; i < elems.length; i++) {
                 if(elems[i].href !== undefined) {
                     if(elems[i].href !== "") {
-                        if(!elems[i].href.startsWith(KT.mainurl)) {
+                        if(!elems[i].href.startsWith(KT.mainurl) && elems[i].dataset.externalUrlWhitelist == undefined) {
                             if(!elems[i].href.startsWith("javascript:")) {
                                 if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
                                     elems[i].addEventListener("click", function (e) {

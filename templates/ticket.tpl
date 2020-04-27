@@ -22,6 +22,9 @@
                             <div class="item" data-value="2">Ticket erneut öffnen</div>
                         {/if}
                     {/if}
+                    {if $__KT['user']->hasPermission("general.ticket.export.pdf") && $__KT['pdfexport']}
+                        <div class="item" data-value="4">Ticket als PDF exportieren</div>
+                    {/if}
                 </div>
             </div>
         {/if}
@@ -206,18 +209,22 @@ $(".ui.dropdown.settings").dropdown({
     action: 'select'
 });
 $('.ui.dropdown.settings').dropdown('setting', 'onChange', function(value, text, $choice){
-    var data = ajax.call(value, {$ticket->ticketID});
-    if(data['success'] !== undefined) {
-        toast.create(data['title'], data['message'], "success");
-        if(tinymce.editors[0] !== undefined) {
-            tinymce.remove(tinymce.editors[0]);
-            document.getElementById("addform").remove();
-        }
-        setTimeout(function() {
-            window.location.reload();
-        }, 3000)
+    if(value == 4) {
+        window.open(link("ticketpdf-{$ticket->ticketID}"), "target=_blank");
     } else {
-        toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
+        var data = ajax.call(value, {$ticket->ticketID});
+        if(data['success'] !== undefined) {
+            toast.create(data['title'], data['message'], "success");
+            if(tinymce.editors[0] !== undefined) {
+                tinymce.remove(tinymce.editors[0]);
+                document.getElementById("addform").remove();
+            }
+            setTimeout(function() {
+                window.location.reload();
+            }, 3000)
+        } else {
+            toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
+        }
     }
 });
 $(".deletebutton").click(function() {
