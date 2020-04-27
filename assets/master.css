@@ -164,3 +164,17 @@ table {
 .jsSortable tr {
     cursor: move;
 }
+.ui.styled.accordion .accordion .plainItem, .ui.styled.accordion .plainItem {
+    margin: 0;
+    padding: .75em 1em;
+    color: rgba(0,0,0,.4);
+    font-weight: 700;
+    -webkit-transition: background .1s ease,color .1s ease;
+    transition: background .1s ease,color .1s ease;
+}
+.ui.styled.accordion .accordion .plainItem:not(:first-child), .ui.styled.accordion .plainItem:not(:first-child) {
+    border-top: 1px solid rgba(34,36,38,.15);
+}
+.faqsearch {
+    width: 100%;
+}

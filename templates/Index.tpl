@@ -10,6 +10,9 @@
             <th>Kategorie</th>
             <th>Datum</th>
             <th>Status</th>
+            {if $__KT['ticketRating']}
+                <th>Bewertung</th>
+            {/if}
         </tr>
     </thead>
     <tbody>
@@ -20,10 +23,17 @@
             <td data-label="Kategorie"><span class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</span></td>
             <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
             <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
+            {if $__KT['ticketRating']}
+                {if $ticket->isRated()}
+                <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}"></div></td>
+                {else}
+                <td data-label="Bewertung"><i>noch nicht bewertet</i></td>
+                {/if}
+            {/if}
         </tr>
         {foreachelse}
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 <div class="ui info message">
                     <ul class="list">
                         <li>Du hast noch keine Tickets erstellt.</li>
@@ -34,4 +44,9 @@
         {/foreach}
     </tbody>
 </table>
+{if $__KT['ticketRating']}
+<script>
+$(".ui.huge.{$__KT['ticketRatingIcon']}.rating").rating("disable");
+</script>
+{/if}
 {include file="footer.tpl"}

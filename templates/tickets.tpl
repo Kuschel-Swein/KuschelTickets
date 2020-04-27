@@ -73,6 +73,8 @@
 </table>
 <script>
 $('.ui.selection.dropdown').dropdown();
+{if $__KT['ticketRating']}
 $(".ui.huge.{$__KT['ticketRatingIcon']}.rating").rating("disable");
+{/if}
 </script>
 {include file="footer.tpl"}

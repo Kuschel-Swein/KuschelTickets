@@ -2,6 +2,14 @@
 <div class="ui container grid stackable">
     <div class="four wide column">
         <div class="ui styled accordion">
+        <div class="plainItem">
+            <div class="ui category search faqsearchField field">
+                <div class="ui icon input faqsearch">
+                    <input class="prompt" type="text" placeholder="Suchen..">
+                </div>
+                <div class="results"></div>
+            </div>
+        </div>
         {foreach from=$categorys item="category"}
         <div class="title">
             <i class="dropdown icon"></i>
@@ -39,6 +47,21 @@
 <script>
 $(document).ready(function(){
     $('.ui.accordion').accordion();
+});
+
+var searchContent = [
+    {foreach from=$categorys item="category"}
+        {foreach from=$category['faqs'] item="faq"}
+            { category: "{$category['name']}", title: "{$faq->getQuestion()}", url: "#{$faq->faqID}"},
+        {/foreach}
+    {/foreach}
+];
+
+$(".ui.faqsearchField").search({
+    type: 'category',
+    source: searchContent,
+    fullTextSearch: false,
+    showNoResults: false
 });
 
 window.onhashchange = function() {
