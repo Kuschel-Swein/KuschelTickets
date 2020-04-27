@@ -49,13 +49,19 @@ class notificationsPage extends Page {
             ),
             array(
                 "identifier" => "notification_ticket_answer_content",
-                "display" => "auf ein Ticket wurde welches deine Inhalte enthält geantwortet"
+                "display" => "auf ein Ticket welches deine Inhalte enthält wurde geantwortet"
             ),
             array(
                 "identifier" => "notification_ticket_new",
                 "display" => "ein neues Ticket wurde erstellt"
             )
         ];
+        if($config['ticketRating']) {
+            array_push($notificationreasons, array(
+                "identifier" => "notification_ticket_rated",
+                "display" => "ein Ticket mit deinem Inhalt wurde bewertet"
+            ));
+        }
         $this->notificationreasons = $notificationreasons;
 
         if($subpage == "settings") {

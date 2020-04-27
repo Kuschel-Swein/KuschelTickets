@@ -6,7 +6,7 @@
  */
 error_reporting(0);
 
-if(file_exists("config.php")) {
+if(file_exists("data/INSTALLED")) {
     header("Location: index.php");
     die("Weiterleitung auf die <a href='index.php'>index.php</a> Seite.");
 }
@@ -75,7 +75,7 @@ function resultEnd() {
     $error = 14 + $error;
     if($error == 14) {
         return '<div class="final result success">KuschelTickets wird vollständig unterstützt</div>';
-    } else if($error > 10) {
+    } else if($error == 15 || $error == 16) {
         return '<div class="final result warning">KuschelTickets könnte unterstützt werden, jedoch konnten einige Überprüfungen nicht ausgeführt werden</div>';
     } else {
         return '<div class="final result error">KuschelTickets wird NICHT unterstützt</div>';
@@ -106,7 +106,7 @@ function resultEnd() {
                 padding-right: 7px;
                 border-right: 2px dotted #44bd32;
             }
-            .errror::before {
+            .error::before {
                 content: '✘';
                 margin-right: 7px;
                 padding-right: 7px;

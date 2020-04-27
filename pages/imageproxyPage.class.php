@@ -12,6 +12,7 @@ class imageproxyPage extends Page {
             $url = Utils::fromASCI($parameters['url']);
             if(preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url)) {
                 $imginfo = getimagesize($url);
+                header("Cache-Control: max-age=86400");
                 header("Content-type:".$imginfo['mime']);
                 readfile($url);
             }

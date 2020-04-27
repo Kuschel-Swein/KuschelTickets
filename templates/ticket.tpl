@@ -195,6 +195,43 @@
             <li>Dieses Ticket wurde geschlossen oder wurde als erledigt markiert, deshalb kannst du nicht antworten.</li>
         </ul>
     </div>
+        {if $__KT['ticketRating'] && $ticket->getState() !== 1}
+            <div class="ui segment" id="ratingSection">
+                <br>
+                {if !$ticket->isRated()}
+                    {if $ticket->getCreator()->userID == $__KT['user']->userID}
+                        {if $__KT['user']->hasPermission("general.ticket.rate")}
+                            <div class="ui one column center aligned page grid">
+                                <h4 id="ticketRating_title">Bitte bewerte unseren Support:</h4><br>
+                            </div>
+                            <div class="ui one column center aligned page grid">
+                                <div class="ui massive {$__KT['ticketRatingIcon']} rating" id="ticketRating"></div>
+                            </div>
+                        {else}
+                            <div class="ui error message">
+                                <ul class="list">
+                                    <li>Du hast nicht die erforderliche Berechtigung Tickets zu bewerten.</li>
+                                </ul>
+                            </div>
+                        {/if}
+                    {else}
+                        <div class="ui info message">
+                            <ul class="list">
+                                <li>Der Ticketersteller hat noch keine Bewertung zu diesem Ticket abgegeben.</li>
+                            </ul>
+                        </div>
+                    {/if}
+                {else}
+                    <div class="ui one column center aligned page grid">
+                        <h4>Bewertung:</h4><br>
+                    </div>
+                    <div class="ui one column center aligned page grid">
+                        <div class="ui massive {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}" id="ticketRating"></div>
+                    </div>
+                {/if}
+                <br>
+            </div>
+        {/if}
     {/if}
 {else}
     <div class="ui error message">
@@ -205,6 +242,35 @@
 {/if}
 {include file="wysiwyg.tpl" selector="#text"}
 <script>
+{if !$ticket->isRated()}
+    {if $ticket->getCreator()->userID == $__KT['user']->userID}
+        {if $__KT['user']->hasPermission("general.ticket.rate")}
+            $("#ticketRating").rating({
+                initialRating: 0,
+                maxRating: 5,
+                onRate: function(rating) {
+                    {if $__KT['ticketRatingIcon'] == "star"}
+                    var ratingIcon = "Sternen";
+                    {else if $__KT['ticketRatingIcon'] == "heart"}
+                    var ratingIcon = "Herzen";
+                    {/if}
+                    modal.confirm("Möchtest du dieses Ticket wirklich mit <b>" + rating + " von 5</b> " + ratingIcon + " bewerten?", function() {
+                        var data = ajax.post(32, {$ticket->ticketID}, "rating=" + rating);
+                        if(data.success) {
+                            toast.create(data.title, data.message, "success");
+                            $("#ticketRating").rating("disable");
+                            document.getElementById("ticketRating_title").innerHTML = "Bewertung:";
+                        } else {
+                            toast.create("Fehler", "Es ist ein Fehler aufgetreten, bitte versuche es erneut.", "error");
+                        }
+                    });
+                }
+            });
+        {/if}
+    {/if}
+{else}
+$("#ticketRating").rating("disable");
+{/if}
 $(".ui.dropdown.settings").dropdown({
     action: 'select'
 });
@@ -218,6 +284,10 @@ $('.ui.dropdown.settings').dropdown('setting', 'onChange', function(value, text,
             if(tinymce.editors[0] !== undefined) {
                 tinymce.remove(tinymce.editors[0]);
                 document.getElementById("addform").remove();
+            }
+            var elem = document.getElementById("ratingSection");
+            if(elem) {
+                elem.remove();
             }
             setTimeout(function() {
                 window.location.reload();

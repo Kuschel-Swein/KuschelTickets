@@ -58,6 +58,7 @@ class ajaxPage extends Page {
          * 29 => open chat
          * 30 => [ADMIN] delete menuentry
          * 31 => [ADMIN] sort menuentries
+         * 32 => rate ticket
          */
         if($type == 1) {
             if(UserUtils::isLoggedIn()) {
@@ -101,6 +102,7 @@ class ajaxPage extends Page {
                     if($user->hasPermission("mod.tickets.reopen") && $ticket->getState() !== "1") {
                         $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." erneut geöffnet.");
                         $ticket->setState(1);
+                        $ticket->resetRating();
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich erneut geöffnet.",
@@ -882,6 +884,58 @@ class ajaxPage extends Page {
                             "message" => null,
                             "title" => null
                         );
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 32) {
+            if(UserUtils::isLoggedIn() && $config['ticketRating']) {
+                if(isset($parameters['object']) && !empty($parameters['object'])) {
+                    $user = new User(UserUtils::getUserID());
+                    if($user->hasPermission("general.ticket.rate")) {
+                        $ticket = new Ticket($parameters['object']);
+                        if($ticket->exists()) {
+                            if($ticket->getCreator()->userID == $user->userID && !$ticket->isRated()) {
+                                if(isset($_POST['rating']) && !empty($_POST['rating']) && is_numeric($_POST['rating'])) {
+                                    $rating = (int) $_POST['rating'];
+                                    $ratingIcon = "Sternen";
+                                    if($config['ticketRatingIcon'] == "heart") {
+                                        $ratingIcon = "Herzen";
+                                    }
+                                    if($rating > 0 && $rating < 6) {
+                                        $ticket->setRating($rating);
+                                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
+                                        $stmt->execute([$ticket->ticketID]);
+                                        $already = [];
+                                        Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $user);
+                                        array_push($already, $user->userID);
+                                        while($row = $stmt->fetch()) {
+                                            $account = new User((int) $row['creator']);
+                                            if(!$account->hasPermission("mod.view.ticket.all")) {
+                                                if($account->userID == $ticket->getCreator()->userID) {
+                                                    if(!in_array($account->userID, $already)) {
+                                                        Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
+                                                    }
+                                                }
+                                            } else {
+                                                if(!in_array($account->userID, $already)) {
+                                                    Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
+                                                }
+                                            }
+                                        }
+                                        $result = array(
+                                            "success" => "true",
+                                            "message" => "Du hast dieses Ticket erfolgreich bewertet.",
+                                            "title" => "Ticket bewertet"
+                                        );
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } else {

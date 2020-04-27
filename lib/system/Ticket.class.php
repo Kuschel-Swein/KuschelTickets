@@ -55,6 +55,38 @@ class Ticket {
         return $row['state'];
     }
 
+    public function isRated() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE ticketID = ?");
+        $stmt->execute([$this->ticketID]);
+        $row = $stmt->fetch();
+        return $row['rating'] !== null;
+    }
+
+    public function getRating() {
+        global $config;
+
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE ticketID = ?");
+        $stmt->execute([$this->ticketID]);
+        $row = $stmt->fetch();
+        return $row['rating'];
+    }
+
+    public function setRating(int $rating) {
+        global $config;
+
+        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_tickets SET `rating`= ? WHERE ticketID = ?");
+        $stmt->execute([$rating, $this->ticketID]);
+    }
+
+    public function resetRating() {
+        global $config;
+
+        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_tickets SET `rating`= NULL WHERE ticketID = ?");
+        $stmt->execute([$this->ticketID]);
+    }
+
     public function getFormattedState(String $type) {
         global $config;
         $ids = ["closed", "open", "done"];

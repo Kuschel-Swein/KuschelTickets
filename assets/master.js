@@ -1116,7 +1116,7 @@ const externalpage = {
             return ('00' + c.charCodeAt(0)).slice(-3);
         });
     },
-    init: function() {
+    init: async function() {
         if(KT.externalURLFavicons) {
             var elems = document.getElementsByTagName("a");
             for(var i = 0; i < elems.length; i++) {

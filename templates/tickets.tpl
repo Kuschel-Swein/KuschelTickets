@@ -3,14 +3,14 @@
   <div class="four wide column">
     <div class="field">
       <label>Suche</label>
-      <input type="text" id="search_text" onchange="utils.search(document.querySelector('#search_list'), this, document.querySelector('#search_type'), 6);" onkeyup="utils.search(document.querySelector('#search_list'), this, document.querySelector('#search_type'), 6);">
+      <input type="text" id="search_text" onchange="utils.search(document.querySelector('#search_list'), this, document.querySelector('#search_type'), 7);" onkeyup="utils.search(document.querySelector('#search_list'), this, document.querySelector('#search_type'), 7);">
     </div>
   </div>
   <div class="column">
     <div class="field">
       <label>Typ</label>
       <div class="ui selection dropdown">
-        <input type="hidden" id="search_type" onchange="utils.search(document.querySelector('#search_list'),  document.querySelector('#search_text'), this, 6);">
+        <input type="hidden" id="search_type" onchange="utils.search(document.querySelector('#search_list'),  document.querySelector('#search_text'), this, 7);">
         <i class="dropdown icon"></i>
         <div class="default text"></div>
         <div class="menu">
@@ -36,6 +36,9 @@
         <th>Kategorie</th>
         <th>Datum</th>
         <th>Status</th>
+        {if $__KT['ticketRating']}
+          <th class="no-sort">Bewertung</th>
+        {/if}
     </tr>
   </thead>
   <tbody id="search_list">
@@ -44,13 +47,20 @@
       <td data-label="ID">{$ticket->ticketID}</td>
       <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
       <td data-label="Ersteller">{$ticket->getCreator()->getUserName()}</td>
-      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 6);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
+      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 7);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
       <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
-      <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status {$ticket->getFormattedState("name")} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 6);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
+      <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status {$ticket->getFormattedState("name")} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 7);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
+      {if $__KT['ticketRating']}
+        {if $ticket->isRated()}
+          <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}"></div></td>
+        {else}
+          <td data-label="Bewertung"><i>noch nicht bewertet</i></td>
+        {/if}
+      {/if}
     </tr>
     {foreachelse}
     <tr>
-        <td colspan="6">
+        <td colspan="7">
             <div class="ui info message">
                 <ul class="list">
                     <li>Es wurden noch keine Tickets erstellt.</li>
@@ -63,6 +73,6 @@
 </table>
 <script>
 $('.ui.selection.dropdown').dropdown();
-
+$(".ui.huge.{$__KT['ticketRatingIcon']}.rating").rating("disable");
 </script>
 {include file="footer.tpl"}

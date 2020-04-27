@@ -198,6 +198,10 @@ $permissions = [
     array(
         "name" => "general_ticket_export_pdf",
         "display" => "kann Tickets als PDF exportieren"
+    ),
+    array(
+        "name" => "general_ticket_rate",
+        "display" => "kann eigene Tickets bewerten"
     )
 ];
 

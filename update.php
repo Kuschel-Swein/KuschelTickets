@@ -8,14 +8,14 @@ if(file_exists("data/INSTALLED")) {
 $success = "";
 require("config.php");
 define("UPDATERTOVERSION", "v2.2");
-define("UPDATERFROMVERSION", "v2.1");
+define("UPDATERFROMVERSION", "v2.1.1");
 if($config['version'] !== UPDATERFROMVERSION) {
     die("Dieser Updater kann nur von der Version <b>".UPDATERFROMVERSION."</b> auf die Version <b>".UPDATERTOVERSION."</b> aktualisieren.");
 }
 if(isset($_POST['submit'])) {
     $pdo = $config['db'];
 
-    $permissions = ['general.tickets.quote', 'admin.login.other', 'admin.bypass.login.other', 'general.notifications.view', 'general.notifications.settings', 'admin.acp.page.cleanup', 'admin.acp.page.errors', 'general.editor.templates'];
+    $permissions = ['general.supportchat.view', 'general.supportchat.join', 'general.supportchat.use', 'mod.supportchat.create', 'admin.acp.page.menuentries', 'general.ticket.export.pdf', 'general.ticket.rate'];
     $stmt = $pdo->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1");
     $stmt->execute();
     while($row = $stmt->fetch()) {
@@ -28,35 +28,46 @@ if(isset($_POST['submit'])) {
         $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (1, ? , 1)");
         $stmt->execute([$perm]);
     }
-    $pdo->query("UPDATE kuscheltickets".KT_N."_group_permissions SET `name`='mod.view.ticket.all' WHERE name = 'general.view.ticket.all'");  
-    $pdo->query("DELETE FROM kuscheltickets".KT_N."_group_permissions WHERE name = 'general.view.pages'");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys ADD `color` VARCHAR(535) NOT NULL AFTER `categoryName`;");
-    $pdo->query("UPDATE kuscheltickets".KT_N."_ticket_categorys SET `color`='blue' WHERE 1;");
-    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_notifications (
-        notificationID int NOT NULL AUTO_INCREMENT,
-        linkIdentifier TEXT NOT NULL,
-        content TEXT NOT NULL,
-        userID int NOT NULL,
-        PRIMARY KEY (notificationID),
-        FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");  
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq ADD FOREIGN KEY (category) REFERENCES kuscheltickets".KT_N."_faq_categorys(categoryID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_group_permissions ADD FOREIGN KEY (groupID) REFERENCES kuscheltickets".KT_N."_groups(groupID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD FOREIGN KEY (creator) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_answers ADD FOREIGN KEY (ticketID) REFERENCES kuscheltickets".KT_N."_tickets(ticketID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `sent` INT(1) NOT NULL AFTER `done`;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `oauth` INT NOT NULL DEFAULT '0' AFTER `email_change_time`;");
+    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_supportchat (
+        chatID int NOT NULL AUTO_INCREMENT,
+        creator int NOT NULL REFERENCES kuscheltickets".KT_N."_accounts(userID),
+        user int REFERENCES kuscheltickets".KT_N."_accounts(userID),
+        time int NOT NULL,
+        state int NOT NULL,
+        PRIMARY KEY (chatID)
     );");
-    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_editortemplates (
-        templateID int NOT NULL AUTO_INCREMENT,
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat ADD FOREIGN KEY (creator) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat ADD FOREIGN KEY (user) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
+    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_supportchat_messages (
+        messageID int NOT NULL AUTO_INCREMENT,
+        chatID int NOT NULL REFERENCES kuscheltickets".KT_N."_supportchat(chatID),
+        poster int NOT NULL,
+        time int NOT NULL,
+        PRIMARY KEY (messageID)
+    );");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat_messages ADD FOREIGN KEY (chatID) REFERENCES kuscheltickets".KT_N."_supportchat(chatID) ON DELETE CASCADE;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat_messages` ADD `content` TEXT NOT NULL AFTER `poster`;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD `rating` INT(1) NULL AFTER `color`;");
+    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_menu (
+        menuID int NOT NULL AUTO_INCREMENT,
         title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        userID int,
-        PRIMARY KEY (templateID),
-        FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE
+        controller TEXT NOT NULL,
+        system INT DEFAULT 0,
+        sorting INT DEFAULT 0,
+        PRIMARY KEY (menuID)
     );");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD `description` TEXT NOT NULL AFTER `content`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `time` INT NOT NULL AFTER `userID`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `done` INT(1) NOT NULL AFTER `time`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD `color` VARCHAR(255) NOT NULL AFTER `time`;");
-    $pdo->query("UPDATE kuscheltickets".KT_N."_tickets SET `color`='blue' WHERE 1");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `notificationsettings` TEXT NOT NULL AFTER `userGroup`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages ADD `type` INT(1) NOT NULL AFTER `login`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_pages CHANGE `login` `groups` TEXT NOT NULL;");
-    $pdo->query("UPDATE kuscheltickets".KT_N."_pages SET `groups`='[]' WHERE 1");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_menu ADD `parent` INT NULL AFTER `controller`;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_menu ADD FOREIGN KEY (parent) REFERENCES kuscheltickets".KT_N."_menu(menuID) ON DELETE CASCADE;");
+    $pdo->query("INSERT INTO kuscheltickets".KT_N."_menu (`menuID`, `title`, `controller`, `parent`, `system`, `sorting`) VALUES  (1, 'Startseite', 'Index', NULL, 1, 1), (2, 'Meine Tickets', 'mytickets', NULL, 1, 2), (3, 'Tickets', 'tickets', NULL, 1, 3), (4, 'FAQ', 'faq', NULL, 1, 4), (5, 'Account verwalten', 'accountmanagement', NULL, 1, 5), (6, 'Editorvorlagen', 'editortemplates', 5, 1, 6), (7, 'SupportChat', 'supportchat', 4, 1, 7), (8, 'Administration', 'admin', NULL, 1, 8);");
+
     $count = count($config['recaptcha']['cases']);
     $recaptchacases = $config['recaptcha']['cases'];
     $recaptchacases_ready = "";
@@ -88,16 +99,32 @@ if(isset($_POST['submit'])) {
     '        "database" => false'.PHP_EOL.
     '    ),'.PHP_EOL.
     '    "cookie" => "'.$config['cookie'].'",'.PHP_EOL.
-    '    "seourls" => false,'.PHP_EOL.
-    '    "faviconextension" => "png",'.PHP_EOL.
-    '    "externalURLTitle" => true,'.PHP_EOL.
-    '    "faviconmime" => "image/png",'.PHP_EOL.
-    '    "proxyAllImages" => true,'.PHP_EOL.
-    '    "externalURLFavicons" => true,'.PHP_EOL.
-    '    "externalURLWarning" => true,'.PHP_EOL.
-    '    "useDesktopNotification" => true,'.PHP_EOL.
-    '    "emailnotifications" => true,'.PHP_EOL.
+    '    "cookienotice" => true,'.PHP_EOL.
+    '    "seourls" => '.$config['seourls'].','.PHP_EOL.
+    '    "ticketRating" => true,'.PHP_EOL.
+    '    "ticketRatingIcon" => "star",'.PHP_EOL.
+    '    "pdfexport" => true,'.PHP_EOL.
+    '    "faviconextension" => "'.$config['faviconextension'].'",'.PHP_EOL.
+    '    "externalURLTitle" => '.$config['externalURLTitle'].','.PHP_EOL.
+    '    "faviconmime" => "'.$config['faviconmime'].'",'.PHP_EOL.
+    '    "proxyAllImages" => '.$config['proxyAllImages'].','.PHP_EOL.
+    '    "externalURLFavicons" => '.$config['externalURLFavicons'].','.PHP_EOL.
+    '    "externalURLWarning" => '.$config['externalURLWarning'].','.PHP_EOL.
+    '    "useDesktopNotification" => '.$config['useDesktopNotification'].','.PHP_EOL.
+    '    "emailnotifications" => '.$config['emailnotifications'].','.PHP_EOL.
     '    "adminmail" => "'.$config['adminmail'].'",'.PHP_EOL.
+    '    "oauth" => array('.PHP_EOL.
+    '        "google" => array('.PHP_EOL.
+    '            "use" => false,'.PHP_EOL.
+    '            "clientid" => "",'.PHP_EOL.
+    '            "clientsecret" => ""'.PHP_EOL.
+    '        ),'.PHP_EOL.
+    '        "github" => array('.PHP_EOL.
+    '            "use" => false,'.PHP_EOL.
+    '            "clientid" => "",'.PHP_EOL.
+    '            "clientsecret" => ""'.PHP_EOL.
+    '        ),'.PHP_EOL.
+    '    ),'.PHP_EOL.
     '    "mail" => array('.PHP_EOL.
     '        "host" => "'.$config['mail']['host'].'",'.PHP_EOL.
     '        "auth" => '.$config['mail']['auth'].','.PHP_EOL.
@@ -123,7 +150,7 @@ if(isset($_POST['submit'])) {
     'define("KT_N", "'.KT_N.'");'.PHP_EOL.
     '');
     fclose($file);
-    $success = "KuschelTickets wurde erfolgreich aktualisiert.";
+    $success = "KuschelTickets wurde erfolgreich aktualisiert. Sieh doch mal in den Einstellungen des ACPs vorbei, es gab einige Änderungen.";
     $f = fopen("data/INSTALLED", "w");
     fclose($f);
 }
@@ -144,7 +171,7 @@ if(isset($_POST['submit'])) {
         <div class="ui grid container">
             <div class="ui sixteen wide column segment">
                 <h1>KuschelTickets Aktualisierung</h1>
-                <strong><?php echo $success; ?></strong>
+                <?php if($success !== "") { ?><div class="ui success message"><?php echo $success; ?></div><?php } ?>
                 <p>Hier kannst du KuschelTickets aktualisieren, dieser Updater wird KuschelTickets auf die Version <b><?php echo UPDATERTOVERSION; ?></b> bringen.</p>
                 <p>Nach dem start der Aktualisierung, kann es etwas dauern bis diese fertig ist.</p>
                 <form action="update.php" method="post">

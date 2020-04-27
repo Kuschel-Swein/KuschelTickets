@@ -43,6 +43,16 @@ define("DATA", array(
             "text" => "Administration",
             "identifier" => "admin",
             "permission" => "admin.acp.use"
+        ),
+        array(
+            "text" => "Benachrichtigungen",
+            "identifier" => "notifications",
+            "permission" => "general.notifications.view"
+        ),
+        array(
+            "text" => "Benachrichtigungseinstellungen",
+            "identifier" => "notifications/settings",
+            "permission" => "general.notifications.settings"
         )
     ]
 ));

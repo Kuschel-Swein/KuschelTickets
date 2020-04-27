@@ -35,7 +35,8 @@ $errors = array(
     "oauth_google_clientid" => false,
     "oauth_google_clientsecret" => false,
     "oauth_github_clientid" => false,
-    "oauth_github_clientsecret" => false
+    "oauth_github_clientsecret" => false,
+    "ticketRatingIcon" => false
 );
 
 $success = false;
@@ -218,7 +219,21 @@ if(isset($parameters['submit'])) {
                                                                                                             $validoauth = false;
                                                                                                         }
                                                                                                     }
-                                                                                                    if($validrecaptcha && $validfavicon && $validoauth) {
+                                                                                                    $validticketRatingIcon = true;
+                                                                                                    if(isset($parameters['ticketRating'])) {
+                                                                                                        $validticketRatingIcon = false;
+                                                                                                        $options = ["heart", "star"];
+                                                                                                        if(isset($parameters['ticketRatingIcon']) && !empty($parameters['ticketRatingIcon'])) {
+                                                                                                            if(in_array($parameters['ticketRatingIcon'], $options)) {
+                                                                                                                $validticketRatingIcon = true;
+                                                                                                            } else {
+                                                                                                                $errors['ticketRatingIcon'] = "Bitte wähle ein valides Icon für die Ticketbewertungen.";
+                                                                                                            }
+                                                                                                        } else {
+                                                                                                            $errors['ticketRatingIcon'] = "Bitte wähle ein Icon für die Ticketbewertungen.";
+                                                                                                        }
+                                                                                                    }
+                                                                                                    if($validrecaptcha && $validfavicon && $validoauth && $validticketRatingIcon) {
                                                                                                         // SAVE THE CONFIG FILE
                                                                                                         $recaptchacases = explode(",", $parameters['recaptchacases']);
                                                                                                         $count = count($recaptchacases);
@@ -299,6 +314,14 @@ if(isset($parameters['submit'])) {
                                                                                                             $proxyAllImages = "false";
                                                                                                         }
 
+                                                                                                        if(isset($parameters['ticketRating'])) {
+                                                                                                            $ticketRating = ($parameters['ticketRating'] == "on") ? "true" : "false";
+                                                                                                            $ticketRatingIcon = $parameters['ticketRatingIcon'];
+                                                                                                        } else {
+                                                                                                            $ticketRating = "false";
+                                                                                                            $ticketRatingIcon = "";
+                                                                                                        }
+
                                                                                                         if(isset($parameters['externalURLWarning'])) {
                                                                                                             $externalURLWarning = ($parameters['externalURLWarning'] == "on") ? "true" : "false";
                                                                                                         } else {
@@ -358,6 +381,8 @@ if(isset($parameters['submit'])) {
                                                                                                         '    ),'.PHP_EOL.
                                                                                                         '    "cookie" => "'.$parameters['cookie'].'",'.PHP_EOL.
                                                                                                         '    "seourls" => '.$seourls.','.PHP_EOL.
+                                                                                                        '    "ticketRating" => '.$ticketRating.','.PHP_EOL.
+                                                                                                        '    "ticketRatingIcon" => "'.$ticketRatingIcon.'",'.PHP_EOL.
                                                                                                         '    "pdfexport" => '.$pdfexport.','.PHP_EOL.
                                                                                                         '    "faviconextension" => "'.$faviconextension.'",'.PHP_EOL.
                                                                                                         '    "externalURLTitle" => '.$externalURLTitle.','.PHP_EOL.

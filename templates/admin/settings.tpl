@@ -142,6 +142,24 @@
             <label>Cookie Hinweis anzeigen</label>
         </div>
     </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['ticketRating']} checked{/if} name="ticketRating" onchange="if(this.checked) { document.getElementById('ticketsRating_section').style.display = 'block'; } else { document.getElementById('ticketsRating_section').style.display = 'none'; }">
+            <label>Tickets können bewertet werden</label>
+        </div>
+    </div>
+    <div id="ticketsRating_section"{if !$site['config']['ticketRating']} style="display: none"{/if}>
+        <div class="field required{if $site['errors']['ticketRatingIcon'] !== false} error{/if}">
+            <label>Ticketbewertungsicon</label>
+            <div class="ui selection dropdown ticketRatingIcon">
+            <input type="hidden" name="ticketRatingIcon">
+            <i class="dropdown icon"></i>
+            <div class="default text"></div>
+            <div class="menu">
+            </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="ui tab" data-tab="second">
     <div class="field required{if $site['errors']['databasedatabase'] !== false} error{/if}">
@@ -381,6 +399,24 @@ $('.ui.selection.dropdown.states.donecolor').dropdown({
             value: "{$color['value']}"
         },
         {/foreach}
+    ],
+});
+$('.ui.selection.dropdown.ticketRatingIcon').dropdown({
+    values: [
+        {
+            {if $site['config']['ticketRatingIcon'] == "star"}
+            selected: true,
+            {/if}
+            name: "<span class='ui star rating'><i class='icon active'></i></span> Stern",
+            value: "star"
+        },
+        {
+            {if $site['config']['ticketRatingIcon'] == "heart"}
+            selected: true,
+            {/if}
+            name: "<span class='ui heart rating'><i class='icon active'></i></span> Herz",
+            value: "heart"
+        }
     ],
 });
 $('.ui.selection.dropdown.recaptchaversion').dropdown({
