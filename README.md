@@ -1,16 +1,9 @@
 ![KuschelTickets](https://user-images.githubusercontent.com/52657944/78670180-aafc7a00-78dd-11ea-9bd4-0c73d8b62c6b.png)
 ---
 
-
-DERZEIT GIBT ES EINEN FEHLER WELCHEN ICH MIT DEM NÄCHSTEN UPDATE BEHEBE: Benennt bitte die Datei pages/PagePage.class.php zu pagePage.class.php um und fügt den folgenden Inhalt ein, um den Fehler direkt zu beheben. Inhalt: https://gist.github.com/Kuschel-Swein/48a308ddadb14a3b276c01c93e3fe4ea
-===
-
-
-
 Willkommen bei KuschelTickets!
 KuschelTickets ist ein auf PHP basierendes Ticketsystem.
 
-Solltest du KuschelTickets vor dem Download ausprobieren wollen, kannst du dies in der [Demo](https://demo.kuschel-swein.eu/KuschelTickets) tun. Diese Demo wird jeden Tag um 23 Uhr zurückgesetzt.
 Achte bitte darauf, dass du KuschelTickets nur unter _Releases_ herunterladen solltest, die anderen Dateien sind in der Entwicklung.
 
 ## Warum sollte ich KuschelTickets verwenden?

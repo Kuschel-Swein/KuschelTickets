@@ -104,6 +104,7 @@ if(isset($_POST['submit'])) {
     '    "ticketRating" => true,'.PHP_EOL.
     '    "ticketRatingIcon" => "star",'.PHP_EOL.
     '    "pdfexport" => true,'.PHP_EOL.
+    '    "registrationEnabled" => true,'.PHP_EOL.
     '    "faviconextension" => "'.$config['faviconextension'].'",'.PHP_EOL.
     '    "externalURLTitle" => '.$config['externalURLTitle'].','.PHP_EOL.
     '    "faviconmime" => "'.$config['faviconmime'].'",'.PHP_EOL.

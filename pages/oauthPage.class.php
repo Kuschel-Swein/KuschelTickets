@@ -58,11 +58,16 @@ class oauthPage extends Page {
                             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
                         }
                     } else {
-                        $password = Utils::randomString(700);
-                        $name = Oauth::getUserName($name);
-                        UserUtils::create($name, $email, $password, "1");
-                        $this->type = "success";
-                        $this->messages = ["Es wurde erfolgreich ein Account mit der E-Mail Adresse ".$email." angelegt.", "Bitte bestätige nun deine E-Mail Adresse, danach kannst du deinen Account komplett nutzen."];
+                        if($config['registrationEnabled']) {
+                            $password = Utils::randomString(700);
+                            $name = Oauth::getUserName($name);
+                            UserUtils::create($name, $email, $password, "1");
+                            $this->type = "success";
+                            $this->messages = ["Es wurde erfolgreich ein Account mit der E-Mail Adresse ".$email." angelegt.", "Bitte bestätige nun deine E-Mail Adresse, danach kannst du deinen Account komplett nutzen."];
+                        } else {
+                            $this->type = "error";
+                            $this->messages = ["Die Registrierung wurde von einem Administrator deaktiviert.", "Solltest du dies für deinen Fehler halten, wende dich bitte an ".$config['adminmail']];
+                        }
                     }
                 }
             }
@@ -87,11 +92,16 @@ class oauthPage extends Page {
                                     throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
                                 }
                             } else {
-                                $password = Utils::randomString(700);
-                                $name = Oauth::getUserName($name);
-                                UserUtils::create($name, $email, $password, "2");
-                                $this->type = "success";
-                                $this->messages = ["Es wurde erfolgreich ein Account mit der E-Mail Adresse ".$email." angelegt.", "Bitte bestätige nun deine E-Mail Adresse, danach kannst du deinen Account komplett nutzen."];
+                                if($config['registrationEnabled']) {
+                                    $password = Utils::randomString(700);
+                                    $name = Oauth::getUserName($name);
+                                    UserUtils::create($name, $email, $password, "2");
+                                    $this->type = "success";
+                                    $this->messages = ["Es wurde erfolgreich ein Account mit der E-Mail Adresse ".$email." angelegt.", "Bitte bestätige nun deine E-Mail Adresse, danach kannst du deinen Account komplett nutzen."];
+                                } else {
+                                    $this->type = "error";
+                                    $this->messages = ["Die Registrierung wurde von einem Administrator deaktiviert.", "Solltest du dies für deinen Fehler halten, wende dich bitte an ".$config['adminmail']];
+                                }    
                             }
                         } else {
                             throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");

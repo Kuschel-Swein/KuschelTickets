@@ -202,6 +202,5 @@ function resultEnd() {
         <span><a href="https://github.com/Kuschel-Swein/KuschelTickets/">KuschelTickets</a></span>
         <span>ein Projekt von <a href="https://github.com/Kuschel-Swein">Kuschel_Swein</a></span>
         <span><a href="https://github.com/Kuschel-Swein/KuschelTickets/wiki">Wiki</a></span>
-        <span><a href="https://demo.kuschel-swein.eu/KuschelTickets">Demo</a></span>
     </footer>
 </html>

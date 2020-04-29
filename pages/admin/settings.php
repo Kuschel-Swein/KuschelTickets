@@ -308,6 +308,12 @@ if(isset($parameters['submit'])) {
                                                                                                             $pdfexport = "false";
                                                                                                         }
 
+                                                                                                        if(isset($parameters['registrationEnabled'])) {
+                                                                                                            $registrationEnabled = ($parameters['registrationEnabled'] == "on") ? "true" : "false";
+                                                                                                        } else {
+                                                                                                            $registrationEnabled = "false";
+                                                                                                        }
+
                                                                                                         if(isset($parameters['proxyAllImages'])) {
                                                                                                             $proxyAllImages = ($parameters['proxyAllImages'] == "on") ? "true" : "false";
                                                                                                         } else {
@@ -384,6 +390,7 @@ if(isset($parameters['submit'])) {
                                                                                                         '    "ticketRating" => '.$ticketRating.','.PHP_EOL.
                                                                                                         '    "ticketRatingIcon" => "'.$ticketRatingIcon.'",'.PHP_EOL.
                                                                                                         '    "pdfexport" => '.$pdfexport.','.PHP_EOL.
+                                                                                                        '    "registrationEnabled" => '.$registrationEnabled.','.PHP_EOL.
                                                                                                         '    "faviconextension" => "'.$faviconextension.'",'.PHP_EOL.
                                                                                                         '    "externalURLTitle" => '.$externalURLTitle.','.PHP_EOL.
                                                                                                         '    "faviconmime" => "'.$faviconmime.'",'.PHP_EOL.

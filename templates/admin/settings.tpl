@@ -329,6 +329,12 @@
             <label>Ticket PDF Export</label>
         </div>
     </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['registrationEnabled']} checked{/if} name="registrationEnabled">
+            <label>Registrierung aktivieren</label>
+        </div>
+    </div>
 </div>
 <br>
 <button type="submit" name="submit" class="ui blue submit button">Absenden</button>

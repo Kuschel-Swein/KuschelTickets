@@ -306,6 +306,7 @@ if(STEP == 3 && isset($_POST['submit'])) {
         '    "ticketRating" => true,'.PHP_EOL.
         '    "ticketRatingIcon" => "star",'.PHP_EOL.
         '    "pdfexport" => true,'.PHP_EOL.
+        '    "registrationEnabled" => true,'.PHP_EOL.
         '    "faviconextension" => "png",'.PHP_EOL.
         '    "externalURLTitle" => true,'.PHP_EOL.
         '    "faviconmime" => "image/png",'.PHP_EOL.

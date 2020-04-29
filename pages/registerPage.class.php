@@ -26,7 +26,7 @@ class registerPage extends Page {
             throw new AccessDeniedException("Du kannst diese Seite nicht öffnen");
         }
 
-        if(isset($parameters['submit'])) {
+        if(isset($parameters['submit']) && $config['registrationEnabled']) {
             if(recaptcha::validate("registration")) {
                 if(isset($parameters['username']) && !empty($parameters['username'])) {
                     if(isset($parameters['email']) && !empty($parameters['email'])) {

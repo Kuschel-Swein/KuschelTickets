@@ -97,7 +97,13 @@ class TicketCategory {
                 $counter++;
                 array_push($inputs, $helper);
             } else if($input->type == "select") {
-                $field = "<div class='ui selection dropdown custom'>
+                $multiple = "";
+                if(isset($input->multiple)) {
+                    if($input->multiple) {
+                        $multiple = " multiple";
+                    }
+                }
+                $field = "<div class='ui selection dropdown custom".$multiple."'>
                         <input type='hidden' name='customInput".$counter."'>
                         <i class='dropdown icon'></i>
                         <div class='default text'></div>
@@ -224,11 +230,31 @@ class TicketCategory {
                     foreach($data[$i]->options as $option) {
                         array_push($values, $option->value);
                     }
-                    if(in_array($parameters['customInput'.$i], $values)) {
-                        $result['errors'][$i] = false;
-                        $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['customInput'.$i]."</p>"; 
+                    if(isset($data[$i]->multiple) && $data[$i]->multiple == true) {
+                        $valid = false;
+                        $selections = explode(",", $parameters['customInput'.$i]);
+                        if(count($selections) > 0) {
+                            $valid = true;
+                        }
+                        foreach($selections as $selection) {
+                            if(!in_array($selection, $values)) {
+                                $valid = false;
+                                break;
+                            }
+                        }
+                        if(!$valid) {
+                            $result['errors'][$i] = "Bitte wähle einen Wert für das Feld ".$data[$i]->title.".";
+                        } else {
+                            $result['errors'][$i] = false;
+                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['customInput'.$i]."</p>"; 
+                        }
                     } else {
-                        $result['errors'][$i] = "Bitte wähle einen Wert für das Feld ".$data[$i]->title.".";
+                        if(in_array($parameters['customInput'.$i], $values)) {
+                            $result['errors'][$i] = false;
+                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['customInput'.$i]."</p>"; 
+                        } else {
+                            $result['errors'][$i] = "Bitte wähle einen Wert für das Feld ".$data[$i]->title.".";
+                        }
                     }
                 }
             } else {

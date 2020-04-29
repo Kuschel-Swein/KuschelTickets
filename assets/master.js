@@ -248,6 +248,12 @@ const custominput = {
                 '</div>' +
             '</div>' +
             '<div class="categoryfields" id="categoryfields_select" style="display: none">' +
+                '<div class="field">' +
+                    '<div class="ui checkbox">' +
+                        '<input type="checkbox" id="customInput' + count + '_options_multiple">' +
+                        '<label>Sollen mehrere Optionen auswählbar sein?</label>' +
+                    '</div>' +
+                '</div>' +
                 '<div class="field required">' +
                     '<label>Optionen</label>' +
                     '<textarea id="customInput' + count + '_options"></textarea>' +
@@ -481,6 +487,7 @@ const custominput = {
                 } else if(type == "select") {
                     var options = [];
                     var content = document.getElementById("customInput" + count + "_options").value;
+                    var multiple = document.getElementById("customInput" + count + "_options_multiple").checked;
                     content = clean(content);
                     content = content.split("\n");
                     content.forEach(function(c) {
@@ -506,6 +513,7 @@ const custominput = {
                     });
                     object = {
                         type : type,
+                        multiple: multiple,
                         options : options,
                         description : clean(document.getElementById("customInput" + count + "_description").value),
                         required : document.getElementById("customInput" + count + "_required").checked,
@@ -625,6 +633,12 @@ const custominput = {
                 '</div>' +
             '</div>' +
             '<div class="categoryfields" id="categoryfields_select" style="display: none">' +
+                '<div class="field">' +
+                    '<div class="ui checkbox">' +
+                        '<input type="checkbox" id="customInput' + mainid + '_options_multiple">' +
+                        '<label>Sollen mehrere Optionen auswählbar sein?</label>' +
+                    '</div>' +
+                '</div>' +
                 '<div class="field required">' +
                     '<label>Optionen</label>' +
                     '<textarea id="customInput' + mainid + '_options"></textarea>' +
@@ -690,6 +704,7 @@ const custominput = {
                 }
             });
             document.getElementById("customInput" + mainid + "_options").value = selection;
+            document.getElementById("customInput" + mainid + "_options_multiple").checked = (options['multiple'] !== undefined) ? options['multiple'] : false;
         }
         $('#customInput' + mainid + '_type_dropdown').dropdown('setting', 'onChange', function(value, text, $choice) {
             var elems = document.getElementsByClassName("categoryfields");
@@ -912,6 +927,7 @@ const custominput = {
                 } else if(type == "select") {
                     var options = [];
                     var content = document.getElementById("customInput" + mainid + "_options").value;
+                    var multiple = document.getElementById("customInput" + mainid + "_options_multiple").checked;
                     content = clean(content);
                     content = content.split("\n");
                     content.forEach(function(c) {
@@ -937,6 +953,7 @@ const custominput = {
                     });
                     object = {
                         type : type,
+                        multiple: multiple,
                         options : options,
                         description : clean(document.getElementById("customInput" + mainid + "_description").value),
                         required : document.getElementById("customInput" + mainid + "_required").checked,
