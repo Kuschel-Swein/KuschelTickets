@@ -4,7 +4,6 @@
 Willkommen bei KuschelTickets!
 KuschelTickets ist ein auf PHP basierendes Ticketsystem.
 
-Solltest du KuschelTickets vor dem Download ausprobieren wollen, kannst du dies in der [Demo](https://demo.kuschel-swein.eu/KuschelTickets) tun. Diese Demo wird jeden Tag um 23 Uhr zurückgesetzt.
 Achte bitte darauf, dass du KuschelTickets nur unter _Releases_ herunterladen solltest, die anderen Dateien sind in der Entwicklung.
 
 ## Warum sollte ich KuschelTickets verwenden?
