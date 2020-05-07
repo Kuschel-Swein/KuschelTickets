@@ -11,7 +11,7 @@
             <th>Datum</th>
             <th>Status</th>
             {if $__KT['ticketRating']}
-                <th>Bewertung</th>
+                <th class="no-sort">Bewertung</th>
             {/if}
         </tr>
     </thead>
