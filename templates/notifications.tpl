@@ -43,10 +43,10 @@
         <tbody id="search_list">
             {foreach from=$__KT['user']->getNotifications() item="notification"}
             <tr>
-                <td data-label="ID">{if !$notification->isDone()}<b>{/if}{$notification->notificationID}{if !$notification->isDone()}</b>{/if}</td>
-                <td data-label="Nachricht">{if !$notification->isDone()}<b>{/if}<a href="{$notification->getLink()}">{$notification->getMessage()}</a>{if !$notification->isDone()}</b>{/if}</td>
-                <td data-label="Datum">{if !$notification->isDone()}<b>{/if}{$notification->getTime()|date_format:"%d.%m.%Y"}, {$notification->getTime()|date_format:"%H:%M"} Uhr{if !$notification->isDone()}</b>{/if}</td>
-                <td data-label="gelesen">{if $notification->isDone()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<a data-id="{$notification->notificationID}" class="pointer" onclick="notifications.doneList(this);" data-tooltip="Nein, jetzt als gelesen markieren"><i class="icon times"></i></a>{/if}</td>
+                <td data-label="ID">{if $notification->done == 0}<b>{/if}{$notification->notificationID}{if $notification->done == 0}</b>{/if}</td>
+                <td data-label="Nachricht">{if $notification->done == 0}<b>{/if}<a href="{$notification->getLink()}">{$notification->content}</a>{if $notification->done == 0}</b>{/if}</td>
+                <td data-label="Datum">{if $notification->done == 0}<b>{/if}{$notification->time|date_format:"%d.%m.%Y"}, {$notification->time|date_format:"%H:%M"} Uhr{if $notification->done == 0}</b>{/if}</td>
+                <td data-label="gelesen">{if $notification->done !== 0}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<a data-id="{$notification->notificationID}" class="pointer" onclick="notifications.doneList(this);" data-tooltip="Nein, jetzt als gelesen markieren"><i class="icon times"></i></a>{/if}</td>
             </tr>
             {foreachelse}
             <tr>

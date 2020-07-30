@@ -39,13 +39,13 @@
     </thead>
     <tbody id="search_list">
         {foreach from=$site['categories'] item="category"}
-        <tr id="faqcategory{$category['id']}">
-        <td data-label="ID">{$category['id']}</td>
-        <td data-label="Name">{$category['name']}</a></td>
-        <td data-label="FAQs">{$category['faqs']}</a></td>
+        <tr id="faqcategory{$category->categoryID}">
+        <td data-label="ID">{$category->categoryID}</td>
+        <td data-label="Name">{$category->name}</a></td>
+        <td data-label="FAQs">{$category->getFAQs()|count}</a></td>
         <td data-label="Aktion">
-            <a href="javascript:deleteCategory({$category['id']});" data-tooltip="Löschen"><i class="icon times"></i></a>
-            <a href="{link url="admin/faqcategories/edit-{$category['id']}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="javascript:deleteCategory({$category->categoryID});" data-tooltip="Löschen"><i class="icon times"></i></a>
+            <a href="{link url="admin/faqcategories/edit-{$category->categoryID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
@@ -123,11 +123,11 @@
 <a class="ui blue button right floated" href="{link url="admin/faqcategories"}">Kategorien Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faqcategories/edit-{$site['id']}"}" method="post">
+<form class="ui form{if $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/faqcategories/edit-{$site['category']->categoryID}"}" method="post">
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" value="{$site['text']}">
+            <input type="text" name="text" value="{$site['category']->name}">
         </div>
     </div>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>

@@ -42,9 +42,9 @@
         {foreach from=$site['ticketcategories'] item="category"}
         <tr id="ticketcategoryentry{$category->categoryID}">
         <td data-label="ID">{$category->categoryID}</td>
-        <td data-label="Name">{$category->getName()}</a></td>
-        <td data-label="Farbe"><span class="ui label {$category->getColor()}">{$category->getName()}</span></td>
-        <td data-label="Eingabefelder">{$category->getInputCount()}</a></td>
+        <td data-label="Name">{$category->categoryName}</a></td>
+        <td data-label="Farbe"><span class="ui label {$category->color}">{$category->categoryName}</span></td>
+        <td data-label="Eingabefelder">{$category->inputs|count}</a></td>
         <td data-label="Aktion">
             <a href="javascript:deleteCategory({$category->categoryID});" data-tooltip="Löschen"><i class="icon times"></i></a>
             <a href="{link url="admin/ticketcategories/edit-{$category->categoryID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
@@ -179,7 +179,7 @@
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="utils.previewText(this, 'Farbe');" onkeyup="utils.previewText(this, 'Farbe');" value="{$site['ticketcategory']->getName()}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Farbe');" onkeyup="utils.previewText(this, 'Farbe');" value="{$site['ticketcategory']->categoryName}">
         </div>
     </div>
     <div class="field{if $site['errors']['color'] !== false} error{/if}">
@@ -190,8 +190,8 @@
         <div class="five wide column overflow-x-auto">
           <div class="field">
             <div class="ui radio checkbox">
-              <input type="radio" value="{$color}" name="color"{if $site['ticketcategory']->getColor() == $color} checked{/if}>
-              <label><div class="ui {$color} label preview">{$site['ticketcategory']->getName()}</div></label>
+              <input type="radio" value="{$color}" name="color"{if $site['ticketcategory']->color == $color} checked{/if}>
+              <label><div class="ui {$color} label preview">{$site['ticketcategory']->categoryName}</div></label>
             </div>
           </div>
         </div>
@@ -202,7 +202,7 @@
     <br>
     <br>
     <div class="ui celled list" id="customInputsContainer">
-      {for $i=0 to $site['ticketcategory']->getInputCount()}
+      {for $i=0 to $site['ticketcategory']->inputs|count}
         {assign var="inputdata" value="customInputData{$i}"}
         {assign var="inputtitle" value="customInputTitle{$i}"}
         {if isset($site['inputjson'][$i]) && isset($site['inputnames'][$i])}
@@ -222,7 +222,7 @@
     <br>
     <br>
     <br>
-    <input type="hidden" id="custominputCounter" name="custominputCounter" value="{$site['ticketcategory']->getInputCount()}">
+    <input type="hidden" id="custominputCounter" name="custominputCounter" value="{$site['ticketcategory']->inputs|count}">
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
     {if $site['errors']['text'] !== false || $site['errors']['token'] !== false || $site['errors']['custominput'] !== false || $site['errors']['color'] !== false}

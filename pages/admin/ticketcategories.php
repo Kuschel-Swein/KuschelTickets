@@ -1,8 +1,10 @@
 <?php
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\TicketCategory;
+use KuschelTickets\lib\data\ticket\category\Category;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\KuschelTickets;
+use KuschelTickets\lib\data\ticket\category\CategoryList;
 
 /**
  * 
@@ -97,7 +99,7 @@ if(isset($parameters['add'])) {
                                 }
                                 if($errors['custominput'] == false) {
                                     $text = strip_tags($parameters['text']);
-                                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
+                                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categories WHERE categoryName = ?");
                                     $stmt->execute([$text]);
                                     $row = $stmt->fetch();
                                     if($row) {
@@ -105,20 +107,20 @@ if(isset($parameters['add'])) {
                                     } else {
                                         $inputs = json_encode($inputdata);
                                         $inputs = strip_tags($inputs);
-                                        $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_ticket_categorys(`categoryName`, `inputs`, `color`) VALUES (?, ?, ?)");
+                                        $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_ticket_categories(`categoryName`, `inputs`, `color`) VALUES (?, ?, ?)");
                                         $stmt->execute([$text, $inputs, $color]);
                                         $success = "Diese Kategorie wurde erfolgreich erstellt.";
                                     }
                                 }
                             } else {
                                 $text = strip_tags($parameters['text']);
-                                $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categories WHERE categoryName = ?");
                                 $stmt->execute([$text]);
                                 $row = $stmt->fetch();
                                 if($row) {
                                     $errors['text'] = "Dieser Name ist bereits vergeben.";
                                 } else {
-                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_ticket_categorys(`categoryName`, `inputs`, `color`) VALUES (?, ?, ?)");
+                                    $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_ticket_categories(`categoryName`, `inputs`, `color`) VALUES (?, ?, ?)");
                                     $inputs = "[]";
                                     $stmt->execute([$text, $inputs, $color]);
                                     $success = "Diese Kategorie wurde erfolgreich erstellt.";
@@ -153,9 +155,9 @@ if(isset($parameters['add'])) {
     if(empty($parameters['edit'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
-    $category = new TicketCategory($parameters['edit']);
+    $category = new Category($parameters['edit']);
     
-    if(!$category->exists()) {
+    if(!$category->categoryID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
@@ -245,28 +247,28 @@ if(isset($parameters['add'])) {
                                 } 
                                 if($errors['custominput'] == false) {
                                     $text = strip_tags($parameters['text']);
-                                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
+                                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categories WHERE categoryName = ?");
                                     $stmt->execute([$text]);
                                     $row = $stmt->fetch();
-                                    if($row && $text !== $category->getName()) {
+                                    if($row && $text !== $category->categoryName) {
                                         $errors['text'] = "Dieser Name ist bereits vergeben.";
                                     } else {
                                         $inputs = json_encode($inputdata);
                                         $inputs = strip_tags($inputs);
-                                        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_ticket_categorys SET `categoryName`=?,`inputs`=?,`color`=? WHERE categoryID = ?");
+                                        $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_ticket_categories SET `categoryName`=?,`inputs`=?,`color`=? WHERE categoryID = ?");
                                         $stmt->execute([$text, $inputs, $color, $category->categoryID]);
                                         $success = "Diese Kategorie wurde erfolgreich bearbeitet.";
                                     }
                                 } 
                             } else {
                                 $text = strip_tags($parameters['text']);
-                                $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryName = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categories WHERE categoryName = ?");
                                 $stmt->execute([$text]);
                                 $row = $stmt->fetch();
-                                if($row && $text !== $category->getName()) {
+                                if($row && $text !== $category->categoryName) {
                                     $errors['text'] = "Dieser Name ist bereits vergeben.";
                                 } else {
-                                    $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_ticket_categorys SET `categoryName`=?,`inputs`=?,`color`=? WHERE categoryID = ?");  
+                                    $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_ticket_categories SET `categoryName`=?,`inputs`=?,`color`=? WHERE categoryID = ?");  
                                     $inputs = "[]";                           
                                     $stmt->execute([$text, $inputs, $color, $category->categoryID]);
                                     $success = "Diese Kategorie wurde erfolgreich bearbeitet.";
@@ -288,15 +290,14 @@ if(isset($parameters['add'])) {
             $errors['token'] = "Deine Sitzung ist leider abgelaufen, bitte lade die Seite neu.";
         }
     }
-    $inputjson = $category->getInputJSON();
-    $inputjson = json_decode($inputjson);
+    $inputjson = $category->inputs;
     $inputnames = [];
     $inputs = [];
     foreach($inputjson as $input) {
         array_push($inputnames, $input->title);
         array_push($inputs, json_encode($input));
     }
-
+    $category->load();
     $site = array(
         "success" => $success,
         "site" => $subpage,
@@ -309,15 +310,8 @@ if(isset($parameters['add'])) {
 } else {
     $subpage = "index";
 
-    $ticketcategories = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        array_push($ticketcategories, new TicketCategory($row['categoryID']));
-    }
-
     $site = array(
-        "ticketcategories" => $ticketcategories,
+        "ticketcategories" => new CategoryList(),
         "site" => $subpage
     );
 }

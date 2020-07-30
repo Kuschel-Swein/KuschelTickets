@@ -2,8 +2,11 @@
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\system\Group;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
-use KuschelTickets\lib\system\PageContent;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\data\page\Page;
+use KuschelTickets\lib\data\page\PageList;
+use KuschelTickets\lib\KuschelTickets;
+use KuschelTickets\lib\data\user\group\GroupList;
 
 /**
  * 
@@ -38,7 +41,7 @@ if(isset($parameters['add'])) {
                     if(isset($parameters['url']) && !empty($parameters['url'])) {
                         if(isset($parameters['text']) && !empty($parameters['text'])) {
                             $url = strip_tags($parameters['url']);
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE url = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE url = ?");
                             $stmt->execute([$url]);
                             $row = $stmt->fetch();
                             if($row == false) {
@@ -49,7 +52,7 @@ if(isset($parameters['add'])) {
                                 }
                                 $title = strip_tags($parameters['title']);
                                 $groups = json_encode($groups);
-                                $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_pages(`identifier`, `url`, `title`, `content`, `groups`, `system`, `type`) VALUES (?, ?, ?, ?, ?, 0, ?)");
+                                $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_pages(`identifier`, `url`, `title`, `content`, `groups`, `system`, `type`) VALUES (?, ?, ?, ?, ?, 0, ?)");
                                 $stmt->execute([$url, $url, $title, $text, $groups, $type]);
                                 $success = "Diese Seite wurde erfolgreich gespeichert.";
                             } else {
@@ -78,7 +81,7 @@ if(isset($parameters['add'])) {
         "errors" => $errors,
         "selectedgroups" => $groups,
         "type" => $type,
-        "allgroups" => Group::getAllGroups()
+        "allgroups" => new GroupList()
     );
 
 } else if(isset($parameters['edit'])) {
@@ -87,20 +90,15 @@ if(isset($parameters['add'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
-    $page = null;
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
-    $stmt->execute([$parameters['edit']]);
-    $row = $stmt->fetch();
-    if($row) {
-        $page = $row;
-    }
-    if($page == null) {
+    $page = new Page($parameters['edit']);
+
+    if(!$page->pageID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
-    $type = $page['type'];
+    $type = $page->type;
 
-    $groups = json_decode($page['groups']);
+    $groups = $page->groups;
 
     $errors = array(
         "title" => false,
@@ -123,10 +121,10 @@ if(isset($parameters['add'])) {
                     if(isset($parameters['url']) && !empty($parameters['url'])) {
                         if(isset($parameters['text']) && !empty($parameters['text'])) {
                             $url = strip_tags($parameters['url']);
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE url = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE url = ?");
                             $stmt->execute([$url]);
                             $row = $stmt->fetch();
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
                             $stmt->execute([$parameters['edit']]);
                             $r = $stmt->fetch();
                             if($row == false || $row['url'] == $r['url']) {
@@ -138,14 +136,14 @@ if(isset($parameters['add'])) {
                                     }
                                     $title = strip_tags($parameters['title']);
                                     $login = strip_tags($parameters['loginneed']);
-                                    $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_pages SET `identifier`=?,`url`=?,`title`=?,`content`=?,`groups`=? WHERE pageID = ?");
+                                    $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_pages SET `identifier`=?,`url`=?,`title`=?,`content`=?,`groups`=? WHERE pageID = ?");
                                     $stmt->execute([$url, $url, $title, $text, $groups, $parameters['edit']]);
                                     $success = "Diese Seite wurde erfolgreich gespeichert.";
                                 } else if($r['system'] == "1") {
                                     $text = Utils::purify($parameters['text']);
                                     $title = strip_tags($parameters['title']);
                                     $login = strip_tags($parameters['loginneed']);
-                                    $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_pages SET `title`=?,`content`=? WHERE pageID = ?");
+                                    $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_pages SET `title`=?,`content`=? WHERE pageID = ?");
                                     $stmt->execute([$title, $text, $parameters['edit']]);
                                     $success = "Diese Seite wurde erfolgreich gespeichert.";
                                 }
@@ -169,10 +167,7 @@ if(isset($parameters['add'])) {
         }
     }
 
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
-    $stmt->execute([$parameters['edit']]);
-    $row = $stmt->fetch();
-    $page = $row;
+    $page->load();
 
     $site = array(
         "success" => $success,
@@ -180,21 +175,13 @@ if(isset($parameters['add'])) {
         "errors" => $errors,
         "page" => $page,
         "selectedgroups" => $groups,
-        "allgroups" => Group::getAllGroups()
+        "allgroups" => new GroupList()
     );
 } else {
     $subpage = "index";
-    $pages = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        $row['content'] = PageContent::get($row['identifier']);
-        array_push($pages, $row);
-    }
-
 
     $site = array(
-        "pages" => $pages,
+        "pages" => new PageList(),
         "site" => $subpage
     );
 }

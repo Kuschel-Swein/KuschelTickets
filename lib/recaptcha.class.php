@@ -1,6 +1,7 @@
 <?php
 namespace KuschelTickets\lib;
 use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\HttpRequest;
 
 class recaptcha {
 
@@ -13,7 +14,7 @@ class recaptcha {
                 // recaptcha v2
                 $return = '<div class="g-recaptcha" data-sitekey="'.$config['recaptcha']['public'].'"></div><br>';
                 $return = $return.'<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
-            } else if($version == 3){
+            } else if($version == 3) {
                 // recaptcha v3
                 $return = '<input name="g-recaptcha-response" type="hidden" id="g-recaptcha-response">';
                 $return = $return.'<script src="https://www.google.com/recaptcha/api.js?render='.$config['recaptcha']['public'].'"></script>';
@@ -37,14 +38,26 @@ class recaptcha {
         if($config['recaptcha']['use'] == true && in_array($usecase, $config['recaptcha']['cases'])) {
             $version = $config['recaptcha']['version'];
             if($version == 2) {
-                $request = Utils::httpPost("https://www.google.com/recaptcha/api/siteverify", array("secret" => $config['recaptcha']['secret'], "response" => $_POST['g-recaptcha-response']));
-                $request = json_decode($request, true);
-                return $request['success'];
+                $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify");
+                $httpRequest->enableSSL();
+                $httpRequest->setRequestType(HttpRequest::POST);
+                $httpRequest->setPostFields(array(
+                    "secret" => $config['recaptcha']['secret'],
+                    "response" => $_POST['g-recaptcha-response']
+                ));
+                $httpRequest->execute();
+                $response = $httpRequest->getResponse();
+                $response = json_decode($response, true);
+                return $response['success'];
             } else if($version == 3) {
-                $request = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$config['recaptcha']['secret']."&response=".$_POST['g-recaptcha-response']);
-                $request = json_decode($request);
-                if($request->success == true){
-                    if($request->score >= 0.6){
+                $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify?secret=".$config['recaptcha']['secret']."&response=".$_POST['g-recaptcha-response']);
+                $httpRequest->enableSSL();
+                $httpRequest->setRequestType(HttpRequest::GET);
+                $httpRequest->execute();
+                $response = $httpRequest->getResponse();
+                $response = json_decode($response);
+                if($response->success == true){
+                    if($response->score >= 0.6){
                         return true;
                     } else {
                         return false;

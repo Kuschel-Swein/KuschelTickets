@@ -1,8 +1,10 @@
 <?php
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\system\MenuEntry;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\data\menu\MenuEntry;
+use KuschelTickets\lib\data\menu\MenuEntryList;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\KuschelTickets;
 
 /**
  * 
@@ -20,14 +22,14 @@ if(isset($parameters['add'])) {
     );
 
     $navigation = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         array_push($navigation, new MenuEntry($row['menuID']));
     }
 
     $controllers = DATA['topnavigation'];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         array_push($controllers, array(
@@ -64,12 +66,12 @@ if(isset($parameters['add'])) {
                             }
                             if($validParent) {
                                 $text = strip_tags($parameters['text']);
-                                $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_menu(`title`, `controller`, `parent`) VALUES (?, ?, ?)");
+                                $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_menu(`title`, `controller`, `parent`) VALUES (?, ?, ?)");
                                 $stmt->execute([$text, $parameters['controller'], $parent]);
-                                $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu WHERE title=? ORDER BY menuID DESC LIMIT 1");
+                                $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_menu WHERE title=? ORDER BY menuID DESC LIMIT 1");
                                 $stmt->execute([$text]);
                                 $row = $stmt->fetch();
-                                $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `sorting`=? WHERE menuID = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_menu SET `sorting`=? WHERE menuID = ?");
                                 $stmt->execute([$row['menuID'], $row['menuID']]);
                                 $success = "Dieser Menüeintrag wurde erfolgreich hinzugefügt.";
                             }
@@ -104,12 +106,12 @@ if(isset($parameters['add'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
     $entry = new MenuEntry((int) $parameters['edit']);
-    if(!$entry->exists()) {
+    if(!$entry->menuID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
     $navigation = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
     $stmt->execute();
     $childs = $entry->getChilds();
     $childIDs = [];
@@ -126,7 +128,7 @@ if(isset($parameters['add'])) {
     }
 
     $controllers = DATA['topnavigation'];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         array_push($controllers, array(
@@ -177,7 +179,7 @@ if(isset($parameters['add'])) {
                             }
                             if($validParent) {
                                 $text = strip_tags($parameters['text']);
-                                $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `title`=?, `controller`=?, `parent`=? WHERE menuID = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_menu SET `title`=?, `controller`=?, `parent`=? WHERE menuID = ?");
                                 $stmt->execute([$text, $parameters['controller'], $parent, $parameters['edit']]);
                                 $success = "Dieser Menüeintrag wurde erfolgreich bearbeitet.";
                             }
@@ -201,7 +203,7 @@ if(isset($parameters['add'])) {
     $entry = new MenuEntry((int) $parameters['edit']);
 
     $navigation = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_menu");
     $stmt->execute();
     $childs = $entry->getChilds();
     $childIDs = [];
@@ -217,7 +219,7 @@ if(isset($parameters['add'])) {
     }
 
     $controllers = DATA['topnavigation'];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_pages");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         array_push($controllers, array(
@@ -245,15 +247,8 @@ if(isset($parameters['add'])) {
 } else {
     $subpage = "index";
 
-    $navigation = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu ORDER BY sorting ASC");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        array_push($navigation, new MenuEntry($row['menuID']));
-    }
-
     $site = array(
-        "navigation" => $navigation,
+        "navigation" => new MenuEntryList([], "ORDER BY sorting ASC"),
         "site" => $subpage
     );
 }

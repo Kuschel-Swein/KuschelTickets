@@ -3,8 +3,9 @@ use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Mailer;
 use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
+use KuschelTickets\lib\exception\AccessDeniedException;
 use KuschelTickets\lib\recaptcha;
+use KuschelTickets\lib\KuschelTickets;
 
 class passwordresetPage extends Page {
 
@@ -24,7 +25,7 @@ class passwordresetPage extends Page {
             "recaptcha" => false
         );
 
-        if(UserUtils::isLoggedIn()) {
+        if(KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du kannst diese Seite nicht öffnen");
         }
         if(isset($parameters['token']) && !empty($parameters['token'])) {

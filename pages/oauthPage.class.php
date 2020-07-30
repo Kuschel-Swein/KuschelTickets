@@ -8,6 +8,7 @@ use KuschelTickets\lib\Exceptions\AccessDeniedException;
 use KuschelTickets\lib\Exceptions\PageNotFoundException;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\Link;
+use KuschelTickets\lib\KuschelTickets;
 
 class oauthPage extends Page {
 
@@ -17,7 +18,7 @@ class oauthPage extends Page {
     public function readParameters(Array $parameters) {
         global $config;
         
-        if(UserUtils::isLoggedIn()) {
+        if(KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
         $type = null;

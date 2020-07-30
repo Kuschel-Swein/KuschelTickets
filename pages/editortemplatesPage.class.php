@@ -1,12 +1,13 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\recaptcha;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\KuschelTickets;
 
 class editortemplatesPage extends Page {
 
@@ -18,7 +19,7 @@ class editortemplatesPage extends Page {
     public function readParameters(Array $parameters) {
         global $config;
 
-        if(!UserUtils::isLoggedIn()) {
+        if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
 
@@ -34,8 +35,7 @@ class editortemplatesPage extends Page {
         $success = false;
         $editortpl = null;
 
-        $user = new User(UserUtils::getUserID());
-        if(!$user->hasPermission("general.editor.templates")) {
+        if(!KuschelTickets::getUser()->hasPermission("general.editor.templates")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
 
@@ -53,14 +53,14 @@ class editortemplatesPage extends Page {
                                         $text = Utils::purify($parameters['text']);
                                         if(!empty($text) && $text !== "<p></p>") {
                                             $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE title = ? AND userID = ?");
-                                            $stmt->execute([$title, $user->userID]);
+                                            $stmt->execute([$title, KuschelTickets::getUser()->userID]);
                                             $row = $stmt->fetch();
                                             if($row === false) {
                                                 if(isset($parameters['description']) && !empty($parameters['description'])) {
                                                     $description = strip_tags($parameters['description']);
                                                     if(!empty($description)) {
                                                         $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_editortemplates(`title`, `content`, `description`, `userID`) VALUES (?, ?, ?, ?)");
-                                                        $stmt->execute([$title, $text, $description, $user->userID]);
+                                                        $stmt->execute([$title, $text, $description, KuschelTickets::getUser()->userID]);
                                                         $success = "Deine Editorvorlage wurde erfolgreich gespeichert.";
                                                     } else {
                                                         $errors['description'] = "Bitte gib eine Beschreibung an.";
@@ -101,7 +101,7 @@ class editortemplatesPage extends Page {
             }
 
             $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
-            $stmt->execute([$user->userID, $parameters['edit']]);
+            $stmt->execute([KuschelTickets::getUser()->userID, $parameters['edit']]);
             $row = $stmt->fetch();
             if($row == false) {
                 throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");
@@ -120,7 +120,7 @@ class editortemplatesPage extends Page {
                                         $text = Utils::purify($parameters['text']);
                                         if(!empty($text) && $text !== "<p></p>") {
                                             $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE title = ? AND userID = ?");
-                                            $stmt->execute([$title, $user->userID]);
+                                            $stmt->execute([$title, KuschelTickets::getUser()->userID]);
                                             $row = $stmt->fetch();
                                             if($row === false || $row['title'] == $title) {
                                                 if(isset($parameters['description']) && !empty($parameters['description'])) {
@@ -130,7 +130,7 @@ class editortemplatesPage extends Page {
                                                         $stmt->execute([$title, $text, $description, $parameters['edit']]);
                                                         $success = "Deine Editorvorlage wurde erfolgreich gespeichert.";
                                                         $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
-                                                        $stmt->execute([$user->userID, $parameters['edit']]);
+                                                        $stmt->execute([KuschelTickets::getUser()->userID, $parameters['edit']]);
                                                         $row = $stmt->fetch();
                                                         $editortpl = $row;
                                                     } else {

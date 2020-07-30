@@ -6,13 +6,25 @@ use KuschelTickets\lib\system\TicketCategory;
 class Utils {
 
     public static function redirect(String $url) {
+        header("Location: ".$url);
         echo '<meta http-equiv="refresh" content="0; URL='.$url.'">';
+    }
+
+    public static function autoload(String $glob) {
+        $glob = glob($glob);
+        foreach($glob as $file) {
+            if(is_file($file)) {
+                require_once($file);
+            } else {
+                self::autoload($file."/*");
+            }
+        }
     }
 
     public static function getCategorys() {
         global $config;
 
-        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categorys");
+        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_categories");
         $stmt->execute();
         $categorys = [];
         while($row = $stmt->fetch()) {
@@ -64,7 +76,7 @@ class Utils {
     public static function error($error) {
         global $config; 
 
-        if(get_class($error) !== "KuschelTickets\lib\Exceptions\PageNotFoundException" && get_class($error) !== "KuschelTickets\lib\Exceptions\AccessDeniedException") {
+        if(get_class($error) !== "KuschelTickets\lib\exception\PageNotFoundException" && get_class($error) !== "KuschelTickets\lib\exception\AccessDeniedException") {
             $errorcode = Utils::generateErrorCode();
             $file = fopen("./data/logs/".$errorcode.".txt", "w");
             fwrite($file, "======================================================================".PHP_EOL."EXCEPTION ".date("d.m.Y H:i:s").PHP_EOL."======================================================================".PHP_EOL.PHP_EOL.var_export($error, true));

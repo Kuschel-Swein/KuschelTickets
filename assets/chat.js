@@ -33,7 +33,7 @@ const chat = {
             '<i class="large chat middle aligned icon"></i>' +
             '<div class="content">' +
                 header +
-                '<div class="description">' + chat.time + '</div>' +
+                '<div class="description">' + formatUnix(chat.time) + '</div>' +
             '</div>';
             elem.appendChild(div);
         });
@@ -126,7 +126,7 @@ const chat = {
                 '<div class="content">' +
                     '<span class="author">' + message.badge + " " + message.poster + '</span>' +
                     '<div class="metadata float-right">' +
-                        '<span class="date">' + message.time + '</span>' +
+                        '<span class="date">' + formatUnix(message.time, false) + '</span>' +
                     '</div>' +
                     '<div class="text">' +
                     message.content +

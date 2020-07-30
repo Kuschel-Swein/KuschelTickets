@@ -1037,7 +1037,7 @@ const notifications = {
             if(notifications_content.length > 0) {
                 result = "";
                 notifications_content.forEach(function(notification) {
-                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + notification['link'] + '"  data-tooltip="' + notification['time'] + '">' + notification['message'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
+                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + notification['time'] + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
                     var data = ajax.call(22, notification['notificationID']);
                     if(data['success']) {
@@ -1075,7 +1075,7 @@ const notifications = {
             if(notifications_content.length > 0) {
                 result = "";
                 notifications_content.forEach(function(notification) {
-                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + notification['link'] + '"  data-tooltip="' + notification['time'] + '">' + notification['message'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
+                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + notification['time'] + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
                     var data = ajax.call(22, notification['notificationID']);
                     if(data['success']) {
@@ -1113,15 +1113,18 @@ const notifications = {
     },
     options: function(notification) {
         return {
-            body: notification['message'],
+            body: notification['content'],
             icon: KT.mainurl + "data/favicon." + KT.faviconextension
         }
     },
     desktopNotification: function(notification) {
         if(KT.useDesktopNotification) {
-            var notify = new Notification(KT.pagetitle + " Benachrichtigung", notifications.options(notification));
-            notify.onclick = function() {
-                window.open(notification['link'], "_blank");
+            if(notification['sent'] == 0) {
+                var notify = new Notification(KT.pagetitle + " Benachrichtigung", notifications.options(notification));
+                notify.onclick = function() {
+                    window.open(notification['link'], "_blank");
+                }
+                ajax.call(23, notification['notificationID']);
             }
         }
     }
@@ -1246,4 +1249,36 @@ function link(link) {
     } else {
         return KT.mainurl + "index.php?" + link + "/";
     }
+}
+
+function formatUnix(unix, addDate = true, addTime = true) {
+    unix = unix*1000;
+    var date = new Date(unix);
+    var result = "";
+    if(addDate) {
+        var day = date.getDate();
+        if(day < 10) {
+            day = "0" + day;
+        }
+        var month = date.getDate();
+        if(month < 10) {
+            month = "0" + month;
+        }
+        result = day + "." + month + "." + date.getFullYear();
+    }
+    if(addTime) {
+        var hours = date.getHours();
+        if(hours < 10) {
+            hours = "0" + hours;
+        }
+        var minutes = date.getMinutes();
+        if(minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if(result !== "") {
+            result = result + " ";
+        }
+        result = result + hours + ":" + minutes + " Uhr";
+    }
+    return result;
 }

@@ -11,13 +11,13 @@
     <div class="field required{if $errors['username'] !== false} error{/if}">
         <label>Benutzername</label>
         <div class="ui input">
-            <input type="text" name="username" value="{$__KT['user']->getUserName()}">
+            <input type="text" name="username" value="{$__KT['user']->username}">
         </div>
     </div>
     <div class="field{if $errors['email'] !== false} error{/if}">
         <label>E-Mail Adresse</label>
         <div class="ui input">
-            <input type="email" name="email" placeholder="{$__KT['user']->getEmail()}">
+            <input type="email" name="email" placeholder="{$__KT['user']->email}">
         </div>
     </div>
     <div class="ui divider"></div>

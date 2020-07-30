@@ -1,4 +1,4 @@
-<h3>Willkommen im KuschelTickets ACP, {$__KT['user']->getUserName()}</h3>
+<h3>Willkommen im KuschelTickets ACP, {$__KT['user']->username}</h3>
 <p>Hier kannst du KuschelTickets konfigurieren, ebenfalls kannst du hier deine Konfigurationsdatei auf einer schönen Oberfläche verwalten.</p>
 <p></p>
 {if $site}

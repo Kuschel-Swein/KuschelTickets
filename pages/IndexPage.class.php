@@ -2,9 +2,9 @@
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\Link;
-use KuschelTickets\lib\system\TicketCategory;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\Ticket;
+use KuschelTickets\lib\data\ticket\Ticket;
+use KuschelTickets\lib\KuschelTickets;
 
 class IndexPage extends Page {
 
@@ -13,13 +13,13 @@ class IndexPage extends Page {
     public function readParameters(Array $parameters) {
         global $config;
 
-        if(!UserUtils::isLoggedIn()) {
+        if(!KuschelTickets::getUser()->userID) {
             Utils::redirect(Link::get("login"));
             die();
         }
 
-        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? ORDER BY ticketID DESC LIMIT 10");
-        $stmt->execute([UserUtils::getUserID()]);
+        $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? ORDER BY ticketID DESC LIMIT 10");
+        $stmt->execute([KuschelTickets::getUser()->userID]);
         while($row = $stmt->fetch()) {
             array_push($this->tickets, new Ticket($row['ticketID']));
         }

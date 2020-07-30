@@ -2,11 +2,12 @@
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\Ticket;
+use KuschelTickets\lib\KuschelTickets;
 use KuschelTickets\lib\dompdfAdapter;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
 use KuschelTickets\lib\Link;
+use KuschelTickets\lib\data\ticket\Ticket;
 
 class ticketpdfPage extends Page {
 
@@ -19,25 +20,25 @@ class ticketpdfPage extends Page {
             throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");
         }
 
-        if(!UserUtils::isLoggedIn()) {
+        if(KuschelTickets::getUser() == null) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
-        $user = new User(UserUtils::getUserID());
-        if(!$user->hasPermission("general.view.ticket.own") && !$user->hasPermission("mod.view.ticket.all")) {
+
+        if(!KuschelTickets::getUser()->hasPermission("general.view.ticket.own") && !KuschelTickets::getUser()->hasPermission("mod.view.ticket.all")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
         $ticket = new Ticket($parameters['ticketpdf']);
-        if(!$ticket->exists()) {
+        if(!$ticket->ticketID) {
             throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");
         }
         $creator = $ticket->getCreator();
-        if(!$user->hasPermission("mod.view.ticket.all")) {
-            if($user->userID !== $creator->userID) {
+        if(!KuschelTickets::getUser()->hasPermission("mod.view.ticket.all")) {
+            if(KuschelTickets::getUser()->userID !== $creator->userID) {
                 throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
             }
         }
 
-        if(!$user->hasPermission("general.ticket.export.pdf")) {
+        if(!KuschelTickets::getUser()->hasPermission("general.ticket.export.pdf")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
 
@@ -46,8 +47,8 @@ class ticketpdfPage extends Page {
         $content = "";
         $rating = "";
         if($config['ticketRating']) {
-            if($ticket->isRated()) {
-                $rating = "<br>Bewertung: ".$ticket->getRating()."/5";
+            if($ticket->rating != null) {
+                $rating = "<br>Bewertung: ".$ticket->rating."/5";
             } else {
                 $rating = "<br><i>noch nicht bewertet</i>";
             }
@@ -56,7 +57,7 @@ class ticketpdfPage extends Page {
         $content = $content.'
             <header>
                 <center>
-                    <small>'.$config['pagetitle'].' &mdash; Ticket #'.$ticket->ticketID.' &mdash; '.$ticket->getCategory().' &mdash; <a href="'.Link::get("ticket-".$ticket->ticketID).'">'.Link::get("ticket-".$ticket->ticketID).'</a></small>
+                    <small>'.$config['pagetitle'].' &mdash; Ticket #'.$ticket->ticketID.' &mdash; '.$ticket->category.' &mdash; <a href="'.Link::get("ticket-".$ticket->ticketID).'">'.Link::get("ticket-".$ticket->ticketID).'</a></small>
                     <small>'.$rating.'</small>
                 </center>
             </header>
@@ -64,19 +65,19 @@ class ticketpdfPage extends Page {
 
         $content = $content."
         <article>
-            <u>".$ticket->getCreator()->getGroup()->getGroupBadge()." ".$ticket->getCreator()->getUserName()." schrieb am ".date("d.m.Y", $ticket->getTime())." um ".date("H:i", $ticket->getTime())." Uhr:</u>
+            <u>".$ticket->getCreator()->getGroup()->getGroupBadge()." ".$ticket->getCreator()->username." schrieb am ".date("d.m.Y", $ticket->time)." um ".date("H:i", $ticket->time)." Uhr:</u>
             <blockquote>
-                ".$ticket->getContent()."
+                ".$ticket->content."
             </blockquote>
         </article>";
 
         foreach($ticket->getAnswers() as $answer) {
-            if($answer['creator'] !== "system") {
+            if($answer->creator !== 0) {
                 $content = $content."
                 <article>
-                    <u>".$answer['creator']->getGroup()->getGroupBadge()." ".$answer['creator']->getUserName()." schrieb am ".date("d.m.Y", $answer['time'])." um ".date("H:i", $answer['time'])." Uhr:</u>
+                    <u>".$answer->getCreator()->getGroup()->getGroupBadge()." ".$answer->getCreator()->username." schrieb am ".date("d.m.Y", $answer->time)." um ".date("H:i", $answer->time)." Uhr:</u>
                     <blockquote>
-                        ".$answer['content']."
+                        ".$answer->content."
                     </blockquote>
                 </article>";
             } else {
@@ -84,7 +85,7 @@ class ticketpdfPage extends Page {
                 <article>
                 <hr>
                 <center>
-                ".$answer['content']." &mdash; ".date("d.m.Y", $answer['time'])." um ".date("H:i", $answer['time'])." Uhr
+                ".$answer->content." &mdash; ".date("d.m.Y", $answer->time)." um ".date("H:i", $answer->time)." Uhr
                 </center>
                 <hr>
                 </article>
@@ -92,7 +93,7 @@ class ticketpdfPage extends Page {
             }
         }
 
-        $content = '<html><head><title>'.$ticket->getTitle().'</title><meta charset="utf-8"><style>'.self::getCSS().'</style></head><body>'.$content.'</body></html>';
+        $content = '<html><head><title>'.$ticket->title.'</title><meta charset="utf-8"><style>'.self::getCSS().'</style></head><body>'.$content.'</body></html>';
         $this->content = dompdfAdapter::create($content);
     }
 

@@ -1,14 +1,16 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\Link;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\Notification;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
-use KuschelTickets\lib\system\TicketCategory;
+use KuschelTickets\lib\data\user\notification\Notification;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\data\ticket\category\Category;
 use KuschelTickets\lib\recaptcha;
+use KuschelTickets\lib\KuschelTickets;
+use KuschelTickets\lib\data\ticket\category\CategoryList;
 
 class addticketpage extends Page {
 
@@ -26,11 +28,11 @@ class addticketpage extends Page {
             "custominput" => false
         );
 
-        if(!UserUtils::isLoggedIn()) {
+        if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
-        $user = new User(UserUtils::getUserID());
-        if(!$user->hasPermission("general.tickets.add")) {
+
+        if(!KuschelTickets::getUser()->hasPermission("general.tickets.add")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
 
@@ -41,7 +43,7 @@ class addticketpage extends Page {
                         if(isset($parameters['title']) && !empty($parameters['title'])) {
                             if(isset($parameters['category']) && !empty($parameters['category'])) {
                                 $category = strip_tags($parameters['category']);
-                                $cat = new TicketCategory($category);
+                                $cat = new Category($category);
                                 $result = $cat->validateInputs($parameters);
                                 $this->errors['custominput'] = $result['errors'];
                                 $worked = true;
@@ -51,17 +53,10 @@ class addticketpage extends Page {
                                         break;
                                     }
                                 }
-                                if($worked) {
+                                if($worked == true) {
                                     if(isset($parameters['text']) && !empty($parameters['text'])) {
-                                        $categorys = Utils::getCategorys();
-                                        $category_exists = false;
-                                        foreach($categorys as $category) {
-                                            if($category->categoryID == $parameters['category']) {
-                                                $category_exists = true;
-                                                break;
-                                            }
-                                        }
-                                        if($category_exists) {
+                                        $categoryCheck = new Category($parameters['category']);
+                                        if($categoryCheck->categoryID) {
                                             $text = Utils::purify($parameters['text']);
                                             $customfields = "";
                                             if(isset($result['results'])) {
@@ -72,30 +67,30 @@ class addticketpage extends Page {
                                             if(!empty($text) && $text !== "<p></p>") {
                                                     $text = $customfields.$text;
                                                     $title = strip_tags($parameters['title']);
-                                                    $category = $cat->getName();
-                                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_tickets(`creator`, `title`, `category`, `content`, `state`, `time`, `color`) VALUES (?, ?, ?, ? , 1, ?, ?)");
+                                                    $category = $cat->categoryName;
+                                                    $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_tickets(`creator`, `title`, `category`, `content`, `state`, `time`, `color`) VALUES (?, ?, ?, ? , 1, ?, ?)");
                                                     $time = time();
-                                                    $color = $cat->getColor();
-                                                    $stmt->execute([$user->userID, $title, $category, $text, $time, $color]);
+                                                    $color = $cat->color;
+                                                    $stmt->execute([KuschelTickets::getUser()->userID, $title, $category, $text, $time, $color]);
                                                     $this->success = true;
-                                                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? AND time = ? LIMIT 1");
-                                                    $stmt->execute([$user->userID, $time]);
+                                                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE creator = ? AND time = ? LIMIT 1");
+                                                    $stmt->execute([KuschelTickets::getUser()->userID, $time]);
                                                     $r = $stmt->fetch();
 
                                                     $nonotify = false;
-                                                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
+                                                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
                                                     $stmt->execute();
                                                     while($row = $stmt->fetch()) {
                                                         $account = new User((int) $row['userID']);
                                                         if($account->hasPermission("mod.view.tickets.list")) {
-                                                            Notification::create("notification_ticket_new", "Es wurde ein neues Ticket von ".$user->getUserName()." in der Kategorie ".$cat->getName()." erstellt.", "ticket-".$r['ticketID'], $account);
-                                                            if($account->userID == $user->userID) {
+                                                            Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$cat->categoryName." erstellt.", "ticket-".$r['ticketID'], $account);
+                                                            if($account->userID == KuschelTickets::getUser()->userID) {
                                                                 $nonotify = true;
                                                             }
                                                         }
                                                     }
                                                     if(!$nonotify) {
-                                                        Notification::create("notification_ticket_new", "Es wurde ein neues Ticket von ".$user->getUserName()." in der Kategorie ".$cat->getName()." erstellt.", "ticket-".$r['ticketID'], $user);
+                                                        Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$cat->categoryName." erstellt.", "ticket-".$r['ticketID'], $user);
                                                     }
                                                     Utils::redirect(Link::get("ticket-".$r['ticketID']));
                                             } else {
@@ -132,7 +127,7 @@ class addticketpage extends Page {
         return array(
             "errors" => $this->errors,
             "success" => $this->success,
-            "categorys" => Utils::getCategorys(),
+            "categorys" => new CategoryList(),
             "recaptcha" => recaptcha::build('addticket')
         );
     }

@@ -1,42 +1,40 @@
 <?php
 namespace KuschelTickets\lib;
-use KuschelTickets\lib\system\MenuEntry;
+
+use KuschelTickets\lib\data\menu\MenuEntry;
+use KuschelTickets\lib\data\menu\MenuEntryList;
 use KuschelTickets\lib\Link;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
+use KuschelTickets\lib\KuschelTickets;
 
 class KuschelTickets {
     public static function buildMenu(String $activePage) {
         global $config;
-
-        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_menu ORDER BY sorting ASC");
-        $stmt->execute();
+        $menu = new MenuEntryList([], "ORDER BY sorting ASC");
         $result = "";
-        $menu = [];
-        while($row = $stmt->fetch()) {
-            array_push($menu, new MenuEntry($row['menuID']));
-        }
         foreach($menu as $entry) {
             if(!$entry->hasParent()) {
                 $active = "";
-                if($activePage == $entry->getController()) {
+                if($activePage == $entry->controller) {
                     $active = " active";
                 }
                 if($entry->isSystemPage()) {
-                    if(UserUtils::isLoggedIn()) {
-                        if(!UserUtils::getUser()->hasPermission($entry->getPermission())) {
+                    if(KuschelTickets::getUser()->userID) {
+                        if(!KuschelTickets::getUser()->hasPermission($entry->getPermission())) {
                             continue;
                         }
                     } else {
                         continue;
                     }
                 } else {
-                    if(!$entry->canView(UserUtils::getUser())) {
+                    if(!$entry->canView(KuschelTickets::getUser())) {
                         continue;
                     }
                 }
                 $childs = $entry->getChilds();
-                if(empty($childs)) {
-                    $result = $result.'<a class="item'.$active.'" href="'.Link::get($entry->getLink()).'">'.$entry->getTitle().'</a>';
+                if(count($childs) == 0) {
+                    $result = $result.'<a class="item'.$active.'" href="'.Link::get($entry->getLink()).'">'.$entry->title.'</a>';
                 } else {
                     if($active == " active") {
                         $active = " visualactive";
@@ -52,7 +50,7 @@ class KuschelTickets {
 
                     $result = $result.'
                         <div class="ui dropdown navigation item'.$active.'">
-                            <a class="menuLink" href="'.Link::get($entry->getLink()).'">'.$entry->getTitle().'</a> <i class="dropdown icon"></i>
+                            <a class="menuLink" href="'.Link::get($entry->getLink()).'">'.$entry->title.'</a> <i class="dropdown icon"></i>
                             <div class="menu">
                                 '.$childData.'
                             </div>
@@ -68,33 +66,33 @@ class KuschelTickets {
         $result = "";
         $active = "";
         if($child->isSystemPage()) {
-            if(UserUtils::isLoggedIn()) {
-                if(!UserUtils::getUser()->hasPermission($child->getPermission())) {
+            if(KuschelTickets::getUser()->userID) {
+                if(!KuschelTickets::getUser()->hasPermission($child->getPermission())) {
                     return $result;
                 }
             } else {
                 return $result;
             }
         } else {
-            if(!$child->canView(UserUtils::getUser())) {
+            if(!$child->canView(KuschelTickets::getUser())) {
                 return $result;
             }
         }
         $activeChild = "";
-        if($activePage == $child->getController()) {
+        if($activePage == $child->controller) {
             $activeChild = " active";
             $active = " visualactive";
         }
         $childsOfChild = $child->getChilds();
-        if(empty($childsOfChild)) {
-            $result = $result.'<a class="item'.$activeChild.'" href="'.Link::get($child->getLink()).'">'.$child->getTitle().'</a>';
+        if(count($childsOfChild) == 0) {
+            $result = $result.'<a class="item'.$activeChild.'" href="'.Link::get($child->getLink()).'">'.$child->title.'</a>';
         } else {
             if($activeChild == " active") {
                 $activeChild = " visualactive";
             }
             $result = $result.'
                 <div class="ui dropdown child navigation item'.$activeChild.'">
-                    <a class="menuLink" href="'.Link::get($child->getLink()).'">'.$child->getTitle().'</a> <i class="dropdown icon"></i>
+                    <a class="menuLink" href="'.Link::get($child->getLink()).'">'.$child->title.'</a> <i class="dropdown icon"></i>
                     <div class="menu">';
             foreach($childsOfChild as $childOfChild) {
                 $data = KuschelTickets::menuHelper($activePage, $childOfChild);
@@ -114,5 +112,9 @@ class KuschelTickets {
     public static function getDB() {
         global $config;
         return $config['db'];
+    }
+
+    public static function getUser() {
+        return (isset($_SESSION['userID'])) ? new User($_SESSION['userID']) : new User(0);
     }
 }

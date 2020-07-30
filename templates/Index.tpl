@@ -1,5 +1,5 @@
 {include file="header.tpl" title="Startseite"}
-<h1>Willkommen, {$__KT['user']->getUserName()}</h1>
+<h1>Willkommen, {$__KT['user']->username}</h1>
 <div class="ui divider"></div>
 <h3>deine letzten 10 Tickets</h3>
 <table class="ui celled table">
@@ -19,13 +19,13 @@
         {foreach from=$tickets item="ticket"}
         <tr>
             <td data-label="ID">{$ticket->ticketID}</td>
-            <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
-            <td data-label="Kategorie"><span class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</span></td>
-            <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
+            <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->title}</a></td>
+            <td data-label="Kategorie"><span class="ui label {$ticket->color}">{$ticket->category}</span></td>
+            <td data-label="Datum">{$ticket->time|date_format:"%d.%m.%Y"}, {$ticket->time|date_format:"%H:%M"} Uhr</td>
             <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
             {if $__KT['ticketRating']}
-                {if $ticket->isRated()}
-                <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}"></div></td>
+                {if $ticket->hasRating()}
+                <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->rating}"></div></td>
                 {else}
                 <td data-label="Bewertung"><i>noch nicht bewertet</i></td>
                 {/if}

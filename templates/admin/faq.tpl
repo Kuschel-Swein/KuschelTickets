@@ -42,13 +42,13 @@
         {foreach from=$site['faqs'] item="faq"}
         <tr id="faqentry{$faq->faqID}">
         <td data-label="ID">{$faq->faqID}</td>
-        <td data-label="Frage">{$faq->getQuestion()}</a></td>
-        <td data-label="Kategorie">{$faq->getCategoryName()}</td>
+        <td data-label="Frage">{$faq->question}</a></td>
+        <td data-label="Kategorie">{$faq->getCategory()->name}</td>
         <td data-label="Aktion">
             <a href="javascript:deleteFAQ({$faq->faqID});" data-tooltip="Löschen"><i class="icon times"></i></a>
             <a href="{link url="admin/faq/edit-{$faq->faqID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
             <a href="javascript:showFAQ({$faq->faqID});" data-tooltip="Ansehen"><i class="icon eye"></i></a>
-            <div id="faqanswer{$faq->faqID}" data-question="{$faq->getQuestion()}" class="display-none">{$faq->getAnswer()}</div>
+            <div id="faqanswer{$faq->faqID}" data-question="{$faq->question}" class="display-none">{$faq->answer}</div>
         </td>
         </tr>
         {foreachelse}
@@ -187,12 +187,12 @@ $('.ui.selection.dropdown.category').dropdown({
     <div class="field required{if $site['errors']['question'] !== false} error{/if}">
     <label>Frage</label>
         <div class="ui input">
-            <input type="text" name="question" value="{$site['faq']->getQuestion()}">
+            <input type="text" name="question" value="{$site['faq']->question}">
         </div>
     </div>
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
         <label>Antwort</label>
-        <textarea id="text" rows="10" name="text">{$site['faq']->getAnswer()}</textarea>
+        <textarea id="text" rows="10" name="text">{$site['faq']->answer}</textarea>
     </div>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
@@ -228,7 +228,7 @@ $('.ui.selection.dropdown.category').dropdown({
     values: [
       {foreach from=$site['categorys'] item="category"}
         {
-          {if $site['faq']->getCategory() == $category['id']}
+          {if $site['faq']->getCategory()->categoryID == $category['id']}
             selected: true,
           {/if}
           name: "{$category['name']}",

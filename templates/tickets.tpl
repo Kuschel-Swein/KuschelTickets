@@ -45,14 +45,14 @@
     {foreach from=$tickets item="ticket"}
     <tr>
       <td data-label="ID">{$ticket->ticketID}</td>
-      <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->getTitle()}</a></td>
-      <td data-label="Ersteller">{$ticket->getCreator()->getUserName()}</td>
-      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie {$ticket->getCategory()} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 7);" class="ui label {$ticket->getColor()}">{$ticket->getCategory()}</a></td>
-      <td data-label="Datum">{$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr</td>
-      <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status {$ticket->getFormattedState("name")} anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 7);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
+      <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->title}</a></td>
+      <td data-label="Ersteller">{$ticket->getCreator()->username}</td>
+      <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie „{$ticket->category}“ anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 7);" class="ui label {$ticket->color}">{$ticket->category}</a></td>
+      <td data-label="Datum">{$ticket->time|date_format:"%d.%m.%Y"}, {$ticket->time|date_format:"%H:%M"} Uhr</td>
+      <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status „{$ticket->getFormattedState("name")}“ anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 7);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
       {if $__KT['ticketRating']}
-        {if $ticket->isRated()}
-          <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}"></div></td>
+        {if $ticket->rating != null}
+          <td data-label="Bewertung"><div class="ui huge {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->rating}"></div></td>
         {else}
           <td data-label="Bewertung"><i>noch nicht bewertet</i></td>
         {/if}

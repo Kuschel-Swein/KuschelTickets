@@ -1,7 +1,7 @@
 <?php
 use KuschelTickets\lib\PageHandler;
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\Utils;
 
@@ -13,22 +13,19 @@ require("lib/Utils.class.php");
 require("lib/Link.class.php");
 require("lib/dompdfAdapter.class.php");
 require("lib/recaptcha.class.php");
-require("lib/system/User.class.php");
-require("lib/system/Group.class.php");
 require("lib/system/UserUtils.class.php");
 require("lib/system/CRSF.class.php");
-require("lib/system/FAQ.class.php");
-require("lib/system/Notification.class.php");
-require("lib/system/PageContent.class.php");
-require("lib/system/Ticket.class.php");
-require("lib/system/TicketCategory.class.php");
 require("lib/system/Oauth.class.php");
+require("lib/HttpRequest.class.php");
 require("lib/system/GitHubOauth.class.php");
-require("lib/system/SupportChat.class.php");
-require("lib/system/MenuEntry.class.php");
+require("lib/data/DatabaseObject.class.php");
+require("lib/data/DatabaseObjectList.class.php");
 
-require("lib/exceptions/AccessDeniedException.class.php");
-require("lib/exceptions/PageNotFoundException.class.php");
+
+Utils::autoload("lib/data/*");
+
+require("lib/exception/AccessDeniedException.class.php");
+require("lib/exception/PageNotFoundException.class.php");
 
 if(!file_exists("config.php") || !file_exists("./data/INSTALLED")) {
     Utils::redirect("install.php");

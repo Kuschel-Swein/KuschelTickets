@@ -1,8 +1,8 @@
 {include file="header.tpl" title="Ticket"}
 <div class="column">
     <div class="ui middle attached segment">
-        <div class="ui {$ticket->getColor()} ribbon label">{$ticket->getCategory()}</div>
-        {$ticket->getTitle()}
+        <div class="ui {$ticket->color} ribbon label">{$ticket->category}</div>
+        {$ticket->title}
         {if ($__KT['user']->hasPermission("mod.tickets.close") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.close.own"))) ||
             ($__KT['user']->hasPermission("mod.tickets.done") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.done.own"))) ||
             ($__KT['user']->hasPermission("mod.tickets.reopen") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.reopen.own")))
@@ -10,7 +10,7 @@
             <div class="ui dropdown top right pointing settings float-right">
                 <div class="text" data-tooltip="Einstellungen"><i class="cogs icon"></i></div>
                 <div class="menu">
-                    {if $ticket->getState() == 1}
+                    {if $ticket->state == 1}
                         {if $__KT['user']->hasPermission("mod.tickets.close") || ($ticket->getCreator()->userID == $__KT['user'] && $__KT['user']->hasPermission("general.tickets.close.own"))}
                             <div class="item" data-value="1">Ticket schließen</div>
                         {/if}
@@ -35,10 +35,10 @@
     <h4 class="ui top attached block header">
         <div class="ui left aligned grid container">
             <div class="seven wide column floated left">
-                {$ticket->getCreator()->getGroup()->getGroupBadge()} {$ticket->getCreator()->getUserName()}
+                {$ticket->getCreator()->getGroup()->getGroupBadge()} {$ticket->getCreator()->username}
             </div>
             <div class="six wide column right aligned">
-                {$ticket->getTime()|date_format:"%d.%m.%Y"}, {$ticket->getTime()|date_format:"%H:%M"} Uhr
+                {$ticket->time|date_format:"%d.%m.%Y"}, {$ticket->time|date_format:"%H:%M"} Uhr
             </div>
             <div class="column right aligned">
                 {if (($__KT['user']->hasPermission("general.tickets.delete.own") && $ticket->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("mod.tickets.delete")) || $__KT['user']->hasPermission("general.tickets.quote")}
@@ -52,7 +52,7 @@
                                             <div class="item deletebutton" data-id="{$ticket->ticketID}" data-type="6">Löschen</div>
                                         {/if}
                                         {if $__KT['user']->hasPermission("general.tickets.quote")}
-                                            <div class="item quotebutton" data-username="{$ticket->getCreator()->getUserName()}" data-id="{$ticket->ticketID}" data-type="ticket">Zitieren</div>
+                                            <div class="item quotebutton" data-username="{$ticket->getCreator()->username}" data-id="{$ticket->ticketID}" data-type="ticket">Zitieren</div>
                                         {/if}
                                     </div>
                                 </div>
@@ -65,7 +65,7 @@
     </h4>
     <div class="ui middle attached clearing segment">
         <span id="ticketcontent{$ticket->ticketID}">
-            {$ticket->getContent()}
+            {$ticket->content}
         </span>
         <br>
         <div class="ui computer and tablet only grid">
@@ -75,7 +75,7 @@
                         <button class="ui button deletebutton" data-tooltip="Löschen" data-id="{$ticket->ticketID}" data-type="6"><i class="icon trash"></i></button>
                     {/if}
                     {if $__KT['user']->hasPermission("general.tickets.quote")}
-                        <button class="ui button quotebutton" data-username="{$ticket->getCreator()->getUserName()}" data-id="{$ticket->ticketID}" data-type="ticket" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
+                        <button class="ui button quotebutton" data-username="{$ticket->getCreator()->username}" data-id="{$ticket->ticketID}" data-type="ticket" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
                     {/if}
                 </div>
             </div>
@@ -84,46 +84,46 @@
 </div>
 
 {foreach from=$ticket->getAnswers() item="answer"}
-{if $answer['creator'] == "system"}
+{if $answer->creator == 0}
     <div class="column ticketanswer">
         <div class="ui tablet computer only grid">
             <div class="column">
                 <h4 class="ui horizontal divider header" >
-                    {$answer['content']} - {$answer['time']|date_format:"%d.%m.%Y"}, {$answer['time']|date_format:"%H:%M"} Uhr
+                    {$answer->content} - {$answer->time|date_format:"%d.%m.%Y"}, {$answer->time|date_format:"%H:%M"} Uhr
                 </h4>
             </div>
         </div>
         <div class="ui mobile only grid">
             <div class="column">
                 <div class="ui bottom center aligned attached segment">
-                    {$answer['content']} - {$answer['time']|date_format:"%d.%m.%Y"}, {$answer['time']|date_format:"%H:%M"} Uhr
+                    {$answer->content} - {$answer->time|date_format:"%d.%m.%Y"}, {$answer->time|date_format:"%H:%M"} Uhr
                 </div>
             </div>
         </div>
     </div>
 {else}
-    <div class="column ticketanswer" id="ticketanswer{$answer['id']}">
+    <div class="column ticketanswer" id="ticketanswer{$answer->answerID}">
         <h4 class="ui top attached block header">
             <div class="ui left aligned grid container">
                 <div class="seven wide column floated left">
-                    {$answer['creator']->getGroup()->getGroupBadge()} {$answer['creator']->getUserName()}
+                    {$answer->getCreator()->getGroup()->getGroupBadge()} {$answer->getCreator()->username}
                 </div>
                 <div class="six wide column right aligned">
-                    {$answer['time']|date_format:"%d.%m.%Y"}, {$answer['time']|date_format:"%H:%M"} Uhr
+                    {$answer->time|date_format:"%d.%m.%Y"}, {$answer->time|date_format:"%H:%M"} Uhr
                 </div>
                 <div class="column right aligned">
-                    {if (($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")) || $__KT['user']->hasPermission("general.tickets.quote")}
+                    {if (($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")) || $__KT['user']->hasPermission("general.tickets.quote")}
                         <div class="ui right aligned grid mobile only">
                             <div class="column right aligned">
                                 <div class="ui small icon buttons">
                                     <div class="ui top right pointing dropdown button answeractions">
                                         <i class="settings icon"></i>
                                         <div class="menu">
-                                            {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
-                                                <div class="item deletebutton" data-id="{$answer['id']}" data-type="5">Löschen</div>
+                                            {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
+                                                <div class="item deletebutton" data-id="{$answer->answerID}" data-type="5">Löschen</div>
                                             {/if}
                                             {if $__KT['user']->hasPermission("general.tickets.quote")}
-                                                <div class="item quotebutton" data-username="{$answer['creator']->getUserName()}" data-id="{$answer['id']}" data-type="answer">Zitieren</div>
+                                                <div class="item quotebutton" data-username="{$answer->getCreator()->username}" data-id="{$answer->answerID}" data-type="answer">Zitieren</div>
                                             {/if}
                                         </div>
                                     </div>
@@ -135,18 +135,18 @@
             </div>
         </h4>
         <div class="ui middle attached clearing segment">
-            <span id="ticketanswercontent{$answer['id']}">
-                {$answer['content']}
+            <span id="ticketanswercontent{$answer->answerID}">
+                {$answer->content}
             </span>
             <br>
             <div class="ui computer and tablet only grid">
                 <div class="column right aligned">
                     <div class="ui small icon buttons">
-                        {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer['creator']->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
-                            <button class="ui button deletebutton" data-tooltip="Löschen" data-id="{$answer['id']}" data-type="5"><i class="icon trash"></i></button>
+                        {if ($__KT['user']->hasPermission("general.tickets.deletemessage.own") && $answer->getCreator()->userID == $__KT['user']->userID) || $__KT['user']->hasPermission("general.tickets.deletemessage.other")}
+                            <button class="ui button deletebutton" data-tooltip="Löschen" data-id="{$answer->answerID}" data-type="5"><i class="icon trash"></i></button>
                         {/if}
                         {if $__KT['user']->hasPermission("general.tickets.quote")}
-                            <button class="ui button quotebutton" data-username="{$answer['creator']->getUserName()}" data-id="{$answer['id']}" data-type="answer" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
+                            <button class="ui button quotebutton" data-username="{$answer->getCreator()->username}" data-id="{$answer->answerID}" data-type="answer" data-tooltip="Zitieren"><i class="icon quote left"></i></button>
                         {/if}
                     </div>
                 </div>
@@ -159,9 +159,9 @@
 <div class="ui divider"></div>
 <div class="ticketspacer"></div>
 {if $__KT['user']->hasPermission("general.tickets.answer")}
-    {if $ticket->getState() == 1}
+    {if $ticket->state == 1}
     <form id="addform" class="ui form{if $errors['text'] !== false || $errors['token'] !== false} error{/if}{if $success} success{/if}" action="{link url="ticket-{$ticket->ticketID}"}" method="post">
-        <div class="field{if $errors['text'] !== false} error{/if}">
+        <div class="field required{if $errors['text'] !== false} error{/if}">
             <label>Antwort</label>
             <textarea id="text" name="text">{if isset($tpl['post']['text']) && !$success}{$tpl['post']['text']}{/if}</textarea>
         </div>
@@ -195,10 +195,10 @@
             <li>Dieses Ticket wurde geschlossen oder wurde als erledigt markiert, deshalb kannst du nicht antworten.</li>
         </ul>
     </div>
-        {if $__KT['ticketRating'] && $ticket->getState() !== 1}
+        {if $__KT['ticketRating'] && $ticket->state !== 1}
             <div class="ui segment" id="ratingSection">
                 <br>
-                {if !$ticket->isRated()}
+                {if !$ticket->hasRating()}
                     {if $ticket->getCreator()->userID == $__KT['user']->userID}
                         {if $__KT['user']->hasPermission("general.ticket.rate")}
                             <div class="ui one column center aligned page grid">
@@ -226,7 +226,7 @@
                         <h4>Bewertung:</h4><br>
                     </div>
                     <div class="ui one column center aligned page grid">
-                        <div class="ui massive {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->getRating()}" id="ticketRating"></div>
+                        <div class="ui massive {$__KT['ticketRatingIcon']} rating" data-max-rating="5" data-rating="{$ticket->rating}" id="ticketRating"></div>
                     </div>
                 {/if}
                 <br>
@@ -242,7 +242,7 @@
 {/if}
 {include file="wysiwyg.tpl" selector="#text"}
 <script>
-{if !$ticket->isRated()}
+{if !$ticket->hasRating()}
     {if $ticket->getCreator()->userID == $__KT['user']->userID}
         {if $__KT['user']->hasPermission("general.ticket.rate")}
             $("#ticketRating").rating({

@@ -42,16 +42,16 @@
     </thead>
     <tbody id="search_list">
         {foreach from=$site['pages'] item="page"}
-        <tr id="pageentry{$page['pageID']}">
-        <td data-label="ID">{$page['pageID']}</td>
-        <td data-label="Titel">{$page['title']}</td>
-        <td data-label="Typ">{if $page['type'] == "1"}HTML{else if $page['type'] == "2"}Template{else}WYSIWYG{/if}</td>
-        <td data-label="URL"><a href="{link url="page/{$page['url']}"}" target="_blank">{link url="page/{$page['url']}"}</a></td>
+        <tr id="pageentry{$page->pageID}">
+        <td data-label="ID">{$page->pageID}</td>
+        <td data-label="Titel">{$page->title}</td>
+        <td data-label="Typ">{if $page->type == "1"}HTML{else if $page->type == "2"}Template{else}WYSIWYG{/if}</td>
+        <td data-label="URL"><a href="{link url="page/{$page->url}"}" target="_blank">{link url="page/{$page->url}"}</a></td>
         <td data-label="Aktion">
-          {if $page['system'] !== "1"}
-            <a href="javascript:deletePage({$page['pageID']});" data-tooltip="Löschen"><i class="icon times"></i></a>
+          {if $page->system !== 1}
+            <a href="javascript:deletePage({$page->pageID});" data-tooltip="Löschen"><i class="icon times"></i></a>
           {/if}
-            <a href="{link url="admin/pages/edit-{$page['pageID']}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="{link url="admin/pages/edit-{$page->pageID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
         </td>
         </tr>
         {foreachelse}
@@ -144,7 +144,10 @@
     </div>
     <div class="field required{if $site['errors']['url'] !== false} error{/if}">
     <label>URL</label>
-        <div class="ui input">
+        <div class="ui labeled input">
+            <div class="ui label">
+              {$__KT['mainurl']}page/
+            </div>
             <input type="text" name="url" value="{if isset($tpl['post']['url']) && !$site['success']}{$tpl['post']['url']}{/if}">
         </div>
     </div>
@@ -205,8 +208,10 @@ $('.ui.selection.dropdown.groups').dropdown({
         {foreach from=$site['allgroups'] item="group"}
         {
         {if isset($tpl['post']['groupsaccess']) && !$site['success']}
-          {if (String) $group->groupID|in_array:$site['selectedgroups']}
-            selected: true,
+          {if $site['selectedgroups']|is_array}
+            {if (String) $group->groupID|in_array:$site['selectedgroups']}
+              selected: true,
+            {/if}
           {/if}
         {/if}
           name: '{$group->getGroupBadge()}',
@@ -308,22 +313,25 @@ $('.ui.selection.dropdown.groups').dropdown({
 <a class="ui blue button right floated" href="{link url="admin/pages"}">Seiten Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/pages/edit-{$site['page']['pageID']}"}" method="post">
+<form class="ui form{if $site['errors']['title'] !== false || $site['errors']['text'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/pages/edit-{$site['page']->pageID}"}" method="post">
     <div class="field required{if $site['errors']['title'] !== false} error{/if}">
     <label>Titel</label>
         <div class="ui input">
-            <input type="text" name="title" value="{$site['page']['title']}">
+            <input type="text" name="title" value="{$site['page']->title}">
         </div>
     </div>
     <div class="field required{if $site['errors']['url'] !== false} error{/if}">
     <label>URL</label>
-        <div class="ui input{if $site['page']['system'] == "1"} disabled{/if}">
-            <input type="text" {if $site['page']['system'] == "1"}readonly{/if} name="url" value="{$site['page']['url']}">
+        <div class="ui labeled input{if $site['page']->system == 1} disabled{/if}">
+            <div class="ui label">
+              {$__KT['mainurl']}page/
+            </div>
+            <input type="text" {if $site['page']->system == 1}readonly{/if} name="url" value="{$site['page']->url}">
         </div>
     </div>
     <div class="field">
         <label>Zugriff</label>
-        <div class="ui multiple selection dropdown groups{if $site['page']['system'] == "1"} disabled{/if}">
+        <div class="ui multiple selection dropdown groups{if $site['page']->system == 1} disabled{/if}">
             <input type="hidden" name="groupsaccess">
             <i class="dropdown icon"></i>
             <div class="default text"></div>
@@ -334,7 +342,7 @@ $('.ui.selection.dropdown.groups').dropdown({
     </div>
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
         <label>Inhalt <a href="javascript:variablesInfo()"><i class="icon question"></i></a></label>
-        <textarea id="text" rows="10" name="text">{$site['page']['content']}</textarea>
+        <textarea id="text" rows="10" name="text">{$site['page']->content}</textarea>
     </div>
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
     <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
@@ -361,9 +369,9 @@ $('.ui.selection.dropdown.groups').dropdown({
         </div>
     {/if}
 </form>
-{if $site['page']['type'] == "1"}
+{if $site['page']->type == "1"}
   {include file="codeeditor_html.tpl" selector="#text"}
-{else if $site['page']['type'] == "2"}
+{else if $site['page']->type == "2"}
   {include file="codeeditor_smarty.tpl" selector="#text"}
 {else}
   {include file="wysiwyg.tpl" template="false" selector="#text"}
@@ -382,7 +390,7 @@ $('.ui.selection.dropdown.groups').dropdown({
         {/foreach}
     ],
 });
-{if $site['page']['type'] !== "1" && $site['page']['type'] !== "2"}
+{if $site['page']->type !== "1" && $site['page']->type !== "2"}
   {literal}
   function variablesInfo() {
     modal.modal("Variablen", '' +
@@ -421,7 +429,7 @@ $('.ui.selection.dropdown.groups').dropdown({
     '');
   }
   {/literal}
-{else if $site['page']['type'] == "1"}
+{else if $site['page']->type == "1"}
   {literal}
   function variablesInfo() {
     modal.modal("Information", '' +
@@ -460,7 +468,7 @@ $('.ui.selection.dropdown.groups').dropdown({
     '');
   }
   {/literal}
-{else if $site['page']['type'] == "2"}
+{else if $site['page']->type== "2"}
   {literal}
   function variablesInfo() {
     modal.modal("Information", '' +

@@ -1,16 +1,18 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\User;
-use KuschelTickets\lib\system\Group;
+use KuschelTickets\lib\data\user\User;
+use KuschelTickets\lib\data\user\group\Group;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\Ticket;
+use KuschelTickets\lib\data\ticket\Ticket;
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\FAQ;
+use KuschelTickets\lib\data\faq\FAQ;
+use KuschelTickets\lib\data\user\notification\NotificationList;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\system\Notification;
-use KuschelTickets\lib\system\TicketCategory;
-use KuschelTickets\lib\system\SupportChat;
-use KuschelTickets\lib\system\MenuEntry;
+use KuschelTickets\lib\data\user\notification\Notification;
+use KuschelTickets\lib\data\supportchat\SupportChat;
+use KuschelTickets\lib\data\menu\MenuEntry;
+use KuschelTickets\lib\data\Page\Page as UserPage;
+use KuschelTickets\lib\KuschelTickets;
 
 class ajaxPage extends Page {
 
@@ -61,21 +63,25 @@ class ajaxPage extends Page {
          * 32 => rate ticket
          */
         if($type == 1) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
                     $ticket = new Ticket($parameters['object']);
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("mod.tickets.close") && $ticket->getState() == "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." geschlossen.");
-                        $ticket->setState(0);
+                    
+                    if(KuschelTickets::getUser()->hasPermission("mod.tickets.close") && $ticket->state == "1") {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." geschlossen.");
+                        $ticket->update(array(
+                            "state" => 0
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich geschlossen.",
                             "title" => "Ticket geschlossen"
                         );
-                    } else if($user->hasPermission("general.tickets.close.own") && $ticket->getCreator()->userID == $user->userID && $ticket->getState() == "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." geschlossen.");
-                        $ticket->setState(0);
+                    } else if(KuschelTickets::getUser()->hasPermission("general.tickets.close.own") && $ticket->getCreator()->userID == KuschelTickets::getUser()->userID && $ticket->state == "1") {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." geschlossen.");
+                        $ticket->update(array(
+                            "state" => 0
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich geschlossen.",
@@ -95,22 +101,26 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 2) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
                     $ticket = new Ticket($parameters['object']);
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("mod.tickets.reopen") && $ticket->getState() !== "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." erneut geöffnet.");
-                        $ticket->setState(1);
-                        $ticket->resetRating();
+                    
+                    if(KuschelTickets::getUser()->hasPermission("mod.tickets.reopen") && $ticket->state !== 1) {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." erneut geöffnet.");
+                        $ticket->update(array(
+                            "state" => 1,
+                            "rating" => null
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich erneut geöffnet.",
                             "title" => "Ticket erneut geöffnet"
                         );
-                    } else if($user->hasPermission("general.tickets.reopen.own") && $ticket->getCreator()->userID == $user->userID && $ticket->getState() !== "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." erneut geöffnet.");
-                        $ticket->setState(1);
+                    } else if(KuschelTickets::getUser()->hasPermission("general.tickets.reopen.own") && $ticket->getCreator()->userID == KuschelTickets::getUser()->userID && $ticket->state !== 1) {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." erneut geöffnet.");
+                        $ticket->update(array(
+                            "state" => 1
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich erneut geöffnet.",
@@ -130,21 +140,25 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 3) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
                     $ticket = new Ticket($parameters['object']);
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("mod.tickets.done") && $ticket->getState() == "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." als erledigt markiert.");
-                        $ticket->setState(2);
+                    
+                    if(KuschelTickets::getUser()->hasPermission("mod.tickets.done") && $ticket->state == 1) {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." als erledigt markiert.");
+                        $ticket->update(array(
+                            "state" => 2
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich als erledigt markiert.",
                             "title" => "Ticket als erledigt markiert."
                         );
-                    } else if($user->hasPermission("general.tickets.done.own") && $ticket->getCreator()->userID == $user->userID && $ticket->getState() == "1") {
-                        $ticket->addLog("Das Ticket wurde von ".$user->getUserName()." als erledigt markiert.");
-                        $ticket->setState(2);
+                    } else if(KuschelTickets::getUser()->hasPermission("general.tickets.done.own") && $ticket->getCreator()->userID == KuschelTickets::getUser()->userID && $ticket->state == 1) {
+                        $ticket->addLog("Das Ticket wurde von ".KuschelTickets::getUser()->username." als erledigt markiert.");
+                        $ticket->update(array(
+                            "state" => 2
+                        ));
                         $result = array(
                             "success" => true,
                             "message" => "Das Ticket wurde erfolgreich als erledigt markiert.",
@@ -164,16 +178,16 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 4) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
+                    
                     $account = new User($parameters['object']);
-                    if($user->hasPermission("admin.login.other") && $parameters['object'] !== $user->userID) {
+                    if(KuschelTickets::getUser()->hasPermission("admin.login.other") && $parameters['object'] !== KuschelTickets::getUser()->userID) {
                         if(!$account->hasPermission("admin.bypass.login.other")) {
                             UserUtils::loginAs($account, $account->getHash());
                             $result = array(
                                 "success" => true,
-                                "message" => "Du wurdest erfolgreich als ".$account->getUserName()." eingeloggt. Lade die Seite neu damit die Änderungen sichtbar werden.",
+                                "message" => "Du wurdest erfolgreich als ".$account->username." eingeloggt. Lade die Seite neu damit die Änderungen sichtbar werden.",
                                 "title" => "als Benutzer eingeloggt"
                             );
                         }
@@ -186,23 +200,23 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 5) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    $stmt = $config['db']->prepare("SELECT * FROM `kuscheltickets1_ticket_answers` WHERE answerID = ?");
+                    
+                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE answerID = ?");
                     $stmt->execute([$parameters['object']]);
                     $row = $stmt->fetch();
                     $creator = $row['creator'];
-                    if($user->hasPermission("mod.tickets.answers.delete")) {
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_ticket_answers` WHERE answerID = ?");
+                    if(KuschelTickets::getUser()->hasPermission("mod.tickets.answers.delete")) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE answerID = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
                             "message" => "Diese Antwort wurde erfolgreich gelöscht.",
                             "title" => "Antwort gelöscht"
                         );
-                    } else if($user->hasPermission("general.tickets.answers.delete.own") && $user->userID == $creator) {
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_ticket_answers` WHERE answerID = ?");
+                    } else if(KuschelTickets::getUser()->hasPermission("general.tickets.answers.delete.own") && KuschelTickets::getUser()->userID == $creator) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE answerID = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
@@ -223,25 +237,25 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 6) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
+                    
                     $ticket = new Ticket($parameters['object']);
                     $creator = $ticket->getCreator()->userID;
-                    if($user->hasPermission("mod.tickets.delete")) {
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_tickets` WHERE ticketID = ?");
+                    if(KuschelTickets::getUser()->hasPermission("mod.tickets.delete")) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE ticketID = ?");
                         $stmt->execute([$parameters['object']]);
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_ticket_answers` WHERE ticketID = ?");
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
                             "message" => "Dieses Ticket wurde erfolgreich gelöscht.",
                             "title" => "Ticket gelöscht"
                         );
-                    } else if($user->hasPermission("general.tickets.delete.own") && $user->userID == $creator) {
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_tickets` WHERE ticketID = ?");
+                    } else if(KuschelTickets::getUser()->hasPermission("general.tickets.delete.own") && KuschelTickets::getUser()->userID == $creator) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE ticketID = ?");
                         $stmt->execute([$parameters['object']]);
-                        $stmt = $config['db']->prepare("DELETE FROM `kuscheltickets1_ticket_answers` WHERE ticketID = ?");
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
@@ -262,11 +276,11 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 7) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.faq")) {
-                        $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_faq WHERE faqID = ?");
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.faq")) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_faq WHERE faqID = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
@@ -282,13 +296,13 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 8) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.faqcategories")) {
-                        $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_faq_categorys WHERE categoryID = ?");
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.faqcategories")) {
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_faq_categories WHERE categoryID = ?");
                         $stmt->execute([$parameters['object']]);
-                        $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_faq WHERE category = ?");
+                        $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_faq WHERE category = ?");
                         $stmt->execute([$parameters['object']]);
                         $result = array(
                             "success" => true,
@@ -304,16 +318,12 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 9) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.pages")) {
-                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
-                        $stmt->execute();
-                        $row = $stmt->fetch();
-                        if($row['system'] !== "1") {
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_pages WHERE pageID = ?");
-                            $stmt->execute([$parameters['object']]);
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.pages")) {
+                        $userpage = new UserPage($parameters['object']);
+                        if($userpage->system !== 1) {
+                            $userpage->delete();
                             $result = array(
                                 "success" => true,
                                 "message" => "Diese Seite wurde erfolgreich gelöscht.",
@@ -329,17 +339,16 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 10) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.accounts")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.accounts")) {
                         $account = new User($parameters['object']);
-                        if(!$account->hasPermission("admin.bypass.delete") && $parameters['object'] !== $user->userID && $account->exists()) {
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_accounts WHERE userID = ?");
+                        if(!$account->hasPermission("admin.bypass.delete") && $parameters['object'] !== KuschelTickets::getUser()->userID && $account->userID) {
+                            $account->delete();
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE creator = ?");
                             $stmt->execute([$parameters['object']]);
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE creator = ?");
-                            $stmt->execute([$parameters['object']]);
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE creator = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE creator = ?");
                             $stmt->execute([$parameters['object']]);
                             $result = array(
                                 "success" => true,
@@ -356,17 +365,17 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 11) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.groups")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.groups")) {
                         $group = new Group($parameters['object']);
-                        if(!$group->isSystem() && $group->exists()) {
-                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `userGroup`= 0 WHERE userGroup = ?");
+                        if(!$group->system == 0 && $group->groupID) {
+                            $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `userGroup`= 0 WHERE userGroup = ?");
                             $stmt->execute([$parameters['object']]);
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_group_permissions WHERE groupID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_group_permissions WHERE groupID = ?");
                             $stmt->execute([$parameters['object']]);
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_groups WHERE groupID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_groups WHERE groupID = ?");
                             $stmt->execute([$parameters['object']]);
                             $result = array(
                                 "success" => true,
@@ -383,14 +392,13 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 12) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.ticketcategories")) {
-                        $category = new TicketCategory($parameters['object']);
-                        if($category->exists()) {
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_categorys WHERE categoryID = ?");
-                            $stmt->execute([$parameters['object']]);
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.ticketcategories")) {
+                        $category = new \KuschelTickets\lib\data\ticket\category\Category($parameters['object']);
+                        if($category->categoryID) {
+                            $category->delete();
                             $result = array(
                                 "success" => true,
                                 "message" => "Diese Ticket Kategorie wurde erfolgreich gelöscht.",
@@ -406,14 +414,16 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 13) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.notifications.view")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.notifications.view")) {
                         $notification = new Notification($parameters['object']);
-                        if($notification->exists()) {
-                            if($notification->getUser()->userID == $user->userID && !$notification->isDone()) {
-                                $notification->markAsDone();
+                        if($notification->notificationID) {
+                            if($notification->getUser()->userID == KuschelTickets::getUser()->userID && $notification->done !== 1) {
+                                $notification->update(array(
+                                    "done" => 1
+                                ));
                                 $result = array(
                                     "success" => true,
                                     "message" => "Diese Benachrichtigung wurde als abgeschlossen markiert.",
@@ -430,15 +440,19 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 14) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
                     $user = new User($parameters['object']);
-                    if($user->exists()) {
-                        if($user->userID == UserUtils::getUserID()) {
-                            if($user->hasPermission("general.notifications.view")) {
+                    if($user->userID) {
+                        if($user->userID == KuschelTickets::getUser()->userID) {
+                            if(KuschelTickets::getUser()->hasPermission("general.notifications.view")) {
+                                $list = new NotificationList(array(
+                                    "userID" => KuschelTickets::getUser()->userID,
+                                    "done" => 0
+                                ));
                                 $result = array(
                                     "success" => true,
-                                    "message" => $user->getNotifications(true),
+                                    "message" => $list->getObjects(),
                                     "title" => null
                                 );
                             } else {
@@ -457,10 +471,10 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 15) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.errors")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.errors")) {
                         if(file_exists("./data/logs/".$parameters['object'].".txt")) {
                             $content = file_get_contents("./data/logs/".$parameters['object'].".txt");
                             $result = array(
@@ -478,10 +492,10 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 16) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.errors")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.errors")) {
                         if(file_exists("./data/logs/".$parameters['object'].".txt")) {
                             unlink("./data/logs/".$parameters['object'].".txt");
                             $result = array(
@@ -499,15 +513,15 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 17) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.editor.templates")) {
-                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
-                        $stmt->execute([$user->userID, $parameters['object']]);
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.editor.templates")) {
+                        $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
+                        $stmt->execute([KuschelTickets::getUser()->userID, $parameters['object']]);
                         $row = $stmt->fetch();
                         if($row !== false) {
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_editortemplates WHERE templateID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_editortemplates WHERE templateID = ?");
                             $stmt->execute([$parameters['object']]);
                             $result = array(
                                 "success" => true,
@@ -524,12 +538,12 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 18) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.editor.templates")) {
-                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
-                        $stmt->execute([$user->userID, $parameters['object']]);
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.editor.templates")) {
+                        $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_editortemplates WHERE userID = ? AND templateID = ?");
+                        $stmt->execute([KuschelTickets::getUser()->userID, $parameters['object']]);
                         $row = $stmt->fetch();
                         if($row !== false) {
                             $result = array(
@@ -547,11 +561,11 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 19) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.editor.templates")) {
-                        $editortemplates = $user->getEditorTemplates();
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.editor.templates")) {
+                        $editortemplates = KuschelTickets::getUser()->getEditorTemplates();
                         $out = [];
                         foreach($editortemplates as $editortpl) {
                             $data = array(
@@ -604,14 +618,14 @@ class ajaxPage extends Page {
             }
         } else if($type == 21) {
             if(isset($parameters['object']) && !empty($parameters['object']) && $config['externalURLTitle']) {
-                if(UserUtils::isLoggedIn()) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.view.faq")) {
+                if(KuschelTickets::getUser()->userID) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.view.faq")) {
                         $faq = new FAQ($parameters['object']);
-                        if($faq->exists()) {
+                        if($faq->faqID) {
                             $result = array(
                                 "success" => true,
-                                "message" => $faq->getAnswer(),
+                                "message" => $faq->answer,
                                 "title" => null
                             );
                         }
@@ -619,16 +633,16 @@ class ajaxPage extends Page {
                 }
             }
         } else if($type == 22) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.notifications.view")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.notifications.view")) {
                         $notification = new Notification($parameters['object']);
-                        if($notification->exists()) {
-                            if($notification->getUser()->userID == $user->userID) {
+                        if($notification->notificationID) {
+                            if($notification->getUser()->userID == KuschelTickets::getUser()->userID) {
                                 $result = array(
                                     "success" => true,
-                                    "message" => $notification->isSent(),
+                                    "message" => $notification->sent,
                                     "title" => null
                                 );
                             }
@@ -642,14 +656,15 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 23) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.notifications.view")) {
+                    if(KuschelTickets::getUser()->hasPermission("general.notifications.view")) {
                         $notification = new Notification($parameters['object']);
-                        if($notification->exists()) {
-                            if($notification->getUser()->userID == $user->userID && !$notification->isSent()) {
-                                $notification->markAsSent();
+                        if($notification->notificationID) {
+                            if($notification->getUser()->userID == KuschelTickets::getUser()->userID && $notification->sent !== 1) {
+                                $notification->update(array(
+                                    "sent" => 1
+                                ));
                                 $result = array(
                                     "success" => true,
                                     "message" => true,
@@ -666,16 +681,16 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 24) {
-            if(UserUtils::isLoggedIn()) {
-                $user = new User(UserUtils::getUserID());
-                if($user->hasPermission("general.supportchat.view")) {
-                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 0 AND NOT creator = ?");
-                    $stmt->execute([$user->userID]);
+            if(KuschelTickets::getUser()->userID) {
+                
+                if(KuschelTickets::getUser()->hasPermission("general.supportchat.view")) {
+                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 0 AND NOT creator = ?");
+                    $stmt->execute([KuschelTickets::getUser()->userID]);
                     $data = [];
                     while($row = $stmt->fetch()) {
                         $creator = new User($row['creator']);
                         $content = array(
-                            "creatorName" => $creator->getUserName(),
+                            "creatorName" => $creator->username,
                             "time" => date("d.m.Y", $row['time']).", ".date("H:i", $row['time'])." Uhr",
                             "chatID" => $row['chatID']
                         );
@@ -689,18 +704,18 @@ class ajaxPage extends Page {
                 }
             }
         } else if($type == 25) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.supportchat.join")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.supportchat.join")) {
                         $chat = new SupportChat((int) $parameters['object']);
-                        if($chat->exists()) {
-                            if($chat->getCreator()->userID !== $user->userID) {
+                        if($chat->chatID) {
+                            if($chat->getCreator()->userID !== KuschelTickets::getUser()->userID) {
                                 if($chat->isJoinable()) {
-                                    $chat->join($user);
+                                    $chat->join(KuschelTickets::getUser());
                                     $result = array(
                                         "success" => "true",
-                                        "message" => "Du bist erfolgreich dem Supportchat von ".$chat->getCreator()->getUserName()." beigetreten.",
+                                        "message" => "Du bist erfolgreich dem Supportchat von ".$chat->getCreator()->username." beigetreten.",
                                         "title" => "Supportchat beigetreten"
                                     );
                                 } else {
@@ -733,23 +748,29 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 26) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.supportchat.use")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.supportchat.use")) {
                         $chat = new SupportChat((int) $parameters['object']);
-                        if($chat->exists()) {
-                            if($chat->getCreator()->userID == $user->userID) {
+                        if($chat->chatID) {
+                            $list = $chat->getMessages()->getObjects();
+                            foreach($list as $key => $value) {
+                                $account = new User($value->poster);
+                                $list[$key]->poster = $account->username;
+                                $list[$key]->badge = $account->getGroup()->getGroupBadge();
+                            }
+                            if($chat->getCreator()->userID == KuschelTickets::getUser()->userID) {
                                 $result = array(
                                     "success" => "true",
-                                    "message" => $chat->getMessages(),
+                                    "message" => $list,
                                     "title" => null
                                 );
                             } else if($chat->getUser() !== null) {
-                                if($chat->getUser()->userID == $user->userID) {
+                                if($chat->getUser()->userID == KuschelTickets::getUser()->userID) {
                                     $result = array(
                                         "success" => "true",
-                                        "message" => $chat->getMessages(),
+                                        "message" => $list,
                                         "title" => null
                                     );
                                 }
@@ -764,19 +785,19 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 27) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.supportchat.use")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.supportchat.use")) {
                         $chatID = null;
-                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE user = ? AND NOT state = 2  ORDER BY chatID DESC LIMIT 1");
-                        $stmt->execute([$user->userID]);
+                        $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE user = ? AND NOT state = 2  ORDER BY chatID DESC LIMIT 1");
+                        $stmt->execute([KuschelTickets::getUser()->userID]);
                         $row = $stmt->fetch();
                         if($row !== false) {
                             $chatID = $row['chatID'];
                         } else {
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE creator = ? AND NOT state = 2 ORDER BY chatID DESC LIMIT 1");
-                            $stmt->execute([$user->userID]);
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE creator = ? AND NOT state = 2 ORDER BY chatID DESC LIMIT 1");
+                            $stmt->execute([KuschelTickets::getUser()->userID]);
                             $row = $stmt->fetch();
                             if($row !== false) {
                                 $chatID = $row['chatID'];
@@ -784,8 +805,8 @@ class ajaxPage extends Page {
                         }
                         if($chatID !== null) {
                             $chat = new SupportChat((int) $chatID);
-                            if($chat->exists()) {
-                                $chat->createMessage($user, Utils::fromASCI($parameters['object']));
+                            if($chat->chatID) {
+                                $chat->createMessage(KuschelTickets::getUser(), Utils::fromASCI($parameters['object']));
                                 $result = array(
                                     "success" => "true",
                                     "message" => null,
@@ -802,20 +823,33 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 28) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.supportchat.use")) {
+                    if(KuschelTickets::getUser()->hasPermission("general.supportchat.use")) {
                         $chat = new SupportChat($parameters['object']);
-                        if($chat->exists()) {
-                            if($chat->getUser()->userID == $user->userID) {
-                                $chat->createSystemMessage("Der Benutzer ".$chat->getUser()->getUserName()." hat den Chat verlassen.");
+                        if($chat->chatID) {
+                            if($chat->getUser()->userID == KuschelTickets::getUser()->userID) {
+                                $chat->createSystemMessage("Der Benutzer ".$chat->getUser()->username." hat den Chat verlassen.");
                                 $chat->createSystemMessage("Dieser Chat wird nun geschlossen.");
-                                $chat->close();
-                            } else if($chat->getCreator()->userID == $user->userID) {
-                                $chat->createSystemMessage("Der Benutzer ".$chat->getCreator()->getUserName()." hat den Chat verlassen.");
+                                $chat->update(array(
+                                    "state" => 2
+                                ));
+                                $result = array(
+                                    "success" => "true",
+                                    "message" => null,
+                                    "title" => null
+                                );
+                            } else if($chat->getCreator()->userID == KuschelTickets::getUser()->userID) {
+                                $chat->createSystemMessage("Der Benutzer ".$chat->getCreator()->username." hat den Chat verlassen.");
                                 $chat->createSystemMessage("Dieser Chat wird nun geschlossen.");
-                                $chat->close();
+                                $chat->update(array(
+                                    "state" => 2
+                                ));
+                                $result = array(
+                                    "success" => "true",
+                                    "message" => null,
+                                    "title" => null
+                                );
                             }
                         }
                     }
@@ -827,10 +861,10 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 29) {
-            if(UserUtils::isLoggedIn()) {
-                $user = new User(UserUtils::getUserID());
-                if($user->hasPermission("mod.supportchat.create")) {
-                    $chat = SupportChat::create($user);
+            if(KuschelTickets::getUser()->userID) {
+                
+                if(KuschelTickets::getUser()->hasPermission("mod.supportchat.create")) {
+                    $chat = SupportChat::openChat(KuschelTickets::getUser());
                     $result = array(
                         "success" => "true",
                         "message" => "Dein Supportchat wurde erfolgreich geöffnet.",
@@ -845,15 +879,15 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 30) {
-            if(UserUtils::isLoggedIn()) {
+            if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("admin.acp.page.menuentries")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("admin.acp.page.menuentries")) {
                         $entry = new MenuEntry($parameters['object']);
                         if(!$entry->isSystem()) {
-                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `parent`=NULL WHERE parent = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_menu SET `parent`=NULL WHERE parent = ?");
                             $stmt->execute([$parameters['object']]);
-                            $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_menu WHERE menuID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_menu WHERE menuID = ?");
                             $stmt->execute([$parameters['object']]);
                             $result = array(
                                 "success" => "true",
@@ -870,13 +904,13 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 31) {
-            if(UserUtils::isLoggedIn()) {
-                $user = new User(UserUtils::getUserID());
-                if($user->hasPermission("admin.acp.page.menuentries")) {
+            if(KuschelTickets::getUser()->userID) {
+                
+                if(KuschelTickets::getUser()->hasPermission("admin.acp.page.menuentries")) {
                     if(isset($_POST['json']) && !empty($_POST['json'])) {
                         $json = json_decode($_POST['json']);
                         foreach($json as $key => $value) {
-                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_menu SET `sorting`=? WHERE menuID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_menu SET `sorting`=? WHERE menuID = ?");
                             $stmt->execute([$key, $value]);
                         }
                         $result = array(
@@ -893,13 +927,13 @@ class ajaxPage extends Page {
                 );
             }
         } else if($type == 32) {
-            if(UserUtils::isLoggedIn() && $config['ticketRating']) {
+            if(KuschelTickets::getUser()->userID && $config['ticketRating']) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    $user = new User(UserUtils::getUserID());
-                    if($user->hasPermission("general.ticket.rate")) {
+                    
+                    if(KuschelTickets::getUser()->hasPermission("general.ticket.rate")) {
                         $ticket = new Ticket($parameters['object']);
-                        if($ticket->exists()) {
-                            if($ticket->getCreator()->userID == $user->userID && !$ticket->isRated()) {
+                        if($ticket->ticketID) {
+                            if($ticket->getCreator()->userID == KuschelTickets::getUser()->userID && !$ticket->hasRating()) {
                                 if(isset($_POST['rating']) && !empty($_POST['rating']) && is_numeric($_POST['rating'])) {
                                     $rating = (int) $_POST['rating'];
                                     $ratingIcon = "Sternen";
@@ -907,23 +941,25 @@ class ajaxPage extends Page {
                                         $ratingIcon = "Herzen";
                                     }
                                     if($rating > 0 && $rating < 6) {
-                                        $ticket->setRating($rating);
-                                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
+                                        $ticket->update(array(
+                                            "rating" => $rating
+                                        ));
+                                        $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
                                         $stmt->execute([$ticket->ticketID]);
                                         $already = [];
-                                        Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $user);
-                                        array_push($already, $user->userID);
+                                        Notification::add("notification_ticket_rated", "Das Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, KuschelTickets::getUser());
+                                        array_push($already, KuschelTickets::getUser()->userID);
                                         while($row = $stmt->fetch()) {
                                             $account = new User((int) $row['creator']);
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
                                                 if($account->userID == $ticket->getCreator()->userID) {
                                                     if(!in_array($account->userID, $already)) {
-                                                        Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
+                                                        Notification::add("notification_ticket_rated", "Das Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
                                                     }
                                                 }
                                             } else {
                                                 if(!in_array($account->userID, $already)) {
-                                                    Notification::create("notification_ticket_rated", "Das Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
+                                                    Notification::add("notification_ticket_rated", "Das Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." wurde mit ".$rating." von 5 ".$ratingIcon." bewertet.", "ticket-".$ticket->ticketID, $account);
                                                 }
                                             }
                                         }

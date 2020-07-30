@@ -1,8 +1,8 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\Group;
+use KuschelTickets\lib\data\user\group\Group;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\Exceptions\AccessDeniedException;

@@ -1,5 +1,6 @@
 <?php
 use KuschelTickets\lib\system\CRSF;
+use KuschelTickets\lib\KuschelTickets;
 
 $errors = array(
     "token" => false,
@@ -12,33 +13,33 @@ if(isset($parameters['submit'])) {
         if(CRSF::validate($parameters['CRSF'])) {
             if(isset($parameters['sure'])) {
                 if(isset($parameters['notifications'])) {
-                    $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_notifications WHERE done = 1");
+                    $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_notifications WHERE done = 1");
                     $stmt->execute();
                     $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
                 }
                 if(isset($parameters['tickets'])) {
-                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
+                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
                     $stmt->execute();
                     while($row = $stmt->fetch()) {
-                        $statement = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
+                        $statement = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
                         $statement->execute([$row['ticketID']]);
                     }
-                    $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
+                    $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
                     $stmt->execute();
                     $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
                 }
                 if(isset($parameters['banned'])) {
-                    $stmt = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_accounts WHERE banned = 1");
+                    $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_accounts WHERE banned = 1");
                     $stmt->execute();
                     $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
                 }
                 if(isset($parameters['supportchat'])) {
-                    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
+                    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
                     $stmt->execute();
                     while($row = $stmt->fetch()) {
-                        $statement = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
+                        $statement = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
                         $statement->execute([$row['chatID']]);
-                        $statement = $config['db']->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat WHERE chatID = ?");
+                        $statement = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_supportchat WHERE chatID = ?");
                         $statement->execute([$row['chatID']]);
                     }
                     $success = "Die gewählten Einträge wurden erfolgreich gelöscht.";
@@ -70,41 +71,41 @@ if(isset($parameters['submit'])) {
 
 
 
-$stmt = $config['db']->query('SHOW TABLE STATUS');
+$stmt = KuschelTickets::getDB()->query('SHOW TABLE STATUS');
 $dbsize = $stmt->fetch(PDO::FETCH_ASSOC)["Data_length"];
 $dbsize = round($dbsize/(1024 * 1024), 2);
 
-$stmt = $config['db']->prepare("SELECT COUNT(*) AS readnotifications FROM kuscheltickets".KT_N."_notifications WHERE done = 1");
+$stmt = KuschelTickets::getDB()->prepare("SELECT COUNT(*) AS readnotifications FROM kuscheltickets".KT_N."_notifications WHERE done = 1");
 $stmt->execute();
 $row = $stmt->fetch();
 $readnotifications = $row['readnotifications'];
 
-$stmt = $config['db']->prepare("SELECT COUNT(*) AS closetickets FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
+$stmt = KuschelTickets::getDB()->prepare("SELECT COUNT(*) AS closetickets FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
 $stmt->execute();
 $row = $stmt->fetch();
 $closetickets = $row['closetickets'];
 
-$stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
+$stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_tickets WHERE NOT state = 1");
 $stmt->execute();
 $closeanswers = 0;
 while($row = $stmt->fetch()) {
-    $stmt = $config['db']->prepare("SELECT COUNT(*) AS closeanswers FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT COUNT(*) AS closeanswers FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
     $stmt->execute([$row['ticketID']]);
     $r = $stmt->fetch();
     $closeanswers = $closetickets + $r['closeanswers'];
 }
 
-$stmt = $config['db']->prepare("SELECT COUNT(*) AS bannedusers FROM kuscheltickets".KT_N."_accounts WHERE banned = 1");
+$stmt = KuschelTickets::getDB()->prepare("SELECT COUNT(*) AS bannedusers FROM kuscheltickets".KT_N."_accounts WHERE banned = 1");
 $stmt->execute();
 $row = $stmt->fetch();
 $bannedusers = $row['bannedusers'];
 
 $supportchats = 0;
-$stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
+$stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_supportchat WHERE state = 2");
 $stmt->execute();
 while($row = $stmt->fetch()) {
     $supportchats++;
-    $statement = $config['db']->prepare("SELECT COUNT(*) AS trashAnswers FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
+    $statement = KuschelTickets::getDB()->prepare("SELECT COUNT(*) AS trashAnswers FROM kuscheltickets".KT_N."_supportchat_messages WHERE chatID = ?");
     $statement->execute([$row['chatID']]);
     $messages = 0;
     if(isset($row['trashAnswers'])) {

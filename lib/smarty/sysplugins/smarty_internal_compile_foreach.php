@@ -219,7 +219,13 @@ class Smarty_Internal_Compile_Foreach extends Smarty_Internal_Compile_Private_Fo
         if (isset($itemAttr[ 'index' ])) {
             $output .= "{$itemVar}->index = -1;\n";
         }
-        $output .= "if (\$_from !== null) {\n";
+        $output .= "\$foreachCheck = (\$_from !== null);\n";
+        $output .= "if(\$foreachCheck == true) {\n";
+        $output .= "if(is_countable(\$_from)) {\n";
+        $output .= "\$foreachCheck = (count(\$_from) !== 0);\n";
+        $output .= "}\n";
+        $output .= "}\n";
+        $output .= "if (\$foreachCheck) {\n";
         $output .= "foreach (\$_from as {$keyTerm}{$itemVar}->value) {\n";
         if (isset($attributes[ 'key' ]) && isset($itemAttr[ 'key' ])) {
             $output .= "\$_smarty_tpl->tpl_vars['{$key}']->value = {$itemVar}->key;\n";

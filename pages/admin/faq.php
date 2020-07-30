@@ -1,8 +1,10 @@
 <?php
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\FAQ;
+use KuschelTickets\lib\data\faq\FAQ;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\KuschelTickets;
+use KuschelTickets\lib\data\faq\FAQList;
 
 /**
  * 
@@ -14,7 +16,7 @@ if(isset($parameters['add'])) {
 
     $categorys = [];
     $categorysID = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_faq_categorys");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_faq_categories");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         $data = array(
@@ -42,7 +44,7 @@ if(isset($parameters['add'])) {
                                 $text = Utils::purify($parameters['text']);
                                 $question = strip_tags($parameters['question']);
                                 $category = strip_tags($parameters['category']);
-                                $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_faq(`question`, `answer`, `category`) VALUES (?, ?, ?)");
+                                $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_faq(`question`, `answer`, `category`) VALUES (?, ?, ?)");
                                 $stmt->execute([$question, $text, $category]);
                                 $success = "Dieser FAQ Eintrag wurde erfolgreich hinzugefügt.";
                             } else {
@@ -78,13 +80,13 @@ if(isset($parameters['add'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
     $faq = new FAQ($parameters['edit']);
-    if(!$faq->exists()) {
+    if(!$faq->faqID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
     $categorys = [];
     $categorysID = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_faq_categorys");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_faq_categories");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         $data = array(
@@ -112,7 +114,7 @@ if(isset($parameters['add'])) {
                                 $text = Utils::purify($parameters['text']);
                                 $question = strip_tags($parameters['question']);
                                 $category = strip_tags($parameters['category']);
-                                $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_faq SET `question`=?,`answer`=?,`category`=? WHERE faqID = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_faq SET `question`=?,`answer`=?,`category`=? WHERE faqID = ?");
                                 $stmt->execute([$question, $text, $category, $faq->faqID]);
                                 $success = "Dieser FAQ Eintrag wurde erfolgreich gespeichert.";
                             } else {
@@ -134,7 +136,7 @@ if(isset($parameters['add'])) {
             $errors['token'] = "Deine Sitzung ist leider abgelaufen, bitte lade die Seite neu.";
         }
     }
-
+    $faq->load();
     $site = array(
         "success" => $success,
         "site" => $subpage,
@@ -146,7 +148,7 @@ if(isset($parameters['add'])) {
     $subpage = "index";
 
     $site = array(
-        "faqs" => FAQ::getAll(),
+        "faqs" => new FAQList(),
         "site" => $subpage
     );
 }

@@ -1,11 +1,11 @@
 <?php
 namespace KuschelTickets\lib;
 use KuschelTickets\lib\Link;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\system\Oauth;
-use KuschelTickets\lib\system\MenuEntry;
+use KuschelTickets\lib\data\menu\MenuEntry;
 use KuschelTickets\lib\KuschelTickets;
 
 class Page {

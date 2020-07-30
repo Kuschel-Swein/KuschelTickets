@@ -103,7 +103,7 @@ $('.ui.selection.dropdown.category').dropdown({
             selected: true,
           {/if}
         {/if}
-          name: "<span class='ui label {$category->getColor()}'>{$category->getName()}</span>",
+          name: "<span class='ui label {$category->color}'>{$category->categoryName}</span>",
           value: "{$category->categoryID}"
         },
       {/foreach}

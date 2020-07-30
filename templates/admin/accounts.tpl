@@ -53,14 +53,14 @@
           {foreach from=$site['accounts'] item="account"}
           <tr id="accountentry{$account->userID}">
           <td data-label="ID">{$account->userID}</td>
-          <td data-label="Benutzername">{$account->getUserName()}</a></td>
-          <td data-label="E-Mail"><a href="mailto:{$account->getEmail()}">{$account->getEmail()}</a></td>
-          <td data-label="Benutzergruppe">{$account->getGroup()->getGroupName()}</td>
+          <td data-label="Benutzername">{$account->username}</a></td>
+          <td data-label="E-Mail"><a href="mailto:{$account->email}">{$account->email}</a></td>
+          <td data-label="Benutzergruppe">{$account->getGroup()->name}</td>
           {if $__KT['oauth']['google']['use'] || $__KT['oauth']['github']['use']}
             <td data-label="Loginanbieter">{$account->getAuthProvider()}</td>
           {/if}
           <td data-label="Tickets">{$account->getTicketCount()}</td>
-          <td data-label="Gesperrt">{if $account->isBanned()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</td>
+          <td data-label="Gesperrt">{if $account->banned == 1}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</td>
           <td data-label="Aktion">
             {if !$account->hasPermission("admin.bypass.bannable")}
               <a href="{link url="admin/accounts/ban-{$account->userID}"}" data-tooltip="Sperrung verwalten"><i class="icon ban"></i></a>
@@ -263,7 +263,7 @@ $('.ui.selection.dropdown.usergroup').dropdown({
             selected: true,
           {/if}
         {/if}
-          name: "{$group->getGroupName()}",
+          name: "{$group->name}",
           value: "{$group->groupID}"
         },
       {/foreach}
@@ -286,13 +286,13 @@ $('.ui.selection.dropdown.usergroup').dropdown({
 <div class="field required{if $site['errors']['username'] !== false} error{/if}">
   <label>Benutzername</label>
   <div class="ui input">
-    <input type="text" name="username" value="{$site['edituser']->getUserName()}">
+    <input type="text" name="username" value="{$site['edituser']->username}">
   </div>
 </div>
 <div class="field required{if $site['errors']['email'] !== false} error{/if}">
   <label>E-Mail Adresse</label>
   <div class="ui input">
-    <input type="email" name="email" value="{$site['edituser']->getEmail()}">
+    <input type="email" name="email" value="{$site['edituser']->email}">
   </div>
 </div>
 <div class="field {if $site['errors']['password'] !== false} error{/if}">
@@ -360,7 +360,7 @@ $('.ui.selection.dropdown.usergroup').dropdown({
           {if $site['edituser']->getGroup()->groupID == $group->groupID}
             selected: true,
           {/if}
-          name: "{$group->getGroupName()}",
+          name: "{$group->name}",
           value: "{$group->groupID}"
         },
       {/foreach}

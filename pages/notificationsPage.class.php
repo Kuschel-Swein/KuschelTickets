@@ -1,12 +1,13 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
 use KuschelTickets\lib\system\UserUtils;
 use KuschelTickets\lib\system\Notification;
 use KuschelTickets\lib\system\CRSF;
 use KuschelTickets\lib\system\User;
 use KuschelTickets\lib\recaptcha;
+use KuschelTickets\lib\KuschelTickets;
 
 class notificationsPage extends Page {
 
@@ -18,21 +19,20 @@ class notificationsPage extends Page {
     public function readParameters(Array $parameters) {
         global $config;
 
-        if(!UserUtils::isLoggedIn()) {
+        if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung um diese Seite zu sehen.");
         }
-        $user = new User(UserUtils::getUserID());
 
         $subpage = null;
         if(isset($parameters['settings'])) {
             $subpage = "settings";
-            if(!$user->hasPermission("general.notifications.settings")) {
+            if(!KuschelTickets::getUser()->hasPermission("general.notifications.settings")) {
                 throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung um diese Seite zu sehen.");
             }
         }
         if(isset($_GET['notifications']) || isset($_GET['notifications/'])) {
             $subpage = "index";
-            if(!$user->hasPermission("general.notifications.view")) {
+            if(!KuschelTickets::getUser()->hasPermission("general.notifications.view")) {
                 throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung um diese Seite zu sehen.");
             }
         }
@@ -98,9 +98,9 @@ class notificationsPage extends Page {
                                 }
                             }
                             if($goon) {
-                                $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `notificationsettings`=? WHERE userID = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `notificationsettings`=? WHERE userID = ?");
                                 $settings = json_encode($result);
-                                $stmt->execute([$settings, $user->userID]);
+                                $stmt->execute([$settings, KuschelTickets::getUser()->userID]);
                                 $success = "Deine Einstellungen wurden erfolgreich gespeichert.";
                             }
                         } else {

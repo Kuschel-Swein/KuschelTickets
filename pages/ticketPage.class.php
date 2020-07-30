@@ -1,14 +1,17 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\Ticket;
-use KuschelTickets\lib\system\TicketCategory;
+use KuschelTickets\lib\KuschelTickets;
+use KuschelTickets\lib\data\ticket\Ticket;
+use KuschelTickets\lib\data\ticket\answer\Answer;
+use KuschelTickets\lib\data\user\UserList;
+use KuschelTickets\lib\data\ticket\category\Category;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\system\Notification;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\data\user\notification\Notification;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
 use KuschelTickets\lib\recaptcha;
 
 class ticketPage extends Page {
@@ -20,20 +23,19 @@ class ticketPage extends Page {
     public function readParameters(Array $parameters) {
         global $config;
 
-        if(!UserUtils::isLoggedIn()) {
+        if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
-        $user = new User(UserUtils::getUserID());
-        if(!$user->hasPermission("general.view.ticket.own") && !$user->hasPermission("mod.view.ticket.all")) {
+        if(!KuschelTickets::getUser()->hasPermission("general.view.ticket.own") && !KuschelTickets::getUser()->hasPermission("mod.view.ticket.all")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
         $ticket = new Ticket($parameters['ticket']);
-        if(!$ticket->exists()) {
+        if(!$ticket->ticketID) {
             throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");
         }
         $creator = $ticket->getCreator();
-        if(!$user->hasPermission("mod.view.ticket.all")) {
-            if($user->userID !== $creator->userID) {
+        if(!KuschelTickets::getUser()->hasPermission("mod.view.ticket.all")) {
+            if(KuschelTickets::getUser()->userID !== $creator->userID) {
                 throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
             }
         }
@@ -45,48 +47,45 @@ class ticketPage extends Page {
         );
 
         if(isset($parameters['submit'])) {
-            if($user->hasPermission("general.tickets.answer")) {
-                if($ticket->getState() == 1) {
+            if(KuschelTickets::getUser()->hasPermission("general.tickets.answer")) {
+                if($ticket->state == 1) {
                     if(recaptcha::validate("ticketanswer")) {
                         if(isset($parameters['CRSF']) && !empty($parameters['CRSF'])) {
                             if(CRSF::validate($parameters['CRSF'])) {
                                 if(isset($parameters['text']) && !empty($parameters['text'])) {
                                     $text = Utils::purify($parameters['text']);
                                     if(!empty($text) && $text !== "<p></p>") {
-                                        $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_ticket_answers(`ticketID`, `creator`, `content`, `time`) VALUES (?, ?, ?, ?)");
-                                        $time = time();
-                                        $stmt->execute([$parameters['ticket'], $user->userID, $text, $time]);
-                                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE time = ? AND creator = ?");
-                                        $stmt->execute([$time, $user->userID]);
-                                        $r = $stmt->fetch();
+                                        $answer = Answer::create(array(
+                                            "ticketID" => (int) $parameters['ticket'],
+                                            "creator" => KuschelTickets::getUser()->userID,
+                                            "content" => $text,
+                                            "time" => time()
+                                        ));
                                         $already = [];
-                                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
-                                        $stmt->execute();
-                                        while($row = $stmt->fetch()) {
-                                            $account = new User((int) $row['userID']);
+                                        $allUsers = new UserList();
+                                        foreach($allUsers as $account) {
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
                                                 if($account->userID == $creator->userID) {
-                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                    Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                     array_push($already, $account->userID);
                                                 }
                                             } else {
-                                                Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                 array_push($already, $account->userID);
                                             }
                                         }
-                                        $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_ticket_answers WHERE ticketID = ?");
-                                        $stmt->execute([$ticket->ticketID]);
-                                        while($row = $stmt->fetch()) {
-                                            $account = new User((int) $row['creator']);
+                                        $answers = $ticket->getAnswers();
+                                        foreach($answers as $ticketAnswer) {
+                                            $account = $ticketAnswer->getCreator();
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
                                                 if($account->userID == $creator->userID) {
                                                     if(!in_array($account->userID, $already)) {
-                                                        Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                        Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                     }
                                                 }
                                             } else {
                                                 if(!in_array($account->userID, $already)) {
-                                                    Notification::create("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->getTitle()." von ".$user->getUserName()." in der Kategorie ".$ticket->getCategory()." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$r['answerID'], $account);
+                                                    Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                 }
                                             }
                                         }
@@ -105,14 +104,10 @@ class ticketPage extends Page {
                         }
                     } else {
                         $this->errors['token'] = "Du wurdest von reCaptcha als Bot erkannt.";
-                    }
-                    
+                    }    
                 }
             }
         }
-
-
-
     }
 
     public function assign() {

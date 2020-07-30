@@ -3,7 +3,7 @@ namespace KuschelTickets\lib\system;
 use KuschelTickets\lib\Mailer;
 use KuschelTickets\lib\Link;
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 
 class UserUtils {
     public static function loginAs(User $user, String $hash) {

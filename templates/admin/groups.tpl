@@ -42,11 +42,11 @@
         {foreach from=$site['groups'] item="group"}
         <tr id="groupentry{$group->groupID}">
         <td data-label="ID">{$group->groupID}</td>
-        <td data-label="Name">{$group->getGroupname()}</a></td>
+        <td data-label="Name">{$group->name}</a></td>
         <td data-label="Badge">{$group->getGroupBadge()}</a></td>
-        <td data-label="System">{if $group->isSystem()}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</a></td>
+        <td data-label="System">{if $group->system == 1}<span data-tooltip="Ja"><i class="icon check"></i></span>{else}<span data-tooltip="Nein"><i class="icon times"></i></span>{/if}</a></td>
         <td data-label="Aktion">
-          {if !$group->isSystem()}
+          {if $group->system !== 1}
             <a href="javascript:deleteGroup({$group->groupID});" data-tooltip="Löschen"><i class="icon times"></i></a>
           {/if}
             <a href="{link url="admin/groups/edit-{$group->groupID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
@@ -205,7 +205,7 @@
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" onchange="utils.previewText(this, 'Badge');" onkeyup="utils.previewText(this, 'Badge');" value="{$site['editgroup']->getGroupname()}">
+            <input type="text" name="text" onchange="utils.previewText(this, 'Badge');" onkeyup="utils.previewText(this, 'Badge');" value="{$site['editgroup']->name}">
         </div>
     </div>
     <div class="field{if $site['errors']['badge'] !== false} error{/if}">
@@ -217,7 +217,7 @@
           <div class="field">
             <div class="ui radio checkbox">
               <input type="radio" value="{$color}" name="badge"{if $site['badge'] == $color} checked{/if}>
-              <label><div class="ui {$color} label preview">{$site['editgroup']->getGroupname()}</div></label>
+              <label><div class="ui {$color} label preview">{$site['editgroup']->name}</div></label>
             </div>
           </div>
         </div>

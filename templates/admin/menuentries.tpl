@@ -41,10 +41,10 @@
         {foreach from=$site['navigation'] item="entry"}
         <tr id="menuentry{$entry->menuID}">
         <td data-label="ID">{$entry->menuID}</td>
-        <td data-label="Name"><a href="{link url=$entry->getLink()}" target="_blank">{$entry->getTitle()}</a></td>
-        <td data-label="Elterneintrag">{if $entry->getParent() !== null}{$entry->getParent()->getTitle()}{else}-/-{/if}</a></td>
+        <td data-label="Name"><a href="{link url=$entry->getLink()}" target="_blank">{$entry->title}</a></td>
+        <td data-label="Elterneintrag">{if $entry->getParent() !== null}{$entry->getParent()->title}{else}-/-{/if}</a></td>
         <td data-label="Aktion">
-            {if !$entry->isSystem()}
+            {if $entry->system !== 1}
               <a href="javascript:deleteMenuEntry({$entry->menuID});" data-tooltip="Löschen"><i class="icon times"></i></a>
             {/if}
             <a href="{link url="admin/menuentries/edit-{$entry->menuID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
@@ -86,7 +86,13 @@
         }
         $('.ui.selection.dropdown').dropdown();
         $("#search_list").sortable({
-          cursor: "move"
+          cursor: "move",
+          helper: function(event, ui) {
+              ui.children().each(function() {
+                  $(this).width($(this).width());
+              });
+              return ui;
+          },
         });
         $("#search_list").on("sortupdate", function(event, ui) {
           var elems = document.getElementById("search_list").querySelectorAll("tr");
@@ -196,7 +202,7 @@ $('.ui.selection.dropdown.parent').dropdown({
             selected: true,
           {/if}
         {/if}
-          name: "{$entry->getTitle()}",
+          name: "{$entry->title}",
           value: "{$entry->menuID}"
         },
       {/foreach}
@@ -211,7 +217,7 @@ $('.ui.selection.dropdown.parent').dropdown({
     <div class="field required{if $site['errors']['text'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="text" value="{$site['entry']->getTitle()}">
+            <input type="text" name="text" value="{$site['entry']->title}">
         </div>
     </div>
     <div class="field required{if $site['errors']['controller'] !== false} error{/if}">
@@ -279,7 +285,7 @@ $('.ui.selection.dropdown.controller').dropdown({
     values: [
       {foreach from=$site['controllers'] item="controller"}
         {
-          {if $site['entry']->getController() == $controller['identifier']}
+          {if $site['entry']->controller == $controller['identifier']}
             selected: true,
           {/if}
           name: "{$controller['text']}",
@@ -298,7 +304,7 @@ $('.ui.selection.dropdown.parent').dropdown({
               selected: true,
             {/if}
           {/if}
-          name: "{$entry->getTitle()}",
+          name: "{$entry->title}",
           value: "{$entry->menuID}"
         },
         {/if}

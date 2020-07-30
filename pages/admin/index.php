@@ -1,18 +1,14 @@
 <?php
+use KuschelTickets\lib\HttpRequest;
 $site = false;
-$opts = [
-    "http" => [
-        "method" => "GET",
-        "header" => [
-            "User-Agent: PHP"
-        ]
-    ]
-];
-$context = stream_context_create($opts);
+$httpRequest = new HttpRequest("https://api.github.com/repos/Kuschel-Swein/KuschelTickets/releases/latest");
+$httpRequest->enableSSL();
+$httpRequest->setRequestType(HttpRequest::GET);
+$httpRequest->execute();
+$response = $httpRequest->getResponse();
 try {
-    $data = file_get_contents("https://api.github.com/repos/Kuschel-Swein/KuschelTickets/releases/latest", false, $context);
-    $data = json_decode($data);
-    if($config['version'] !== $data->tag_name) {
+    $response = json_decode($response);
+    if($config['version'] !== $response->tag_name) {
         $site = true;
     }
 } catch(Exception $e) {

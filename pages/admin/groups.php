@@ -1,8 +1,10 @@
 <?php
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\Group;
+use KuschelTickets\lib\data\user\group\Group;
+use KuschelTickets\lib\data\user\group\GroupList;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\KuschelTickets;
 
 /**
  * 
@@ -224,7 +226,7 @@ if(isset($parameters['add'])) {
                     if(isset($parameters['badge']) && !empty($parameters['badge'])) {
                         if(in_array($parameters['badge'], $colors)) {
                             $text = strip_tags($parameters['text']);
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
                             $stmt->execute([$text]);
                             $row = $stmt->fetch();
                             if($row) {
@@ -232,9 +234,9 @@ if(isset($parameters['add'])) {
                             } else {
                                 $badge = strip_tags($parameters['badge']);
                                 $badge = '<div class="ui '.$badge.' label groupBadge">%NAME%</div>';
-                                $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_groups(`name`,`badge`,`system`) VALUES (?,?,0)");
+                                $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_groups(`name`,`badge`,`system`) VALUES (?,?,0)");
                                 $stmt->execute([$text, $badge]);
-                                $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
                                 $stmt->execute([$text]);
                                 $row = $stmt->fetch();
                                 $groupID = $row['groupID'];
@@ -245,7 +247,7 @@ if(isset($parameters['add'])) {
                                     if(isset($parameters[$name])) {
                                         $value = "1";
                                     }
-                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (?, ?, ?)");
+                                    $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (?, ?, ?)");
                                     $stmt->execute([$groupID, $name_db, $value]);
                                 }
                                 $success = "Diese Gruppe wurde erfolgreich hinzugefügt.";
@@ -281,7 +283,7 @@ if(isset($parameters['add'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
     $group = new Group($parameters['edit']);
-    if(!$group->exists()) {
+    if(!$group->groupID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
@@ -300,15 +302,15 @@ if(isset($parameters['add'])) {
                     if(isset($parameters['badge']) && !empty($parameters['badge'])) {
                         if(in_array($parameters['badge'], $colors)) {
                             $text = strip_tags($parameters['text']);
-                            $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE name = ?");
                             $stmt->execute([$text]);
                             $row = $stmt->fetch();
-                            if($row && $row['name'] !== $group->getGroupName()) {
+                            if($row && $row['name'] !== $group->name) {
                                 $errors['text'] = "Dieser Name ist bereits vergeben.";
                             } else {
                                 $badge = strip_tags($parameters['badge']);
                                 $badge = '<div class="ui '.$badge.' label groupBadge">%NAME%</div>';
-                                $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_groups SET `name`= ?, `badge`=? WHERE groupID = ?");
+                                $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_groups SET `name`= ?, `badge`=? WHERE groupID = ?");
                                 $stmt->execute([$text, $badge, $group->groupID]);
                                 if($group->groupID !== 1) {
                                     $groupID = $group->groupID;
@@ -319,7 +321,7 @@ if(isset($parameters['add'])) {
                                         if(isset($parameters[$name])) {
                                             $value = "1";
                                         }
-                                        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_group_permissions SET `value`= ? WHERE groupID = ? AND name = ?");
+                                        $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_group_permissions SET `value`= ? WHERE groupID = ? AND name = ?");
                                         $stmt->execute([$value, $groupID, $name_db]);
                                     }
                                 }
@@ -342,6 +344,7 @@ if(isset($parameters['add'])) {
         }
     }
 
+    $group->load();
     $gpermissions = array();
     foreach($group->getPermissions() as $permission) {
         $name = $permission['name'];
@@ -349,7 +352,7 @@ if(isset($parameters['add'])) {
         $gpermissions[$name] = $permission['value'];
     }
 
-    $badge = $group->getUnformattedBadge();
+    $badge = $group->badge;
     $badge = str_replace('<div class="ui ', '', $badge);
     $badge = str_replace(' label groupBadge">%NAME%</div>', '', $badge);
 
@@ -366,15 +369,8 @@ if(isset($parameters['add'])) {
 } else {
     $subpage = "index";
 
-    $groups = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        array_push($groups, new Group($row['groupID']));
-    }
-
     $site = array(
-        "groups" => $groups,
+        "groups" => new GroupList(),
         "site" => $subpage
     );
 }

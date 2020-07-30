@@ -13,13 +13,13 @@
         {foreach from=$categorys item="category"}
         <div class="title">
             <i class="dropdown icon"></i>
-            {$category['name']}
+            {$category->name}
         </div>
         <div class="content">
             <p>
                 <ul class="ui list">
-                    {foreach from=$category['faqs'] item="faq"}
-                        <a class="item" id="faq{$faq->faqID}" href="#{$faq->faqID}">{$faq->getQuestion()}</a>
+                    {foreach from=$category->getFAQs() item="faq"}
+                        <a class="item" id="faq{$faq->faqID}" href="#{$faq->faqID}">{$faq->question}</a>
                     {foreachelse}
                         <i class="item">In dieser Kategorie sind keine FAQs eingetragen.</i>
                     {/foreach}
@@ -51,8 +51,8 @@ $(document).ready(function(){
 
 var searchContent = [
     {foreach from=$categorys item="category"}
-        {foreach from=$category['faqs'] item="faq"}
-            { category: "{$category['name']}", title: "{$faq->getQuestion()}", url: "#{$faq->faqID}"},
+        {foreach from=$category->getFAQs() item="faq"}
+            { category: "{$category->name}", title: "{$faq->question}", url: "#{$faq->faqID}"},
         {/foreach}
     {/foreach}
 ];

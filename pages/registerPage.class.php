@@ -1,8 +1,9 @@
 <?php
 use KuschelTickets\lib\Page;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
+use KuschelTickets\lib\exception\AccessDeniedException;
 use KuschelTickets\lib\recaptcha;
+use KuschelTickets\lib\KuschelTickets;
 
 class registerPage extends Page {
 
@@ -22,7 +23,7 @@ class registerPage extends Page {
         );
         $this->success = false;
 
-        if(UserUtils::isLoggedIn()) {
+        if(KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du kannst diese Seite nicht öffnen");
         }
 

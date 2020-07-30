@@ -3,9 +3,10 @@ use KuschelTickets\lib\Page;
 use KuschelTickets\lib\Utils;
 use KuschelTickets\lib\Link;
 use KuschelTickets\lib\recaptcha;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\KuschelTickets;
 
 class loginPage extends Page {
 
@@ -20,7 +21,7 @@ class loginPage extends Page {
             "token" => false
         );
 
-        if(UserUtils::isLoggedIn()) {
+        if(KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du kannst diese Seite nicht öffnen");
         }
 
@@ -37,9 +38,9 @@ class loginPage extends Page {
                         if($row) {
                             if(password_verify($password, $row['password'])) {
                                 $account = new User($row['userID']);
-                                if($account->isBanned()) {
+                                if($account->banned == 1) {
                                     $this->errors['username'] = "Dein Benutzerkonto wurde aus folgenden gründen gesperrt:";
-                                    $this->errors['password'] = $account->getBanReason();
+                                    $this->errors['password'] = $account->banreason;
                                 } else {
                                     if($account->hasPermission("general.login")) {
                                         UserUtils::loginAs($account, $row['password']);

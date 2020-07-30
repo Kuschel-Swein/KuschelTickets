@@ -1,11 +1,13 @@
 <?php
 use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\Group;
+use KuschelTickets\lib\data\user\group\Group;
+use KuschelTickets\lib\data\user\group\GroupList;
 use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\Exceptions\PageNotFoundException;
-use KuschelTickets\lib\Exceptions\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\KuschelTickets;
 
 /**
  * 
@@ -41,7 +43,7 @@ if(isset($parameters['add'])) {
                                                     $password = password_hash($parameters['password'], PASSWORD_BCRYPT);
                                                     $usergroup = strip_tags($parameters['group']);
                                                     $token = UserUtils::generateToken();
-                                                    $stmt = $config['db']->prepare("INSERT INTO kuscheltickets".KT_N."_accounts(`username`, `password`, `email`, `token`, `userGroup`, `banned`, `password_reset`) VALUES (?, ?, ?, ?, ?, 0, 0)");
+                                                    $stmt = KuschelTickets::getDB()->prepare("INSERT INTO kuscheltickets".KT_N."_accounts(`username`, `password`, `email`, `token`, `userGroup`, `banned`, `password_reset`) VALUES (?, ?, ?, ?, ?, 0, 0)");
                                                     $stmt->execute([$username, $password, $email, $token, $usergroup]);
                                                     $success = true;
                                                 } else {
@@ -79,18 +81,11 @@ if(isset($parameters['add'])) {
         }
     }
 
-    $usergroups = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        array_push($usergroups, new Group($row['groupID']));
-    }
-
     $site = array(
         "success" => $success,
         "site" => $subpage,
         "errors" => $errors,
-        "usergroups" => $usergroups
+        "usergroups" => new GroupList()
     );
 
 } else if(isset($parameters['edit'])) {
@@ -99,7 +94,7 @@ if(isset($parameters['add'])) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
     $account = new User($parameters['edit']);
-    if(!$account->exists()) {
+    if(!$account->userID) {
         throw new PageNotFoundException("Diese Seite wurde leider nicht gefunden.");
     }
 
@@ -118,8 +113,8 @@ if(isset($parameters['add'])) {
                 if(isset($parameters['username']) && !empty($parameters['username'])) {
                     if(isset($parameters['email']) && !empty($parameters['email'])) {
                         if(filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {                                
-                            if(!UserUtils::exists($parameters['username'], "username") || $parameters['username'] == $account->getUserName()) {
-                                if(!UserUtils::exists($parameters['email'], "email") || $parameters['email'] == $account->getEmail()) {
+                            if(!UserUtils::exists($parameters['username'], "username") || $parameters['username'] == $account->username) {
+                                if(!UserUtils::exists($parameters['email'], "email") || $parameters['email'] == $account->email) {
                                     if(isset($parameters['group']) && !empty($parameters['group'])) {
                                         if(isset($parameters['password']) && !empty($parameters['password'])) {
                                             if(isset($parameters['password_confirm']) && !empty($parameters['password_confirm'])) {
@@ -129,7 +124,7 @@ if(isset($parameters['add'])) {
                                                     $password = password_hash($parameters['password'], PASSWORD_BCRYPT);
                                                     $usergroup = strip_tags($parameters['group']);
                                                     $token = UserUtils::generateToken();
-                                                    $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `username`=?,`password`=?,`email`=?,`token`=?,`userGroup`=? WHERE userID = ?");
+                                                    $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `username`=?,`password`=?,`email`=?,`token`=?,`userGroup`=? WHERE userID = ?");
                                                     $stmt->execute([$username, $password, $email, $token, $usergroup, $account->userID]);
                                                     $success = true;
                                                 } else {
@@ -143,7 +138,7 @@ if(isset($parameters['add'])) {
                                             $email = strip_tags($parameters['email']);
                                             $usergroup = strip_tags($parameters['group']);
                                             $token = UserUtils::generateToken();
-                                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `username`=?,`email`=?,`token`=?,`userGroup`=? WHERE userID = ?");
+                                            $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `username`=?,`email`=?,`token`=?,`userGroup`=? WHERE userID = ?");
                                             $stmt->execute([$username, $email, $token, $usergroup, $account->userID]);
                                             $success = true;
                                         }
@@ -173,18 +168,13 @@ if(isset($parameters['add'])) {
         }
     }
 
-    $usergroups = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_groups");
-    $stmt->execute();
-    while($row = $stmt->fetch()) {
-        array_push($usergroups, new Group($row['groupID']));
-    }
+    $account->load();
 
     $site = array(
         "success" => $success,
         "site" => $subpage,
         "errors" => $errors,
-        "usergroups" => $usergroups,
+        "usergroups" => new GroupList(),
         "edituser" => $account
     );
 } else if(isset($parameters['ban'])) {
@@ -213,7 +203,7 @@ if(isset($parameters['add'])) {
             if(CRSF::validate($parameters['CRSF'])) {
                 if($account->isBanned()) {
                     if(isset($parameters['unban'])) {
-                        $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `banned` = 0, `banreason` = NULL WHERE userID = ?");
+                        $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `banned` = 0, `banreason` = NULL WHERE userID = ?");
                         $stmt->execute([$account->userID]);
                         $success = "Dieser Account wurde erfolgreich entsperrt.";
                     }
@@ -221,7 +211,7 @@ if(isset($parameters['add'])) {
                     if(isset($parameters['ban'])) {
                         if(isset($parameters['reason']) && !empty($parameters['reason'])) {
                             $reason = Utils::purify($parameters['reason']);
-                            $stmt = $config['db']->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `banned` = 1, `banreason` = ? WHERE userID = ?");
+                            $stmt = KuschelTickets::getDB()->prepare("UPDATE kuscheltickets".KT_N."_accounts SET `banned` = 1, `banreason` = ? WHERE userID = ?");
                             $stmt->execute([$reason, $account->userID]);
                             $success = "Dieser Account wurde erfolgreich gesperrt.";
                         } else {
@@ -248,7 +238,7 @@ if(isset($parameters['add'])) {
 } else {
     $subpage = "index";
     $accounts = [];
-    $stmt = $config['db']->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
+    $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts");
     $stmt->execute();
     while($row = $stmt->fetch()) {
         array_push($accounts, new User($row['userID']));

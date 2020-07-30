@@ -40,14 +40,14 @@
     </thead>
     <tbody id="search_list">
         {foreach from=$__KT['user']->getEditorTemplates() item="editortemplate"}
-        <tr id="templateentry{$editortemplate['templateID']}">
-        <td data-label="ID">{$editortemplate['templateID']}</td>
-        <td data-label="Titel">{$editortemplate['title']}</a></td>
-        <td data-label="Beschreibung">{$editortemplate['description']}</td>
+        <tr id="templateentry{$editortemplate->templateID}">
+        <td data-label="ID">{$editortemplate->templateID}</td>
+        <td data-label="Titel">{$editortemplate->title}</a></td>
+        <td data-label="Beschreibung">{$editortemplate->description}</td>
         <td data-label="Aktion">
-            <a href="javascript:deleteTemplate({$editortemplate['templateID']});" data-tooltip="Löschen"><i class="icon times"></i></a>
-            <a href="{link url="editortemplates/edit-{$editortemplate['templateID']}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
-            <a href="javascript:watchTemplate({$editortemplate['templateID']})" data-tooltip="Ansehen"><i class="icon eye"></i></a>
+            <a href="javascript:deleteTemplate({$editortemplate->templateID});" data-tooltip="Löschen"><i class="icon times"></i></a>
+            <a href="{link url="editortemplates/edit-{$editortemplate->templateID}"}" data-tooltip="Bearbeiten"><i class="icon pencil"></i></a>
+            <a href="javascript:watchTemplate({$editortemplate->templateID})" data-tooltip="Ansehen"><i class="icon eye"></i></a>
         </td>
         </tr>
         {foreachelse}

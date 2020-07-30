@@ -1,6 +1,6 @@
 <?php
 use KuschelTickets\lib\Page;
-use KuschelTickets\lib\system\User;
+use KuschelTickets\lib\data\user\User;
 use KuschelTickets\lib\system\UserUtils;
 
 class activatePage extends Page {
