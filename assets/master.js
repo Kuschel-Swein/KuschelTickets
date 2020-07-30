@@ -1279,7 +1279,7 @@ function formatUnix(unix, addDate = true, addTime = true) {
             minutes = "0" + minutes;
         }
         if(result !== "") {
-            result = result + " um ";
+            result = result + ", ";
         }
         result = result + hours + ":" + minutes + " Uhr";
     }

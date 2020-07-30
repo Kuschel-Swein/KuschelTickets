@@ -1,12 +1,12 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\KuschelTickets;
 use kt\data\faq\category\CategoryList;
 use kt\system\exception\AccessDeniedException;
 
-class faqPage extends Page {
+class faqPage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         if(!KuschelTickets::getUser()->userID) {
@@ -19,9 +19,9 @@ class faqPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "categories" => new CategoryList()
-        );
+        ));
     }
 
 

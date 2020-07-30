@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\User;
 use kt\system\UserUtils;
 use kt\system\KuschelTickets;
@@ -11,7 +11,7 @@ use kt\system\exception\PageNotFoundException;
 use kt\system\Link;
 use kt\data\ticket\Ticket;
 
-class ticketpdfPage extends Page {
+class ticketpdfPage extends AbstractPage {
 
     private $content = null;
 
@@ -100,9 +100,9 @@ class ticketpdfPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "content" => $this->content
-        );
+        ));
     }
 
     public static function getCSS() {

@@ -196,11 +196,11 @@
 </form>
 
 {if $site['type'] == "1"}
-  {include file="codeeditor_html.tpl" selector="#text"}
+  {include file="__codeeditor.tpl" selector="#text" type="html"}
 {else if $site['type'] == "2"}
-  {include file="codeeditor_smarty.tpl" selector="#text"}
+  {include file="__codeeditor.tpl" selector="#text" type="smarty"}
 {else}
-  {include file="wysiwyg.tpl" template="false" selector="#text"}
+  {include file="__wysiwyg.tpl" template="false" selector="#text"}
 {/if}
 <script>
 $('.ui.selection.dropdown.groups').dropdown({
@@ -370,11 +370,11 @@ $('.ui.selection.dropdown.groups').dropdown({
     {/if}
 </form>
 {if $site['page']->type == "1"}
-  {include file="codeeditor_html.tpl" selector="#text"}
+  {include file="__codeeditor.tpl" selector="#text" type="html"}
 {else if $site['page']->type == "2"}
-  {include file="codeeditor_smarty.tpl" selector="#text"}
+  {include file="__codeeditor.tpl" selector="#text" type="smarty"}
 {else}
-  {include file="wysiwyg.tpl" template="false" selector="#text"}
+  {include file="__wysiwyg.tpl" template="false" selector="#text"}
 {/if}
 <script>
 $('.ui.selection.dropdown.groups').dropdown({

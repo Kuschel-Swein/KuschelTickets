@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\data\user\group\Group;
 use kt\system\UserUtils;
@@ -16,7 +16,7 @@ use kt\data\menu\MenuEntry;
 use kt\data\Page\Page as UserPage;
 use kt\system\KuschelTickets;
 
-class ajaxPage extends Page {
+class ajaxPage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         global $config;
@@ -988,7 +988,7 @@ class ajaxPage extends Page {
     }
 
     public function assign() {
-        return array();
+        KuschelTickets::getTPL()->assign(array());
     }
 
 

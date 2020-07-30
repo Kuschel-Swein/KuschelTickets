@@ -1,12 +1,12 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\system\UserUtils;
 use kt\system\KuschelTickets;
 
-class activatePage extends Page {
+class activatePage extends AbstractPage {
 
     private $result;
 
@@ -42,9 +42,9 @@ class activatePage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "result" => $this->result
-        );
+        ));
     }
 
 

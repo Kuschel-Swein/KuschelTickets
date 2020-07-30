@@ -1,16 +1,14 @@
 <?php
-namespace kt\page;
-
-use kt\system\Page;
-use kt\system\Oauth;
-use kt\system\UserUtils;
-use kt\system\Utils;
-use kt\system\CRSF;
-use kt\system\exception\AccessDeniedException;
-use kt\system\exception\PageNotFoundException;
-use kt\data\user\User;
-use kt\system\Link;
-use kt\system\KuschelTickets;
+use KuschelTickets\lib\Page;
+use KuschelTickets\lib\system\Oauth;
+use KuschelTickets\lib\system\UserUtils;
+use KuschelTickets\lib\Utils;
+use KuschelTickets\lib\system\CRSF;
+use KuschelTickets\lib\exception\AccessDeniedException;
+use KuschelTickets\lib\exception\PageNotFoundException;
+use KuschelTickets\lib\data\user\User;
+use KuschelTickets\lib\Link;
+use KuschelTickets\lib\KuschelTickets;
 
 class oauthPage extends Page {
 

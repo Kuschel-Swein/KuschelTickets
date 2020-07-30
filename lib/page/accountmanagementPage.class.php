@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\system\UserUtils;
 use kt\system\CRSF;
@@ -12,7 +12,7 @@ use kt\system\Link;
 use kt\system\recaptcha;
 use kt\system\KuschelTickets;
 
-class accountmanagementPage extends Page {
+class accountmanagementPage extends AbstractPage {
 
     private $errors;
     private $success;
@@ -142,11 +142,11 @@ class accountmanagementPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "errors" => $this->errors,
             "success" => $this->success,
             "recaptcha" => recaptcha::build("accountmanagement")
-        );
+        ));
     }
 
 

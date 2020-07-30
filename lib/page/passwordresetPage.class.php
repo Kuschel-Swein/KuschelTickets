@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\Mailer;
 use kt\system\Link;
 use kt\system\UserUtils;
@@ -10,7 +10,7 @@ use kt\system\recaptcha;
 use kt\data\user\User;
 use kt\system\KuschelTickets;
 
-class passwordresetPage extends Page {
+class passwordresetPage extends AbstractPage {
 
     private $errors;
     private $token = false;
@@ -115,13 +115,13 @@ class passwordresetPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "errors" => $this->errors,
             "token" => $this->token,
             "result" => $this->result,
             "tokenkey" => $this->tokenkey,
             "recaptcha" => recaptcha::build("passwordreset")
-        );
+        ));
     }
 
 

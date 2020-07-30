@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\Utils;
 use kt\data\user\User;
 use kt\system\UserUtils;
@@ -12,7 +12,7 @@ use kt\system\exception\PageNotFoundException;
 use kt\system\KuschelTickets;
 use kt\data\user\editortemplate\EditorTemplate;
 
-class editortemplatesPage extends Page {
+class editortemplatesPage extends AbstractPage {
 
     private $subpage;
     private $errors;
@@ -180,13 +180,13 @@ class editortemplatesPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "subpage" => $this->subpage,
             "errors" => $this->errors,
             "success" => $this->success,
             "recaptcha" => $this->recaptcha,
             "editortpl" => $this->editortpl
-        );
+        ));
     }
 
 

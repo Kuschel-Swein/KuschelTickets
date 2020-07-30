@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\system\Link;
 use kt\system\UserUtils;
@@ -16,7 +16,7 @@ use kt\system\KuschelTickets;
 use kt\data\ticket\Ticket;
 use kt\data\ticket\category\CategoryList;
 
-class addticketpage extends Page {
+class addticketpage extends AbstractPage {
 
     private $errors;
     private $success = false;
@@ -125,12 +125,12 @@ class addticketpage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "errors" => $this->errors,
             "success" => $this->success,
             "categorys" => new CategoryList(),
             "recaptcha" => recaptcha::build('addticket')
-        );
+        ));
     }
 
 

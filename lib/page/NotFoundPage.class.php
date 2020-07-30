@@ -1,16 +1,16 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 
-class NotFoundPage extends Page {
+class NotFoundPage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         
     }
 
     public function assign() {
-        return array();
+        KuschelTickets::getTPL()->assign(array());
     }
 
 

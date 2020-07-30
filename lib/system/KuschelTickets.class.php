@@ -31,7 +31,7 @@ class KuschelTickets {
         if(KuschelTickets::$user->userID) {
             KuschelTickets::$user->validateHash();
         }
-        new \kt\system\PageHandler();
+        new \kt\system\page\PageHandler();
     }
 
     public static function autoloader(String $className) {

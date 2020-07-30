@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\page\PageList;
 use kt\system\exception\PageNotFoundException;
 use kt\system\exception\AccessDeniedException;
@@ -9,7 +9,7 @@ use kt\system\User;
 use kt\system\UserUtils;
 use kt\system\KuschelTickets;
 
-class pagePage extends Page {
+class pagePage extends AbstractPage {
 
     private $identifier;
     private $page;
@@ -41,12 +41,11 @@ class pagePage extends Page {
     }
 
     public function assign() {
-        global $templateengine;
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "content" => $this->page->getContent(),
             "title" => $this->page->title,
             "type" => $this->page->type
-        );
+        ));
     }
 
 

@@ -1,10 +1,10 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\Utils;
 
-class imageproxyPage extends Page {
+class imageproxyPage extends AbstractPage {
 
     private $tickets = [];
 
@@ -23,7 +23,7 @@ class imageproxyPage extends Page {
     }
 
     public function assign() {
-       return array();
+        KuschelTickets::getTPL()->assign(array());
     }
 
 

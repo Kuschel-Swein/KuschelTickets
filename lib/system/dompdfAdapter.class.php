@@ -1,5 +1,5 @@
 <?php
-namespace kt;
+namespace kt\system;
 
 class dompdfAdapter {
 

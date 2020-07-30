@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\KuschelTickets;
 use kt\data\ticket\Ticket;
 use kt\data\ticket\answer\Answer;
@@ -16,7 +16,7 @@ use kt\system\exception\AccessDeniedException;
 use kt\system\exception\PageNotFoundException;
 use kt\system\recaptcha;
 
-class ticketPage extends Page {
+class ticketPage extends AbstractPage {
 
     private $ticket;
     private $errors;
@@ -113,12 +113,12 @@ class ticketPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "ticket" => $this->ticket,
             "errors" => $this->errors,
             "success" => $this->success,
             "recaptcha" => recaptcha::build("ticketanswer")
-        );
+        ));
     }
 
 

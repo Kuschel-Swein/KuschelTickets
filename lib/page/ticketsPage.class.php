@@ -1,12 +1,12 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\KuschelTickets;
 use kt\data\ticket\TicketList;
 use kt\system\exception\AccessDeniedException;
 
-class ticketsPage extends Page {
+class ticketsPage extends AbstractPage {
 
     private $tickets = [];
 
@@ -22,9 +22,9 @@ class ticketsPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "tickets" => $this->tickets
-        );
+        ));
     }
 
 

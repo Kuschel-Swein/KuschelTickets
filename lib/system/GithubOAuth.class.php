@@ -1,7 +1,7 @@
 <?php
 namespace kt\system;
 
-class Github_OAuth_Client {
+class GitHUbOauth {
     public $authorizeURL = "https://github.com/login/oauth/authorize";
     public $tokenURL = "https://github.com/login/oauth/access_token";
     public $apiURLBase = "https://api.github.com/";

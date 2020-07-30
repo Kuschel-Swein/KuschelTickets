@@ -1,5 +1,5 @@
 <?php
-namespace kt\system;
+namespace kt\system\page;
 use kt\system\Link;
 use kt\data\user\User;
 use kt\system\UserUtils;
@@ -8,7 +8,7 @@ use kt\system\Oauth;
 use kt\data\menu\MenuEntry;
 use kt\system\KuschelTickets;
 
-class Page {
+abstract class AbstractPage {
 
     private $identifier = null;
     private $extravariables = []; 
@@ -17,9 +17,8 @@ class Page {
         $this->identifier = $identifier;
     }
 
-    public function assignTPL(Array $assignements) {
-        $this->extravariables = $assignements;
-    }
+    abstract function readParameters(Array $parameters);
+    abstract function assign();
 
     public function show() {
         global $config;

@@ -126,5 +126,5 @@ if(elem) {
   elem.style.display = "block";
 }
 </script>
-{include file="wysiwyg.tpl" selector="#text"}
+{include file="__wysiwyg.tpl" selector="#text"}
 {include file="footer.tpl"}

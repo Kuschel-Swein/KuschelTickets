@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\exception\AccessDeniedException;
 use kt\system\exception\PageNotFoundException;
 use kt\system\UserUtils;
@@ -11,7 +11,7 @@ use kt\system\User;
 use kt\system\recaptcha;
 use kt\system\KuschelTickets;
 
-class notificationsPage extends Page {
+class notificationsPage extends AbstractPage {
 
     private $subpage;
     private $notificationreasons;
@@ -122,13 +122,13 @@ class notificationsPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "subpage" => $this->subpage,
             "notificationreasons" => $this->notificationreasons,
             "recaptcha" => recaptcha::build('notificationsettings'),
             "errors" => $this->errors,
             "success" => $this->success
-        );
+        ));
     }
 
 

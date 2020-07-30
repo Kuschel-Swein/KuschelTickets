@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\Utils;
 use kt\system\Link;
 use kt\system\recaptcha;
@@ -10,7 +10,7 @@ use kt\system\UserUtils;
 use kt\system\exception\AccessDeniedException;
 use kt\system\KuschelTickets;
 
-class loginPage extends Page {
+class loginPage extends AbstractPage {
 
     private $errors;
 
@@ -67,10 +67,10 @@ class loginPage extends Page {
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "errors" => $this->errors,
             "recaptcha" => recaptcha::build("login")
-        );
+        ));
     }
 
 

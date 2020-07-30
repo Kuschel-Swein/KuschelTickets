@@ -1,5 +1,5 @@
 <?php
-namespace kt\system;
+namespace kt\system\page;
 use kt\system\exception\PageNotFoundException;
 
 class PageHandler {
@@ -49,10 +49,7 @@ class PageHandler {
         $page = "kt\page\\".$page."Page";
         $show = new $page($identifier);
         $show->readParameters($_REQUEST);
-        $show->assignTPL($show->assign());
+        $show->assign();
         $show->show();
-        
-
-
     }
 }

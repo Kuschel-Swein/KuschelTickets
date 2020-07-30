@@ -2,8 +2,8 @@
 namespace kt\system;
 use kt\system\Link;
 use kt\system\UserUtils;
-use kt\system\CRSF;
-use kt\system\Github_OAuth_Client;
+use kt\lib\system\CRSF;
+use kt\lib\system\GithubOAuth;
 
 class Oauth {
 
@@ -26,7 +26,7 @@ class Oauth {
     }
 
     public static function getGooglePath() {
-        return "lib/GoogleOauth/vendor/autoload.php";
+        return "lib/3rdParty/GoogleOauth/vendor/autoload.php";
     }
 
     public static function getGoogleURL() {
@@ -42,7 +42,7 @@ class Oauth {
     public static function getGitHub() {
         global $config;
 
-        $client = new Github_OAuth_Client(array(
+        $client = new GitHubOauth(array(
             "client_id" => $config['oauth']['github']['clientid'],
             "client_secret" => $config['oauth']['github']['clientsecret'],
             "redirect_url" => Link::get("oauth-2")

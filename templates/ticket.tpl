@@ -240,7 +240,7 @@
         </ul>
     </div>
 {/if}
-{include file="wysiwyg.tpl" selector="#text"}
+{include file="__wysiwyg.tpl" selector="#text"}
 <script>
 {if !$ticket->hasRating()}
     {if $ticket->getCreator()->userID == $__KT['user']->userID}

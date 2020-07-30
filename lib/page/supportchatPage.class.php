@@ -1,11 +1,11 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\system\exception\AccessDeniedException;
 use kt\system\KuschelTickets;
 
-class supportchatPage extends Page {
+class supportchatPage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         if(!KuschelTickets::getUser()->userID) {
@@ -20,7 +20,7 @@ class supportchatPage extends Page {
     }
 
     public function assign() {
-        return array();
+        KuschelTickets::getTPL()->assign(array());
     }
 
 

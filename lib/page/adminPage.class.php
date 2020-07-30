@@ -1,7 +1,7 @@
 <?php
 namespace kt\page;
 
-use kt\system\Page;
+use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\system\Utils;
 use kt\data\user\group\Group;
@@ -11,7 +11,7 @@ use kt\system\exception\AccessDeniedException;
 use kt\system\exception\PageNotFoundException;
 use kt\system\KuschelTickets;
 
-class adminPage extends Page {
+class adminPage extends AbstractPage {
 
     private $file;
     private $title;
@@ -116,17 +116,17 @@ class adminPage extends Page {
         }
         $this->file = "admin/".$actualpage['file'].".tpl";
         $this->title = $actualpage['title'];
-        include_once "pages/admin/".$actualpage['file'].".php";
+        include_once "lib/page/admin/".$actualpage['file'].".php";
         $this->site = $site;
 
     }
 
     public function assign() {
-        return array(
+        KuschelTickets::getTPL()->assign(array(
             "title" => $this->title,
             "file" => $this->file,
             "site" => $this->site
-        );
+        ));
     }
 
 

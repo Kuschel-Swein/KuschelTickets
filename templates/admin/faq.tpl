@@ -151,7 +151,7 @@
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" template="false" selector="#text"}
+{include file="__wysiwyg.tpl" template="false" selector="#text"}
 <script>
 $('.ui.selection.dropdown.category').dropdown({
     values: [
@@ -222,7 +222,7 @@ $('.ui.selection.dropdown.category').dropdown({
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" template="false" selector="#text"}
+{include file="__wysiwyg.tpl" template="false" selector="#text"}
 <script>
 $('.ui.selection.dropdown.category').dropdown({
     values: [

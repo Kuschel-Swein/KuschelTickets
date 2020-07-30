@@ -19,6 +19,7 @@ class HttpRequest {
 
     private $requestType;
     private $postFields;
+    private $headers;
 
     private $userpwd;
     private $latency;
@@ -27,22 +28,22 @@ class HttpRequest {
     private $httpCode;
     private $error;
 
-    public function __construct($address) {
+    public function __construct(String $address) {
         if (!isset($address)) {
             throw new Exception("Error: Address not provided.");
         }
         $this->address = $address;
     }
 
-    public function setAddress($address) {
+    public function setAddress(String $address) {
         $this->address = $address;
     }
 
-    public function setBasicAuthCredentials($username, $password) {
+    public function setBasicAuthCredentials(String $username, String $password) {
         $this->userpwd = $username . ':' . $password;
     }
 
-    public function enableCookies($cookie_path) {
+    public function enableCookies(String $cookie_path) {
         $this->cookiesEnabled = true;
         $this->cookiePath = $cookie_path;
     }
@@ -60,7 +61,7 @@ class HttpRequest {
         $this->ssl = false;
     }
 
-    public function setTimeout($timeout = 15) {
+    public function setTimeout(int $timeout = 15) {
         $this->timeout = $timeout;
     }
 
@@ -68,7 +69,7 @@ class HttpRequest {
         return $this->timeout;
     }
 
-    public function setConnectTimeout($connectTimeout = 10) {
+    public function setConnectTimeout(int $connectTimeout = 10) {
         $this->connectTimeout = $connectTimeout;
     }
 
@@ -76,12 +77,16 @@ class HttpRequest {
         return $this->connectTimeout;
     }
 
-    public function setRequestType($type) {
+    public function setRequestType(String $type) {
         $this->requestType = $type;
     }
 
-    public function setPostFields($fields = array()) {
+    public function setPostFields(Array $fields = array()) {
         $this->postFields = $fields;
+    }
+
+    public function setHeaders(Array $headers = array()) {
+        $this->headers = $headers;
     }
 
     public function getResponse() {
@@ -103,7 +108,7 @@ class HttpRequest {
         return $this->error;
     }
 
-    public function checkResponseForContent($content = '') {
+    public function checkResponseForContent(String $content = '') {
         if ($this->httpCode == 200 && !empty($this->responseBody)) {
             if (strpos($this->responseBody, $content) !== false) {
                 return true;
@@ -128,6 +133,9 @@ class HttpRequest {
             if ($this->requestType == 'POST' && isset($this->postFields)) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $this->postFields);
             }
+        }
+        if(!empty($this->headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_URL, $this->address);
