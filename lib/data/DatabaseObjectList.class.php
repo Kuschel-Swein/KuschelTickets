@@ -1,6 +1,6 @@
 <?php
-namespace KuschelTickets\lib\data;
-use KuschelTickets\lib\KuschelTickets;
+namespace kt\data;
+use kt\system\KuschelTickets;
 
 abstract class DatabaseObjectList implements \Countable, \SeekableIterator {
     private $objects = [];
@@ -46,9 +46,9 @@ abstract class DatabaseObjectList implements \Countable, \SeekableIterator {
         }
         if(!empty($limit)) {
             if(!empty($conditionString)) {
-                $limit = " ".$limit;
+                $limit = " LIMIT ".$limit;
             }
-            $conditionString = $conditionString."LIMIT ".$limit;
+            $conditionString = $conditionString.$limit;
         }
         $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM ".$tableName." ".$conditionString);
         foreach($conditions as $key => &$value) {

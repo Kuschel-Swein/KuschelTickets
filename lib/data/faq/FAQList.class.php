@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\faq;
+namespace kt\data\faq;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class FAQList extends DatabaseObjectList {
     public $databaseObject = FAQ::class;

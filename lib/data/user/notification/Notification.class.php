@@ -1,11 +1,11 @@
 <?php
-namespace KuschelTickets\lib\data\user\notification;
+namespace kt\data\user\notification;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\user\User;
-use KuschelTickets\lib\Link;
-use KuschelTickets\lib\Mailer;
-use KuschelTickets\lib\KuschelTickets;
+use kt\data\DatabaseObject;
+use kt\data\user\User;
+use kt\system\Link;
+use kt\system\mailer\Mailer;
+use kt\KuschelTickets;
 
 class Notification extends DatabaseObject {
     public $tableName = "notifications";

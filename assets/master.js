@@ -1037,7 +1037,7 @@ const notifications = {
             if(notifications_content.length > 0) {
                 result = "";
                 notifications_content.forEach(function(notification) {
-                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + notification['time'] + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
+                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + formatUnix(notification['time']) + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
                     var data = ajax.call(22, notification['notificationID']);
                     if(data['success']) {
@@ -1075,7 +1075,7 @@ const notifications = {
             if(notifications_content.length > 0) {
                 result = "";
                 notifications_content.forEach(function(notification) {
-                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + notification['time'] + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
+                    result += '<p id="notificationmenuentry' + notification['notificationID'] + '"><a href="' + link(notification['linkIdentifier']) + '"  data-tooltip="' + formatUnix(notification['time']) + '">' + notification['content'] + '</a><a data-tooltip="gelesen" class="pointer float-right" data-id="' + notification['notificationID'] + '" onClick="notifications.done(this)"><i class="icon check"></i></a></p><div class="ui divider"></div>';
                     ncounter++;
                     var data = ajax.call(22, notification['notificationID']);
                     if(data['success']) {
@@ -1221,14 +1221,17 @@ const externalpage = {
                         if(!elems[i].href.startsWith(KT.mainurl) && elems[i].dataset.externalUrlWhitelist == undefined) {
                             if(!elems[i].href.startsWith("javascript:")) {
                                 if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
-                                    elems[i].addEventListener("click", function (e) {
+                                    var callback = function (e) {
                                         e.preventDefault();
                                         var url = this.href;
                                         modal.confirm("<p>Bitte beachte, dass du nun auf eine Webseite geleitet wirst, für deren Inhalt wir nicht verantwortlich sind und auf die unsere Datenschutzbestimmungen keine Anwendung finden.</p>" + 
                                         "<p>Bitte bestätige dass du auf diese Website weitergeleitet werden möchtest.</p>", function() {
                                             window.open(url, "_blank");
                                         });
-                                    });
+                                    };
+                                    elems[i].addEventListener("click", callback);
+                                    elems[i].addEventListener("contextmenu", callback);
+                                    elems[i].addEventListener("mousewheel", callback);
                                 }
                             }
                         }
@@ -1276,7 +1279,7 @@ function formatUnix(unix, addDate = true, addTime = true) {
             minutes = "0" + minutes;
         }
         if(result !== "") {
-            result = result + " ";
+            result = result + " um ";
         }
         result = result + hours + ":" + minutes + " Uhr";
     }

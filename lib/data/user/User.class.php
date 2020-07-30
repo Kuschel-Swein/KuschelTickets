@@ -1,11 +1,11 @@
 <?php
-namespace KuschelTickets\lib\data\user;
+namespace kt\data\user;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\user\group\Group;
-use KuschelTickets\lib\data\user\editortemplate\EditorTemplateList;
-use KuschelTickets\lib\data\user\notification\NotificationList;
-use KuschelTickets\lib\data\ticket\TicketList;
+use kt\data\DatabaseObject;
+use kt\data\user\group\Group;
+use kt\data\user\editortemplate\EditorTemplateList;
+use kt\data\user\notification\NotificationList;
+use kt\data\ticket\TicketList;
 
 class User extends DatabaseObject {
     public $tableName = "accounts";

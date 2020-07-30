@@ -135,10 +135,10 @@
 </div>
 {/if}
 <form class="ui form{if $site['errors']['reason'] !== false || $site['errors']['token'] !== false} error{/if}{if $site['success'] !== false} success{/if}" action="{link url="admin/accounts/ban-{$site['banuser']->userID}"}" method="post">
-    {if $site['banuser']->isBanned()}
+    {if $site['banuser']->banned == 1}
     <div class="field">
       <label>Sperrungsgrund</label>
-      <blockquote>{$site['banuser']->getBanReason()}</blockquote>
+      <blockquote>{$site['banuser']->banreason}</blockquote>
     </div>
     <div class="ui checkbox">
       <input type="checkbox" name="unban">

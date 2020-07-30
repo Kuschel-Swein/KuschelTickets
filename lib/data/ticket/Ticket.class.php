@@ -1,11 +1,11 @@
 <?php
-namespace KuschelTickets\lib\data\ticket;
+namespace kt\data\ticket;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\ticket\answer\AnswerList;
-use KuschelTickets\lib\data\user\User;
-use KuschelTickets\lib\data\ticket\category\Category;
-use KuschelTickets\lib\KuschelTickets;
+use kt\data\DatabaseObject;
+use kt\data\ticket\answer\AnswerList;
+use kt\data\user\User;
+use kt\data\ticket\category\Category;
+use kt\system\KuschelTickets;
 
 class Ticket extends DatabaseObject {
     public $tableName = "tickets";

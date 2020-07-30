@@ -1,5 +1,5 @@
 <?php
-namespace KuschelTickets\lib\system;
+namespace kt\system;
 
 class CRSF {
 

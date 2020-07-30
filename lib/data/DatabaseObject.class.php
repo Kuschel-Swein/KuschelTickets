@@ -1,8 +1,15 @@
 <?php
-namespace KuschelTickets\lib\data;
-use KuschelTickets\lib\KuschelTickets;
+namespace kt\data;
+use kt\system\KuschelTickets;
 
 abstract class DatabaseObject {
+
+    /*
+     * to prevent users from breaking the system with entering valid json in some inputs
+     * here are some database colums that ignore the json parinsing
+    */
+    const DISABLE_JSON = ["title", "content", "text", "answer", "question", "name", "username", "email"];
+
     public $tableName = "";
     public $tablePrimaryKey = "";
     public $tablePrimaryKeyValue = 0;
@@ -32,7 +39,11 @@ abstract class DatabaseObject {
             foreach($result as $key => $value) {
                 $jsonCheck = json_decode($value);
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    $this->$key = $jsonCheck;
+                    if(!in_array($key, self::DISABLE_JSON)) {
+                        $this->$key = $jsonCheck;
+                    } else {
+                        $this->$key = $value;
+                    }
                 } else {
                     $this->$key = $value;
                 }
@@ -44,7 +55,16 @@ abstract class DatabaseObject {
         $updateString = "UPDATE ".$this->tableName." SET ";
         $counter = 0;
         foreach($data as $key => $value) {
-            $this->$key = $value;
+            $jsonCheck = json_decode($value);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if(!in_array($key, self::DISABLE_JSON)) {
+                    $this->$key = $jsonCheck;
+                } else {
+                    $this->$key = $value;
+                }
+            } else {
+                $this->$key = $value;
+            }
             $updateString = $updateString."`".$key."`= :".strtolower($key);
             $counter++;
             if ($counter !== count($data)) $updateString .= ", ";
@@ -53,6 +73,9 @@ abstract class DatabaseObject {
         KuschelTickets::getDB()->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $stmt = KuschelTickets::getDB()->prepare($updateString);
         foreach($data as $key => &$value) {
+            if(is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            }
             $stmt->bindParam(":".strtolower($key), $value, \PDO::PARAM_STR);
         }
         $stmt->bindParam(":".strtolower($this->tablePrimaryKey), $this->tablePrimaryKeyValue);
@@ -78,6 +101,9 @@ abstract class DatabaseObject {
         $insertString = $insertString.")";
         $stmt = KuschelTickets::getDB()->prepare($insertString);
         foreach($data as $key => &$value) {
+            if(is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            }
             $stmt->bindParam(":".strtolower($key), $value);
         }
         $stmt->execute();

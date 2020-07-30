@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\menu;
+namespace kt\data\menu;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class MenuEntryList extends DatabaseObjectList {
     public $databaseObject = MenuEntry::class;

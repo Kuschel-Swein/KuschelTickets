@@ -1,11 +1,11 @@
 <?php
-namespace KuschelTickets\lib\data\supportchat;
+namespace kt\data\supportchat;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\supportchat\message\MessageList;
-use KuschelTickets\lib\KuschelTickets;
-use KuschelTickets\lib\data\user\User;
-use KuschelTickets\lib\Utils;
+use kt\data\DatabaseObject;
+use kt\data\supportchat\message\MessageList;
+use kt\system\KuschelTickets;
+use kt\data\user\User;
+use kt\system\Utils;
 
 class SupportChat extends DatabaseObject {
     public $tableName = "supportchat";

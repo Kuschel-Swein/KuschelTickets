@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\user\notification;
+namespace kt\data\user\notification;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class NotificationList extends DatabaseObjectList {
     public $databaseObject = Notification::class;

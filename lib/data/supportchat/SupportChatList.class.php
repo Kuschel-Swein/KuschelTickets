@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\supportchat;
+namespace kt\data\supportchat;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class SupportChatList extends DatabaseObjectList {
     public $databaseObject = SupportChat::class;

@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\user;
+namespace kt\data\user;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class UserList extends DatabaseObjectList {
     public $databaseObject = User::class;

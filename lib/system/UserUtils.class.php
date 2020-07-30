@@ -1,9 +1,9 @@
 <?php
-namespace KuschelTickets\lib\system;
-use KuschelTickets\lib\Mailer;
-use KuschelTickets\lib\Link;
-use KuschelTickets\lib\Utils;
-use KuschelTickets\lib\data\user\User;
+namespace kt\system;
+use kt\system\mailer\Mailer;
+use kt\system\Link;
+use kt\system\Utils;
+use kt\data\user\User;
 
 class UserUtils {
     public static function loginAs(User $user, String $hash) {

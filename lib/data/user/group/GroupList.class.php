@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\user\group;
+namespace kt\data\user\group;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class GroupList extends DatabaseObjectList {
     public $databaseObject = Group::class;

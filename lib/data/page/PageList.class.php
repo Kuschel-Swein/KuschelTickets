@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\page;
+namespace kt\data\page;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class PageList extends DatabaseObjectList {
     public $databaseObject = Page::class;

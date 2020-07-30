@@ -10,7 +10,7 @@
                 <div class="results"></div>
             </div>
         </div>
-        {foreach from=$categorys item="category"}
+        {foreach from=$categories item="category"}
         <div class="title">
             <i class="dropdown icon"></i>
             {$category->name}
@@ -50,7 +50,7 @@ $(document).ready(function(){
 });
 
 var searchContent = [
-    {foreach from=$categorys item="category"}
+    {foreach from=$categories item="category"}
         {foreach from=$category->getFAQs() item="faq"}
             { category: "{$category->name}", title: "{$faq->question}", url: "#{$faq->faqID}"},
         {/foreach}

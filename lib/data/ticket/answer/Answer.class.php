@@ -1,8 +1,8 @@
 <?php
-namespace KuschelTickets\lib\data\ticket\answer;
+namespace kt\data\ticket\answer;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\user\User;
+use kt\data\DatabaseObject;
+use kt\data\user\User;
 
 class Answer extends DatabaseObject {
     public $tableName = "ticket_answers";

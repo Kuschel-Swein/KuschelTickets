@@ -1,8 +1,8 @@
 <?php
-namespace KuschelTickets\lib\data\page;
+namespace kt\data\page;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\KuschelTickets;
+use kt\data\DatabaseObject;
+use kt\system\KuschelTickets;
 
 class Page extends DatabaseObject {
     public $tableName = "pages";

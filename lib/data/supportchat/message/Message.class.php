@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\supportchat\message;
+namespace kt\data\supportchat\message;
 
-use KuschelTickets\lib\data\DatabaseObject;
+use kt\data\DatabaseObject;
 
 class Message extends DatabaseObject {
     public $tableName = "supportchat_messages";

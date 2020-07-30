@@ -1,9 +1,9 @@
 <?php
-namespace KuschelTickets\lib\system;
-use KuschelTickets\lib\Link;
-use KuschelTickets\lib\system\UserUtils;
-use KuschelTickets\lib\system\CRSF;
-use KuschelTickets\lib\system\Github_OAuth_Client;
+namespace kt\system;
+use kt\system\Link;
+use kt\system\UserUtils;
+use kt\system\CRSF;
+use kt\system\Github_OAuth_Client;
 
 class Oauth {
 

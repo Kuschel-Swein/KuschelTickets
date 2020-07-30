@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\user\editortemplate;
+namespace kt\data\user\editortemplate;
 
-use KuschelTickets\lib\data\DatabaseObjectList;
+use kt\data\DatabaseObjectList;
 
 class EditorTemplateList extends DatabaseObjectList {
     public $databaseObject = EditorTemplate::class;

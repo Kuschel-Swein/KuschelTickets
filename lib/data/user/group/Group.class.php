@@ -1,8 +1,8 @@
 <?php
-namespace KuschelTickets\lib\data\user\group;
+namespace kt\data\user\group;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\KuschelTickets;
+use kt\data\DatabaseObject;
+use kt\system\KuschelTickets;
 
 class Group extends DatabaseObject {
     public $tableName = "groups";

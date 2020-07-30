@@ -1,7 +1,7 @@
 <?php
-namespace KuschelTickets\lib\data\user\editortemplate;
+namespace kt\data\user\editortemplate;
 
-use KuschelTickets\lib\data\DatabaseObject;
+use kt\data\DatabaseObject;
 
 class EditorTemplate extends DatabaseObject {
     public $tableName = "editortemplates";

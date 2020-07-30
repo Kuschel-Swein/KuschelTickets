@@ -158,12 +158,12 @@ $('.ui.selection.dropdown.category').dropdown({
       {foreach from=$site['categorys'] item="category"}
         {
         {if isset($tpl['post']['category']) && !$site['success']}
-          {if $tpl['post']['category'] == $category['id']}
+          {if $tpl['post']['category'] == $category->categoryID}
             selected: true,
           {/if}
         {/if}
-          name: "{$category['name']}",
-          value: "{$category['id']}"
+          name: "{$category->name}",
+          value: "{$category->categoryID}"
         },
       {/foreach}
     ],
@@ -228,11 +228,11 @@ $('.ui.selection.dropdown.category').dropdown({
     values: [
       {foreach from=$site['categorys'] item="category"}
         {
-          {if $site['faq']->getCategory()->categoryID == $category['id']}
+          {if $site['faq']->getCategory()->categoryID == $category->categoryID}
             selected: true,
           {/if}
-          name: "{$category['name']}",
-          value: "{$category['id']}"
+          name: "{$category->name}",
+          value: "{$category->categoryID}"
         },
       {/foreach}
     ],

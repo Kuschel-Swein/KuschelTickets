@@ -149,22 +149,22 @@
 <a class="ui blue button right floated" href="{link url="editortemplates"}">Editorvorlagen Auflisten</a>
 <br>
 <br>
-<form class="ui form{if $errors['text'] !== false || $errors['token'] !== false || $errors['title'] !== false || $errors['description'] !== false} error{/if}{if $success !== false} success{/if}" action="{link url="editortemplates/edit-{$editortpl['templateID']}"}" method="post">
+<form class="ui form{if $errors['text'] !== false || $errors['token'] !== false || $errors['title'] !== false || $errors['description'] !== false} error{/if}{if $success !== false} success{/if}" action="{link url="editortemplates/edit-{$editortpl->templateID}"}" method="post">
     <div class="field required{if $errors['title'] !== false} error{/if}">
     <label>Name</label>
         <div class="ui input">
-            <input type="text" name="title" value="{$editortpl['title']}">
+            <input type="text" name="title" value="{$editortpl->title}">
         </div>
     </div>
     <div class="field required{if $errors['description'] !== false} error{/if}">
     <label>Beschreibung</label>
         <div class="ui input">
-            <input type="text" name="description" value="{$editortpl['description']}">
+            <input type="text" name="description" value="{$editortpl->description}">
         </div>
     </div>
     <div class="field required{if $errors['text'] !== false} error{/if}">
       <label>Text</label>
-      <textarea id="text" name="text">{$editortpl['content']}</textarea>
+      <textarea id="text" name="text">{$editortpl->content}</textarea>
     </div>
     {$recaptcha}
     <button type="submit" name="submit" class="ui blue submit button">Absenden</button>

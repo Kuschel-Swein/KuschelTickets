@@ -1,8 +1,8 @@
 <?php
-namespace KuschelTickets\lib\data\faq\category;
+namespace kt\data\faq\category;
 
-use KuschelTickets\lib\data\DatabaseObject;
-use KuschelTickets\lib\data\faq\FAQList;
+use kt\data\DatabaseObject;
+use kt\data\faq\FAQList;
 
 class Category extends DatabaseObject {
     public $tableName = "faq_categories";
