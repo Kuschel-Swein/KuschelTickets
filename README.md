@@ -30,7 +30,7 @@ Achte bitte darauf, dass du KuschelTickets nur unter _Releases_ herunterladen so
 - Aufräumarbeiten in der Datenbank über das ACP
 - Favicon und Titel externer Links anzeigbar (im ACP deaktivierbar)
 - CRSF Sicher
-- alle vom benutzer generierten Inhalte sind "*sauber*" dank dem HTML Purifier
+- alle vom Benutzer generierten Inhalte sind "*sauber*" dank dem HTML Purifier
 - reCaptcha Unterstützung (v2 **UND** v3) außerhalb des ACPs
 - viele Aktionen funktionieren über einen Ajax
 - Updater für die vorrangehende Version
