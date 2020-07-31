@@ -33,10 +33,15 @@ Achte bitte darauf, dass du KuschelTickets nur unter _Releases_ herunterladen so
 - alle vom benutzer generierten Inhalte sind "*sauber*" dank dem HTML Purifier
 - reCaptcha Unterstützung (v2 **UND** v3) außerhalb des ACPs
 - viele Aktionen funktionieren über einen Ajax
-- [AB VERSION 2.1] Updater für die vorrangehende Version
+- Updater für die vorrangehende Version
 - Favicon der Seite über das ACP hinterlegbar
 - mehrere Installationen in einer Datenbank möglich
 - eingebaute Update Warnung
+- die Performance steht im Vordergrund, wir verwenden sogenannte "*DatabaseObject*" Klassen, diese führen eine Datenbank-Abfrage nur bei der Erstellung aus
+- 2-Faktor Authentisierung wird für Benutzer unterstützt
+- Menü über das ACP verwalten und sortieren (auch externe URLs oder eingene Seiten sind als Menüpunkt möglich)
+- Drittanbieter Login (GitHub & Google)
+- SupportChat System (*kann* Server belasten, da der Chat aktuell gehalten werden muss)
 
 
 ## Wie installiere ich KuschelTickets?
