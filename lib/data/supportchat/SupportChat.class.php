@@ -19,7 +19,7 @@ class SupportChat extends DatabaseObject {
 
     public function getUser() {
         if($this->user == null) {
-            return null;
+            return new User(0);
         }
         return new User($this->user);
     }
