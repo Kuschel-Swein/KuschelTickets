@@ -27,6 +27,7 @@ abstract class AbstractPage {
         $tpl = array(
             "request" => $_REQUEST,
             "post" => $_POST,
+            "session" => $_SESSION,
             "cookie" => $_COOKIE,
             "server" => $_SERVER,
             "now" => time()
@@ -41,11 +42,7 @@ abstract class AbstractPage {
             KuschelTickets::getTPL()->assign($key, $value, false);
         }
         $kt = $config;
-        if(UserUtils::isLoggedIn()) {
-            $kt['user'] = new User($_SESSION['userID']);
-        } else {
-            $kt['user'] = null;
-        }
+        $kt['user'] = KuschelTickets::getUser();
         $kt['mainurl'] = Link::mainurl();
         $kt['google_auth_uri'] = Oauth::getGoogleURL();
         $kt['github_auth_uri'] = Oauth::getGitHubURL();

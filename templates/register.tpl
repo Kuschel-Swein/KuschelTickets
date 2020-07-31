@@ -30,7 +30,7 @@
       <div class="inline field required{if $errors['legal_notice'] !== false} error{/if}">
         <div class="ui checkbox">
           <input type="checkbox" name="legal_notice">
-          <label>Ich akzeptiere die <a href="index.php?page/legal-notice">Datenschutzerklärung</a></label>
+          <label>Ich akzeptiere die <a href="{link url="page/legal-notice"}" target="_blank">Datenschutzerklärung</a></label>
         </div>
       </div>
       {$recaptcha}
@@ -84,7 +84,7 @@
         <a class="item" href="{link url="passwordreset"}">Passwort vergessen</a>
         <a class="item" href="{link url="login"}">Einloggen</a>
       </div>
-      {include file="oauth_providers.tpl"}
+      {include file="__oauth_providers.tpl"}
     </div>
   </div>
 </div>

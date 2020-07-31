@@ -18,6 +18,10 @@ $permissions = [
         "display" => "kann Zitieren"
     ),
     array(
+        "name" => "general_account_twofactor",
+        "display" => "kann die 2-Faktor Authentisierung verwenden"
+    ),
+    array(
         "name" => "mod_view_tickets",
         "display" => "alle Tickets sehen"
     ),

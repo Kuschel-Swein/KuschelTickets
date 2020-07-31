@@ -20,6 +20,7 @@
 
 namespace kt\system\mailer;
 
+use kt\system\exception\MailerException as Exception;
 /**
  * PHPMailer - PHP email creation and transport class.
  *

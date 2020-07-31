@@ -501,6 +501,13 @@ $('.ui.selection.dropdown.recaptchacases').dropdown({
             {/if}
             name: "Editorvorlagen",
             value: "editortemplates"
+        },
+        {
+            {if "twofactor"|in_array:$site['config']['recaptcha']['cases']}
+            selected: true,
+            {/if}
+            name: "2-Faktor Authentisierung",
+            value: "twofactor"
         }
     ],
 });

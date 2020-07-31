@@ -7,7 +7,7 @@ class PageNotFoundException extends SystemException implements IPrintableExcepti
         header("HTTP/1.0 404 Not Found");
         $show = new \kt\page\NotFoundPage("notfound");
         $show->readParameters($_REQUEST);
-        $show->assignTPL($show->assign());
+        $show->assign();
         $show->show();
     }  
 }

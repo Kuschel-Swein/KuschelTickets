@@ -1,11 +1,11 @@
 <?php
 use kt\system\Utils;
 use kt\system\CRSF;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
+use kt\system\mailer\PHPMailer;
+use kt\system\mailer\SMTP;
+use kt\system\exception\MailerExeption;
 
-$validrecaptchauasecase = ['login', 'registration', 'passwordreset', 'addticket', 'ticketanswer', 'accountmanagement', 'notificationsettings', 'editortemplates'];
+$validrecaptchauasecase = ['login', 'registration', 'passwordreset', 'addticket', 'ticketanswer', 'accountmanagement', 'notificationsettings', 'editortemplates', 'twofactor'];
 
 $errors = array(
     "pagetitle" => false,
@@ -93,9 +93,6 @@ if(isset($parameters['submit'])) {
                                                                                             if(filter_var($parameters['smtpfrom'], FILTER_VALIDATE_EMAIL)) {
                                                                                                 $mailexception = "";
                                                                                                 if($parameters['smtphost'] !== $config['mail']['host'] || $parameters['smtpport'] !== $config['mail']['port'] || $parameters['smtpauth'] !== $config['mail']['auth'] || $parameters['smtpusername'] !== $config['mail']['username'] || $parameters['smtppassword'] !== $config['mail']['password'] || $parameters['smtpform'] !== $config['mail']['from']) {
-                                                                                                    require("lib/PHPMailer/Exception.php");
-                                                                                                    require("lib/PHPMailer/PHPMailer.php");
-                                                                                                    require("lib/PHPMailer/SMTP.php");
                                                                                                     $mail = new PHPMailer();
                                                                                                     try {                    
                                                                                                         $mail->isSMTP(); 
@@ -435,7 +432,7 @@ if(isset($parameters['submit'])) {
                                                                                                         '    )'.PHP_EOL.
                                                                                                         ');'.PHP_EOL.
                                                                                                         ''.PHP_EOL.
-                                                                                                        'define("KT_N", "'.KT_N.'");'.PHP_EOL.
+                                                                                                        'if(!defined("KT_N")) define("KT_N", "'.KT_N.'");'.PHP_EOL.
                                                                                                         '');
                                                                                                         fclose($file);
                                                                                                         $success = "Deine Einstellungen wurden erfolgreich gespeichert und eine neue Konifurationsdatei wurde erstellt.";

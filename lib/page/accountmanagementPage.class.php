@@ -11,6 +11,7 @@ use kt\system\mailer\Mailer;
 use kt\system\Link;
 use kt\system\recaptcha;
 use kt\system\KuschelTickets;
+use kt\system\TOTP;
 
 class accountmanagementPage extends AbstractPage {
 
@@ -34,11 +35,13 @@ class accountmanagementPage extends AbstractPage {
             "email" => false,
             "password_new" => false,
             "password_new_confirm" => false,
+            "twofactor" => false,
             "token" => false
         );
         $this->success = array(
             "username" => false,
             "password" => false,
+            "twofactor" => false,
             "email" => false
         );
 
@@ -51,6 +54,7 @@ class accountmanagementPage extends AbstractPage {
                                 if(isset($parameters['username']) && !empty($parameters['username'])) {
                                     if(UserUtils::exists($parameters['username'], "username") && $parameters['username'] !== KuschelTickets::getUser()->username) {
                                         $this->errors['username'] = "Dieser Benutzername ist bereits vergeben.";
+                                        $this->twofactor($parameters);
                                         $this->emailChange($parameters);
                                         $this->passwordChange($parameters);
                                     } else {
@@ -61,6 +65,7 @@ class accountmanagementPage extends AbstractPage {
                                             ));
                                             $this->success["username"] = "Dein neuer Benutzername wurde erfolgreich gespeichert.";
                                         }
+                                        $this->twofactor($parameters);
                                         $this->emailChange($parameters);
                                         $this->passwordChange($parameters);
                                     }
@@ -81,6 +86,72 @@ class accountmanagementPage extends AbstractPage {
                 }
             } else {
                 $this->errors['token'] = "Du wurdest von reCaptcha als Bot erkannt.";
+            }
+        }
+    }
+
+    public function twofactor(Array $parameters) {
+        global $config;
+
+        if(KuschelTickets::getUser()->hasPermission("general.account.twofactor")) {
+            if(isset($parameters['twofactor_enabled'])) {
+                if($parameters['twofactor_enabled'] == "on") {
+                    if(isset($parameters['twofactor_secret']) && !empty($parameters['twofactor_secret'])) {
+                        if(isset($parameters['twofactor']) && !empty($parameters['twofactor'])) {
+                            $totp = new TOTP();
+                            $validCode = $totp->verifyCode($parameters['twofactor_secret'], $parameters['twofactor'], 2);
+                            if($validCode) {
+                                $backupcodes = [];
+                                for($i = 0; $i < 9; $i++) {
+                                    array_push($backupcodes, Utils::randomString());
+                                }
+                                // use cast to array for better performance
+                                $twofactor = (Array) KuschelTickets::getUser()->twofactor;
+                                $twofactor['use'] = true;
+                                $twofactor['backupcodes'] = $backupcodes;
+                                $twofactor['code'] = $parameters['twofactor_secret'];
+                                $twofactor = (object) $twofactor;
+                                KuschelTickets::getUser()->update(array(
+                                    "twofactor" => $twofactor
+                                ));
+                                $mail = new Mailer(KuschelTickets::getUser()->email, $config['pagetitle']." - Backupcodes", KuschelTickets::getUser()->username);
+                                $message = "<p>Hey ".KuschelTickets::getUser()->username.",</p>
+                                <p>auf der Website ".$config['pagetitle']." wurde die 2-Faktor Authentisierung aktiviert. Hier erhälst du nun zur Sicherheit deine Backupcodes.</p>
+                                <table>
+                                    <tbody>
+                                        <tr><td>".$backupcodes[0]."</td><td>".$backupcodes[1]."</td><td>".$backupcodes[2]."</td></tr>
+                                        <tr><td>".$backupcodes[3]."</td><td>".$backupcodes[4]."</td><td>".$backupcodes[5]."</td></tr>
+                                        <tr><td>".$backupcodes[6]."</td><td>".$backupcodes[7]."</td><td>".$backupcodes[8]."</td></tr>
+                                    </tbody>
+                                </table>
+                                <p></p>
+                                <p><hr></p>
+                                <p>Mit freundlichen Grüßen,</p>
+                                <p>dein ".$config['pagetitle']." Team</p>";
+                                $mail->setMessage($message);
+                                $mail->send();
+                                $this->success['twofactor'] = "Du hast die 2-Faktor Authentisierung erfolgreich aktiviert. Die Backupcodes wurden dir zusätzlich per E-Mail zugesandt.";
+                            } else {
+                                $this->errors['twofactor'] = "Bitte gib einen validen Sicherheitscode an.";
+                            }
+                        } else {
+                            $this->errors['twofactor'] = "Bitte gib den Sicherheitscode an.";
+                        }
+                    } else {
+                        $this->errors['twofactor'] = "Bitte sende eine valide Anfrage.";
+                    }
+                }
+            } else {
+                // use cast to array for better performance
+                $twofactor = (Array) KuschelTickets::getUser()->twofactor;
+                $twofactor['use'] = false;
+                $twofactor['backupcodes'] = [];
+                $twofactor['code'] = "";
+                $twofactor = (object) $twofactor;
+                KuschelTickets::getUser()->update(array(
+                    "twofactor" => $twofactor
+                ));
+                $this->success['twofactor'] = "Du hast die 2-Faktor Authentisierung erfolgreich deaktiviert.";
             }
         }
     }
@@ -145,6 +216,7 @@ class accountmanagementPage extends AbstractPage {
         KuschelTickets::getTPL()->assign(array(
             "errors" => $this->errors,
             "success" => $this->success,
+            "twofactor" => new TOTP(),
             "recaptcha" => recaptcha::build("accountmanagement")
         ));
     }

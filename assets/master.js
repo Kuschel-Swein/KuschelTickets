@@ -30,7 +30,6 @@ $(document).ready(function () {
             elem = elem.parentElement.parentElement;
         }
     }
-    notifications.init();
     externalpage.init();
     $('table').addClass("sortable");
     var elems = document.querySelectorAll('table > thead > tr > th');
@@ -39,7 +38,8 @@ $(document).ready(function () {
             elems[i].classList.add("no-sort");
         }
     }
-    $('table').tablesort()
+    $('table').tablesort();
+    notifications.init();
 });
 
 const ajax = {
@@ -1284,4 +1284,16 @@ function formatUnix(unix, addDate = true, addTime = true) {
         result = result + hours + ":" + minutes + " Uhr";
     }
     return result;
+}
+
+function toggleElement(querySelectorElement, checkBox) {
+    var element = document.querySelector(querySelectorElement);
+    if(!element) {
+        throw new Error("the toggleable element you specified does not exist");
+    }
+    if(checkBox.checked == true) {
+        element.style.display = "";
+    } else {
+        element.style.display = "none";
+    }
 }

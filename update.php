@@ -4,18 +4,19 @@ if(!file_exists("config.php")) {
 }
 if(file_exists("data/INSTALLED")) {
     header("Location: index.php");
+    die();
 }
 $success = "";
-require("config.php");
-define("UPDATERTOVERSION", "v2.2");
-define("UPDATERFROMVERSION", "v2.1.1");
+require "config.php";
+define("UPDATERTOVERSION", "v2.3");
+define("UPDATERFROMVERSION", "v2.2.1");
 if($config['version'] !== UPDATERFROMVERSION) {
     die("Dieser Updater kann nur von der Version <b>".UPDATERFROMVERSION."</b> auf die Version <b>".UPDATERTOVERSION."</b> aktualisieren.");
 }
 if(isset($_POST['submit'])) {
     $pdo = $config['db'];
 
-    $permissions = ['general.supportchat.view', 'general.supportchat.join', 'general.supportchat.use', 'mod.supportchat.create', 'admin.acp.page.menuentries', 'general.ticket.export.pdf', 'general.ticket.rate'];
+    $permissions = ['general.account.twofactor'];
     $stmt = $pdo->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1");
     $stmt->execute();
     while($row = $stmt->fetch()) {
@@ -28,45 +29,11 @@ if(isset($_POST['submit'])) {
         $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (1, ? , 1)");
         $stmt->execute([$perm]);
     }
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_editortemplates ADD FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");  
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq ADD FOREIGN KEY (category) REFERENCES kuscheltickets".KT_N."_faq_categorys(categoryID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_group_permissions ADD FOREIGN KEY (groupID) REFERENCES kuscheltickets".KT_N."_groups(groupID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD FOREIGN KEY (creator) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_answers ADD FOREIGN KEY (ticketID) REFERENCES kuscheltickets".KT_N."_tickets(ticketID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_notifications ADD `sent` INT(1) NOT NULL AFTER `done`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `oauth` INT NOT NULL DEFAULT '0' AFTER `email_change_time`;");
-    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_supportchat (
-        chatID int NOT NULL AUTO_INCREMENT,
-        creator int NOT NULL REFERENCES kuscheltickets".KT_N."_accounts(userID),
-        user int REFERENCES kuscheltickets".KT_N."_accounts(userID),
-        time int NOT NULL,
-        state int NOT NULL,
-        PRIMARY KEY (chatID)
-    );");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat ADD FOREIGN KEY (creator) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat ADD FOREIGN KEY (user) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE;");
-    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_supportchat_messages (
-        messageID int NOT NULL AUTO_INCREMENT,
-        chatID int NOT NULL REFERENCES kuscheltickets".KT_N."_supportchat(chatID),
-        poster int NOT NULL,
-        time int NOT NULL,
-        PRIMARY KEY (messageID)
-    );");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat_messages ADD FOREIGN KEY (chatID) REFERENCES kuscheltickets".KT_N."_supportchat(chatID) ON DELETE CASCADE;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_supportchat_messages` ADD `content` TEXT NOT NULL AFTER `poster`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD `rating` INT(1) NULL AFTER `color`;");
-    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_menu (
-        menuID int NOT NULL AUTO_INCREMENT,
-        title TEXT NOT NULL,
-        controller TEXT NOT NULL,
-        system INT DEFAULT 0,
-        sorting INT DEFAULT 0,
-        PRIMARY KEY (menuID)
-    );");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_menu ADD `parent` INT NULL AFTER `controller`;");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_menu ADD FOREIGN KEY (parent) REFERENCES kuscheltickets".KT_N."_menu(menuID) ON DELETE CASCADE;");
-    $pdo->query("INSERT INTO kuscheltickets".KT_N."_menu (`menuID`, `title`, `controller`, `parent`, `system`, `sorting`) VALUES  (1, 'Startseite', 'Index', NULL, 1, 1), (2, 'Meine Tickets', 'mytickets', NULL, 1, 2), (3, 'Tickets', 'tickets', NULL, 1, 3), (4, 'FAQ', 'faq', NULL, 1, 4), (5, 'Account verwalten', 'accountmanagement', NULL, 1, 5), (6, 'Editorvorlagen', 'editortemplates', 5, 1, 6), (7, 'SupportChat', 'supportchat', 4, 1, 7), (8, 'Administration', 'admin', NULL, 1, 8);");
+
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys RENAME TO kuscheltickets".KT_N."_ticket_categories");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq_categorys RENAME TO kuscheltickets".KT_N."_faq_categories");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `twofactor` TEXT NOT NULL DEFAULT '{\"use\":false,\"code\":\"\",\"backupcodes\":[]}' AFTER `oauth`;");
+    $pdo->query("UPDATE kuscheltickets".KT_N."_accounts SET `twofactor`='{\"use\":false,\"code\":\"\",\"backupcodes\":[]}' WHERE `twofactor` = ''");
 
     $count = count($config['recaptcha']['cases']);
     $recaptchacases = $config['recaptcha']['cases'];
@@ -99,12 +66,12 @@ if(isset($_POST['submit'])) {
     '        "database" => false'.PHP_EOL.
     '    ),'.PHP_EOL.
     '    "cookie" => "'.$config['cookie'].'",'.PHP_EOL.
-    '    "cookienotice" => true,'.PHP_EOL.
+    '    "cookienotice" => '.$config['cookienotice'].','.PHP_EOL.
     '    "seourls" => '.$config['seourls'].','.PHP_EOL.
-    '    "ticketRating" => true,'.PHP_EOL.
-    '    "ticketRatingIcon" => "star",'.PHP_EOL.
-    '    "pdfexport" => true,'.PHP_EOL.
-    '    "registrationEnabled" => true,'.PHP_EOL.
+    '    "ticketRating" => '.$config['ticketRating'].','.PHP_EOL.
+    '    "ticketRatingIcon" => "'.$config['ticketRatingIcon'].'",'.PHP_EOL.
+    '    "pdfexport" => '.$config['pdfexport'].','.PHP_EOL.
+    '    "registrationEnabled" => '.$config['registrationEnabled'].','.PHP_EOL.
     '    "faviconextension" => "'.$config['faviconextension'].'",'.PHP_EOL.
     '    "externalURLTitle" => '.$config['externalURLTitle'].','.PHP_EOL.
     '    "faviconmime" => "'.$config['faviconmime'].'",'.PHP_EOL.
@@ -116,14 +83,14 @@ if(isset($_POST['submit'])) {
     '    "adminmail" => "'.$config['adminmail'].'",'.PHP_EOL.
     '    "oauth" => array('.PHP_EOL.
     '        "google" => array('.PHP_EOL.
-    '            "use" => false,'.PHP_EOL.
-    '            "clientid" => "",'.PHP_EOL.
-    '            "clientsecret" => ""'.PHP_EOL.
+    '            "use" => '.$config['oauth']['google']['use'].','.PHP_EOL.
+    '            "clientid" => "'.$config['oauth']['google']['clientid'].'",'.PHP_EOL.
+    '            "clientsecret" => "'.$config['oauth']['google']['clientsecret'].'"'.PHP_EOL.
     '        ),'.PHP_EOL.
     '        "github" => array('.PHP_EOL.
-    '            "use" => false,'.PHP_EOL.
-    '            "clientid" => "",'.PHP_EOL.
-    '            "clientsecret" => ""'.PHP_EOL.
+    '            "use" => '.$config['oauth']['github']['clientsecret'].','.PHP_EOL.
+    '            "clientid" => "'.$config['oauth']['github']['clientsecret'].'",'.PHP_EOL.
+    '            "clientsecret" => "'.$config['oauth']['github']['clientsecret'].'"'.PHP_EOL.
     '        ),'.PHP_EOL.
     '    ),'.PHP_EOL.
     '    "mail" => array('.PHP_EOL.
@@ -148,7 +115,7 @@ if(isset($_POST['submit'])) {
     '    )'.PHP_EOL.
     ');'.PHP_EOL.
     ''.PHP_EOL.
-    'define("KT_N", "'.KT_N.'");'.PHP_EOL.
+    'if(!defined("KT_N")) define("KT_N", "'.KT_N.'");'.PHP_EOL.
     '');
     fclose($file);
     $success = "KuschelTickets wurde erfolgreich aktualisiert. Sieh doch mal in den Einstellungen des ACPs vorbei, es gab einige Änderungen.";

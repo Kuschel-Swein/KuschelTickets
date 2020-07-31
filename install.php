@@ -1,7 +1,7 @@
 <?php
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
+use kt\system\exception\MailerException;
+use kt\system\mailer\PHPMailer;
+use kt\system\mailer\SMTP;
 /**
  * du kannst mehrere installationen in einer Datenbank haben, modifiziere hierzu einfach die folgende variable
  */
@@ -9,20 +9,26 @@ $KT_N = 1;
 /**
  * ================================================================================
  */
-
 define("KT_N", $KT_N);
-define("VERSION", "v2.2");
+define("VERSION", "v2.3");
+
+require "lib/system/exception/MailerException.class.php";
+require "lib/system/mailer/PHPMailer.class.php";
+require "lib/system/mailer/SMTP.class.php";
+
 if(file_exists("data/INSTALLED")) {
     header("Location: index.php");
+    die();
 }
 session_name("KuschelTickets");
 session_start();
 if(!isset($_GET['step']) || empty($_GET['step']) || !is_numeric($_GET['step'])) {
     header("Location: install.php?step=1");
+    die();
 } else {
     define("STEP", $_GET['step']);
 }
-$permissions = ["general.tickets.quote", "mod.view.tickets", "general.login", "general.view.tickets.self", "general.tickets.add", "general.view.ticket.own", "mod.view.ticket.all", "general.tickets.answer", "general.tickets.deletemessage.own", "general.tickets.deletemessage.other", "mod.tickets.close", "general.tickets.close.own", "mod.tickets.done", "general.tickets.done.own", "mod.tickets.reopen", "general.tickets.reopen.own", "mod.tickets.delete", "general.tickets.delete.own", "mod.tickets.answers.delete", "general.tickets.answers.delete.own", "mod.view.tickets.list", "general.view.dashboard", "general.view.faq", "general.account.manage", "admin.acp.use", "admin.acp.page.dashboard", "admin.acp.page.faq", "admin.acp.page.faqcategories", "admin.acp.page.pages", "admin.acp.page.settings", "admin.acp.page.accounts", "admin.bypass.bannable", "admin.bypass.delete", "admin.acp.page.groups", "admin.acp.page.ticketcategories", "admin.login.other", "admin.bypass.login.other", "general.notifications.view", "general.notifications.settings", "admin.acp.page.cleanup", "admin.acp.page.errors", "general.supportchat.view", "general.supportchat.join", "general.supportchat.use", "mod.supportchat.create", "admin.acp.page.menuentries", "general.ticket.export.pdf", "general.ticket.rate"]; 
+$permissions = ["general.tickets.quote", "mod.view.tickets", "general.login", "general.view.tickets.self", "general.tickets.add", "general.view.ticket.own", "mod.view.ticket.all", "general.tickets.answer", "general.tickets.deletemessage.own", "general.tickets.deletemessage.other", "mod.tickets.close", "general.tickets.close.own", "mod.tickets.done", "general.tickets.done.own", "mod.tickets.reopen", "general.tickets.reopen.own", "mod.tickets.delete", "general.tickets.delete.own", "mod.tickets.answers.delete", "general.tickets.answers.delete.own", "mod.view.tickets.list", "general.view.dashboard", "general.view.faq", "general.account.manage", "admin.acp.use", "admin.acp.page.dashboard", "admin.acp.page.faq", "admin.acp.page.faqcategories", "admin.acp.page.pages", "admin.acp.page.settings", "admin.acp.page.accounts", "admin.bypass.bannable", "admin.bypass.delete", "admin.acp.page.groups", "admin.acp.page.ticketcategories", "admin.login.other", "admin.bypass.login.other", "general.notifications.view", "general.notifications.settings", "admin.acp.page.cleanup", "admin.acp.page.errors", "general.supportchat.view", "general.supportchat.join", "general.supportchat.use", "mod.supportchat.create", "admin.acp.page.menuentries", "general.ticket.export.pdf", "general.ticket.rate", "general.account.twofactor"]; 
 $pdoerror = "";
 if(STEP == 2 && isset($_POST['submit'])) {
     $_SESSION['database'] = $_POST['database'];
@@ -41,13 +47,13 @@ if(STEP == 2 && isset($_POST['submit'])) {
         // clean the database
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_accounts");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_faq");
-        $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_faq_categorys");
+        $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_faq_categories");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_groups");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_group_permissions");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_pages");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_tickets");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_ticket_answers");
-        $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_ticket_categorys");
+        $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_ticket_categories");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_notifications");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_editortemplates");
         $pdo->query("DROP TABLE IF EXISTS kuscheltickets".KT_N."_supportchat");
@@ -69,7 +75,8 @@ if(STEP == 2 && isset($_POST['submit'])) {
                 `password_reset` int(11) DEFAULT NULL,
                 `email_change_email` text DEFAULT NULL,
                 `email_change_time` int(11) NOT NULL,
-                `oauth` int(11) NOT NULL DEFAULT 0
+                `oauth` int(11) NOT NULL DEFAULT 0,
+                `twofactor` text NOT NULL DEFAULT '{\"use\":false,\"code\":\"\",\"backupcodes\":[]}'
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
             "CREATE TABLE `kuscheltickets1_editortemplates` (
                 `templateID` int(11) NOT NULL,
@@ -84,7 +91,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
                 `answer` text NOT NULL,
                 `category` int(11) NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
-            "CREATE TABLE `kuscheltickets1_faq_categorys` (
+            "CREATE TABLE `kuscheltickets1_faq_categories` (
                 `categoryID` int(11) NOT NULL,
                 `name` text NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
@@ -159,7 +166,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
                 `content` text NOT NULL,
                 `time` int(11) NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
-            "CREATE TABLE `kuscheltickets1_ticket_categorys` (
+            "CREATE TABLE `kuscheltickets1_ticket_categories` (
                 `categoryID` int(11) NOT NULL,
                 `categoryName` text NOT NULL,
                 `color` varchar(535) NOT NULL,
@@ -176,7 +183,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             "ALTER TABLE `kuscheltickets1_accounts` ADD PRIMARY KEY (`userID`);",
             "ALTER TABLE `kuscheltickets1_editortemplates` ADD PRIMARY KEY (`templateID`), ADD KEY `userID` (`userID`);",
             "ALTER TABLE `kuscheltickets1_faq` ADD PRIMARY KEY (`faqID`), ADD KEY `category` (`category`);",
-            "ALTER TABLE `kuscheltickets1_faq_categorys` ADD PRIMARY KEY (`categoryID`);",
+            "ALTER TABLE `kuscheltickets1_faq_categories` ADD PRIMARY KEY (`categoryID`);",
             "ALTER TABLE `kuscheltickets1_groups` ADD PRIMARY KEY (`groupID`);",
             "ALTER TABLE `kuscheltickets1_group_permissions` ADD PRIMARY KEY (`permissionID`), ADD KEY `groupID` (`groupID`);",
             "ALTER TABLE `kuscheltickets1_menu` ADD PRIMARY KEY (`menuID`), ADD KEY `parent` (`parent`);",
@@ -186,7 +193,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             "ALTER TABLE `kuscheltickets1_supportchat_messages` ADD PRIMARY KEY (`messageID`), ADD KEY `chatID` (`chatID`);",
             "ALTER TABLE `kuscheltickets1_tickets` ADD PRIMARY KEY (`ticketID`), ADD KEY `creator` (`creator`);",
             "ALTER TABLE `kuscheltickets1_ticket_answers` ADD PRIMARY KEY (`answerID`), ADD KEY `ticketID` (`ticketID`);",
-            "ALTER TABLE `kuscheltickets1_ticket_categorys` ADD PRIMARY KEY (`categoryID`);"
+            "ALTER TABLE `kuscheltickets1_ticket_categories` ADD PRIMARY KEY (`categoryID`);"
         ];
         foreach($statements as $statement) {
             $statement = str_replace("kuscheltickets1", "kuscheltickets".KT_N, $statement);
@@ -198,7 +205,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             "ALTER TABLE `kuscheltickets1_accounts` MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_editortemplates` MODIFY `templateID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_faq` MODIFY `faqID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
-            "ALTER TABLE `kuscheltickets1_faq_categorys` MODIFY `categoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
+            "ALTER TABLE `kuscheltickets1_faq_categories` MODIFY `categoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_groups` MODIFY `groupID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_group_permissions` MODIFY `permissionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_menu` MODIFY `menuID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
@@ -208,7 +215,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             "ALTER TABLE `kuscheltickets1_supportchat_messages` MODIFY `messageID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_tickets` MODIFY `ticketID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
             "ALTER TABLE `kuscheltickets1_ticket_answers` MODIFY `answerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;",
-            "ALTER TABLE `kuscheltickets1_ticket_categorys` MODIFY `categoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;"
+            "ALTER TABLE `kuscheltickets1_ticket_categories` MODIFY `categoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;"
 
         ];
         foreach($statements as $statement) {
@@ -219,7 +226,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
         // constraints
         $statements = [
             "ALTER TABLE `kuscheltickets1_editortemplates` ADD CONSTRAINT `kuscheltickets1_editortemplates_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE, ADD CONSTRAINT `kuscheltickets1_editortemplates_ibfk_2` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE;",
-            "ALTER TABLE `kuscheltickets1_faq` ADD CONSTRAINT `kuscheltickets1_faq_ibfk_1` FOREIGN KEY (`category`) REFERENCES `kuscheltickets1_faq_categorys` (`categoryID`) ON DELETE CASCADE;",
+            "ALTER TABLE `kuscheltickets1_faq` ADD CONSTRAINT `kuscheltickets1_faq_ibfk_1` FOREIGN KEY (`category`) REFERENCES `kuscheltickets1_faq_categories` (`categoryID`) ON DELETE CASCADE;",
             "ALTER TABLE `kuscheltickets1_group_permissions` ADD CONSTRAINT `kuscheltickets1_group_permissions_ibfk_1` FOREIGN KEY (`groupID`) REFERENCES `kuscheltickets1_groups` (`groupID`) ON DELETE CASCADE;",
             "ALTER TABLE `kuscheltickets1_menu` ADD CONSTRAINT `kuscheltickets1_menu_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `kuscheltickets1_menu` (`menuID`) ON DELETE CASCADE;",
             "ALTER TABLE `kuscheltickets1_notifications` ADD CONSTRAINT `kuscheltickets1_notifications_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`), ADD CONSTRAINT `kuscheltickets1_notifications_ibfk_2` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE;",
@@ -254,9 +261,6 @@ if(STEP == 2 && isset($_POST['submit'])) {
 
 $mailexception = "";
 if(STEP == 3 && isset($_POST['submit'])) {
-    require("lib/PHPMailer/Exception.php");
-    require("lib/PHPMailer/PHPMailer.php");
-    require("lib/PHPMailer/SMTP.php");
     $mail = new PHPMailer();
     $auth = (isset($_POST['smtpauth'])) ? true : false;
     try {                    
@@ -276,7 +280,7 @@ if(STEP == 3 && isset($_POST['submit'])) {
         $mail->Subject = "SMTP Server Test";
         $mail->Body = "<div style='font-family: Arial, sans-serif'>Dies ist nur der Test deines SMTP Servers, du kannst diese E-Mail ignorieren.</div>";
         $mail->send();
-    } catch (Exception $e) {
+    } catch (MailerException $e) {
         $mailexception = $e;
     }
     if($mailexception == "") {
@@ -350,7 +354,7 @@ if(STEP == 3 && isset($_POST['submit'])) {
         '    )'.PHP_EOL.
         ');'.PHP_EOL.
         ''.PHP_EOL.
-        'define("KT_N", "'.KT_N.'");'.PHP_EOL.
+        'if(!defined("KT_N")) define("KT_N", "'.KT_N.'");'.PHP_EOL.
         '');
         fclose($file);
         header("Location: install.php?step=4");
@@ -361,7 +365,7 @@ $error4 = "";
 if(STEP == 4 && isset($_POST['submit'])) {
     if($_POST['password'] == $_POST['password_confirm']) {
         $pdo = new PDO("mysql:host=".$_SESSION['databasehost'].":".$_SESSION['databaseport'].";dbname=".$_SESSION['database'], $_SESSION['databaseuser'], $_SESSION['databasepassword']);
-        $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_accounts(`username`, `password`, `email`, `token`, `userGroup`, `banned`) VALUES (?, ?, ?, ?, 1, 0)");
+        $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_accounts(`username`, `password`, `email`, `token`, `userGroup`, `banned`, `password_reset`, `email_change_time`) VALUES (?, ?, ?, ?, 1, 0, 0, 0)");
         $username = strip_tags($_POST['username']);
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
         $email = strip_tags($_POST['email']);
@@ -382,7 +386,6 @@ if(STEP == 5) {
     $file = fopen("data/INSTALLED", "w");
     fclose($file);
     session_destroy();
-    
 }
 ?>
 <!DOCTYPE html>

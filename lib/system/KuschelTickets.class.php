@@ -44,15 +44,15 @@ class KuschelTickets {
     }
 
     public static function handleError(int $errorNumber, String $errorString, String $errorFile, int $errorLine) {
-        throw new \ErrorException($errorString, 0, $errorNumber, $errorFile, $errorLine);
+        self::handleException(new \ErrorException($errorString, 0, $errorNumber, $errorFile, $errorLine));
     }
 
     public static function handleException(\Throwable $exception) {
         global $config;
-        ob_end_clean();
         if($exception instanceof \kt\system\exception\IPrintableException) {
             $exception->show();
         } else {
+            ob_end_clean();
             try {
                 $errorcode = \kt\system\Utils::generateErrorCode();
                 $file = fopen("./data/logs/".$errorcode.".txt", "w");

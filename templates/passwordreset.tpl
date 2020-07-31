@@ -87,7 +87,7 @@
         <a class="item" href="{link url="register"}">Registrieren</a>
         <a class="item" href="{link url="login"}">Einloggen</a>
       </div>
-      {include file="oauth_providers.tpl"}
+      {include file="__oauth_providers.tpl"}
     </div>
   </div>
 </div>

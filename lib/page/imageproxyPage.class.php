@@ -11,7 +11,7 @@ class imageproxyPage extends AbstractPage {
     public function readParameters(Array $parameters) {
         global $config;
         if(isset($parameters['url']) && !empty($parameters['url'])) {
-            $url = Utils::fromASCI($parameters['url']);
+            $url = Utils::fromASCII($parameters['url']);
             if(preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url)) {
                 $imginfo = getimagesize($url);
                 header("Cache-Control: max-age=86400");

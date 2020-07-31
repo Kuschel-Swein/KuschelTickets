@@ -25,7 +25,7 @@ namespace kt\system\exception;
  *
  * @author Marcus Bointon <phpmailer@synchromedia.co.uk>
  */
-class MailerExeption extends \Exception {
+class MailerException extends \Exception {
     /**
      * Prettify error message output.
      *

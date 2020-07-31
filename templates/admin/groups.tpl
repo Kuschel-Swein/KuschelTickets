@@ -109,7 +109,7 @@
       <div class="five wide column overflow-x-auto">
         <div class="field">
           <div class="ui radio checkbox">
-            <input type="radio" value="{$color}" name="badge"{if isset($tpl['post']['badge']) && !$site['success']}{if $tpl['post']['badge'] == $color} checked{/if}{/if}>
+            <input type="radio" value="{$color}" name="badge"{if isset($tpl['post']['badge']) && !$site['success']}{if $tpl['post']['badge'] == $color} checked="checked"{/if}{/if}>
             <label><div class="ui {$color} label preview">Badge</div></label>
           </div>
         </div>
@@ -137,7 +137,7 @@
         {if $permission['name']|strpos:'general_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']])}{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>
@@ -149,7 +149,7 @@
         {if $permission['name']|strpos:'mod_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']])}{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>
@@ -161,7 +161,7 @@
         {if $permission['name']|strpos:'admin_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($tpl['post'][$permission['name']])}{if isset($tpl['post'][$permission['name']]) && !$site['success']} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>
@@ -216,7 +216,7 @@
         <div class="five wide column overflow-x-auto">
           <div class="field">
             <div class="ui radio checkbox">
-              <input type="radio" value="{$color}" name="badge"{if $site['badge'] == $color} checked{/if}>
+              <input type="radio" value="{$color}" name="badge"{if $site['badge'] == $color} checked="checked"{/if}>
               <label><div class="ui {$color} label preview">{$site['editgroup']->name}</div></label>
             </div>
           </div>
@@ -245,7 +245,7 @@
         {if $permission['name']|strpos:'general_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($site['gpermissions'][$permission['name']])}{if $site['gpermissions'][$permission['name']] == "1"} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>
@@ -257,7 +257,7 @@
         {if $permission['name']|strpos:'mod_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($site['gpermissions'][$permission['name']])}{if $site['gpermissions'][$permission['name']] == "1"} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>
@@ -269,7 +269,7 @@
         {if $permission['name']|strpos:'admin_' === 0}
           <div class="field">
             <div class="ui checkbox">
-              <input type="checkbox" name="{$permission['name']}"{if $site['gpermissions'][$permission['name']] == "1"} checked{/if}>
+              <input type="checkbox" name="{$permission['name']}"{if isset($site['gpermissions'][$permission['name']])}{if $site['gpermissions'][$permission['name']] == "1"} checked="checked"{/if}{/if}>
               <label>{$permission['display']}</label>
             </div>
           </div>

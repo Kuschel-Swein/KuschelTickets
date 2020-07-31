@@ -55,10 +55,14 @@ abstract class DatabaseObject {
         $updateString = "UPDATE ".$this->tableName." SET ";
         $counter = 0;
         foreach($data as $key => $value) {
-            $jsonCheck = json_decode($value);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                if(!in_array($key, self::DISABLE_JSON)) {
-                    $this->$key = $jsonCheck;
+            if(is_string($value)) {
+                $jsonCheck = json_decode($value);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    if(!in_array($key, self::DISABLE_JSON)) {
+                        $this->$key = $jsonCheck;
+                    } else {
+                        $this->$key = $value;
+                    }
                 } else {
                     $this->$key = $value;
                 }

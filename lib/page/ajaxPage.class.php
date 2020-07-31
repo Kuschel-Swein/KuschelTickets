@@ -592,7 +592,7 @@ class ajaxPage extends AbstractPage {
             }
         } else if($type == 20) {
             if(isset($parameters['object']) && !empty($parameters['object']) && $config['externalURLTitle']) {
-                $url = Utils::fromASCI($parameters['object']);
+                $url = Utils::fromASCII($parameters['object']);
                 if(preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url)) {
                     $title = $url;
                     $opts = [
@@ -808,7 +808,7 @@ class ajaxPage extends AbstractPage {
                         if($chatID !== null) {
                             $chat = new SupportChat((int) $chatID);
                             if($chat->chatID) {
-                                $chat->createMessage(KuschelTickets::getUser(), Utils::fromASCI($parameters['object']));
+                                $chat->createMessage(KuschelTickets::getUser(), Utils::fromASCII($parameters['object']));
                                 $result = array(
                                     "success" => "true",
                                     "message" => null,
@@ -987,10 +987,6 @@ class ajaxPage extends AbstractPage {
         die(json_encode($result, JSON_PRETTY_PRINT));
     }
 
-    public function assign() {
-        KuschelTickets::getTPL()->assign(array());
-    }
-
-
+    public function assign() { }
 }
 ?>

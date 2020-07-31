@@ -178,3 +178,10 @@ table {
 .faqsearch {
     width: 100%;
 }
+.tox-tinymce {
+    border-radius: .28571429rem!important;
+}
+.twofactorQRCode {
+    border-radius: .28571429rem!important;
+    width: 90%!important;
+}

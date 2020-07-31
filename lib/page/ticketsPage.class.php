@@ -11,7 +11,7 @@ class ticketsPage extends AbstractPage {
     private $tickets = [];
 
     public function readParameters(Array $parameters) {
-        if(KuschelTickets::getUser() == null) {
+        if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
 
@@ -26,7 +26,4 @@ class ticketsPage extends AbstractPage {
             "tickets" => $this->tickets
         ));
     }
-
-
 }
-?>

@@ -144,7 +144,7 @@
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text" templates="false"}
+{include file="__wysiwyg.tpl" selector="#text" templates="false"}
 {else if $subpage="edit"}
 <a class="ui blue button right floated" href="{link url="editortemplates"}">Editorvorlagen Auflisten</a>
 <br>
@@ -195,6 +195,6 @@
         </div>
     {/if}
 </form>
-{include file="wysiwyg.tpl" selector="#text" templates="false"}
+{include file="__wysiwyg.tpl" selector="#text" templates="false"}
 {/if}
 {include file="footer.tpl"}

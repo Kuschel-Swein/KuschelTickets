@@ -64,7 +64,7 @@ class Utils {
         return $errorcode;
     }
 
-    public static function toASCI(String $string) {
+    public static function toASCII(String $string) {
         $integer = "";
         foreach (str_split($string) as $char) {
             $integer .= sprintf("%03s", ord($char));
@@ -72,7 +72,7 @@ class Utils {
         return $integer;
     }
 
-    public static function fromASCI(String $integer) {
+    public static function fromASCII(String $integer) {
         $string = "";
         foreach (str_split($integer, 3) as $number) {
             $string .= chr($number);

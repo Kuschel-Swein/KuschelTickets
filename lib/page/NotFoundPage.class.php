@@ -9,10 +9,7 @@ class NotFoundPage extends AbstractPage {
         
     }
 
-    public function assign() {
-        KuschelTickets::getTPL()->assign(array());
-    }
-
+    public function assign() { }
 
 }
 ?>

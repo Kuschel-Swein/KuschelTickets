@@ -17,7 +17,7 @@
             const kuscheltickets_version = "{$__KT['version']}";
             const notifications_link = "{link url="notifications"}";
             const KT = {
-                {if $__KT['user'] == null}
+                {if !$__KT['user']->userID}
                 userID: null,
                 {else}
                 userID: {$__KT['user']->userID},
@@ -27,8 +27,8 @@
                 externalURLFavicons: {if $__KT['externalURLFavicons']}true{else}false{/if},
                 externalURLWarning: {if $__KT['externalURLWarning']}true{else}false{/if},
                 pushNotificationsAvailable: false,
-                canJoinChat: {if $__KT['user'] !== null}{$__KT['user']->hasPermission("general.supportchat.join")}{else}false{/if},
-                canOpenSupportchat: {if $__KT['user'] !== null}{$__KT['user']->hasPermission("mod.supportchat.create")}{else}false{/if},
+                canJoinChat: {if $__KT['user']->userID}{$__KT['user']->hasPermission("general.supportchat.join")}{else}false{/if},
+                canOpenSupportchat: {if $__KT['user']->userID}{$__KT['user']->hasPermission("mod.supportchat.create")}{else}false{/if},
                 pagetitle: "{$__KT['pagetitle']}",
                 faviconextension: "{$__KT['faviconextension']}",
                 externalURLTitle: {if $__KT['externalURLTitle']}true{else}false{/if},
@@ -54,10 +54,10 @@
                     </div>
                     <div class="ui vertical fluid menu">
                     {$__KT['topnavigation']}
-                    {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
-                        <a href="{link url="notifications"}" class="item">Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
+                    {if $__KT['user']->userID && $__KT['user']->hasPermission("general.notifications.view")}
+                        <a href="{link url="notifications"}" class="item"{if $__KT['user']->userID}{if $__KT['user']->twofactor->use == true}{if !isset($tpl['session']['twofactor'])} style="display: none"{/if}{/if}{/if}>Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
                     {/if}
-                    {if $__KT['user'] !== null}
+                    {if $__KT['user']->userID}
                         <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="item">Logout</a>
                     {else}
                         <a href="{link url="login"}" class="item{if $__KT['activepage'] =="login"} active{/if}">Login</a>
@@ -70,16 +70,18 @@
                 <h2>{$__KT['pagetitle']}</h2>
             </div>
             {$__KT['topnavigation']}
-            {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}
-                <div class="item right">
+            {if $__KT['user']->userID && $__KT['user']->hasPermission("general.notifications.view")}
+                <div class="item right"{if $__KT['user']->userID}{if $__KT['user']->twofactor->use == true}{if !isset($tpl['session']['twofactor'])} style="visibility: hidden"{/if}{/if}{/if}>
                     <div id="notificationsbell" class="pointer" data-position="bottom center">
                         <i class="icon bell"></i>
                         <div class="floating ui tiny red label notificationbadge notificationbadgehandler"></div>
                     </div>
                 </div>
+            {else}
+                <div class="item right" style="visibility: hidden"></div>
             {/if}
-            {if $__KT['user'] !== null}
-                <div class="item right" {if $__KT['user'] !== null && $__KT['user']->hasPermission("general.notifications.view")}style="margin-left: 0!important"{/if}>
+            {if $__KT['user']->userID}
+                <div class="item right" {if $__KT['user']->userID && $__KT['user']->hasPermission("general.notifications.view")}style="margin-left: 0!important"{/if}>
                     <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="ui blue button">Logout</a>
                 </div>
             {else}

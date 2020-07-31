@@ -1,6 +1,8 @@
 <?php
 namespace kt\system\page;
+
 use kt\system\exception\PageNotFoundException;
+use kt\system\KuschelTickets;
 
 class PageHandler {
 
@@ -44,6 +46,15 @@ class PageHandler {
 
         if(!file_exists("lib/page/".$page."Page.class.php")) {
             throw new PageNotFoundException();
+        }
+        if(KuschelTickets::getUser()->userID) {
+            if(KuschelTickets::getUser()->twofactor->use == true) {
+                if(!isset($_SESSION['twofactor'])) {
+                    if($page !=="logout") {
+                        $page = "twofactor";
+                    }
+                }
+            }
         }
         $identifier = $page;
         $page = "kt\page\\".$page."Page";
