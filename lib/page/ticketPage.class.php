@@ -65,7 +65,7 @@ class ticketPage extends AbstractPage {
                                         $allUsers = new UserList();
                                         foreach($allUsers as $account) {
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
-                                                if($account->userID == $creator->userID) {
+                                                if($account->userID == $ticket->creator) {
                                                     Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                     array_push($already, $account->userID);
                                                 }
@@ -78,7 +78,7 @@ class ticketPage extends AbstractPage {
                                         foreach($answers as $ticketAnswer) {
                                             $account = $ticketAnswer->getCreator();
                                             if(!$account->hasPermission("mod.view.ticket.all")) {
-                                                if($account->userID == $creator->userID) {
+                                                if($account->userID == $ticket->creator) {
                                                     if(!in_array($account->userID, $already)) {
                                                         Notification::add("notification_ticket_answer", "Es wurde eine Antwort im Ticket ".$ticket->title." von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->getCategory()->categoryName." erstellt.", "ticket-".$ticket->ticketID."#ticketanswer".$answer->answerID, $account);
                                                     }
