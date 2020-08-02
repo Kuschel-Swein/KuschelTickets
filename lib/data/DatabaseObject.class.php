@@ -27,7 +27,9 @@ abstract class DatabaseObject {
             $this->tablePrimaryKey = strtolower($primaryKey)."ID";
         }
         $this->tablePrimaryKeyValue = $primaryKeyValue;
-        $this->load();
+        if($primaryKeyValue !== 0) {
+            $this->load();
+        }
     }
 
     public function load() {

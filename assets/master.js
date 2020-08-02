@@ -3,11 +3,9 @@ $(document).ready(function () {
         $(".mobile.only.grid .ui.vertical.menu").toggle(100);
     });
       
-    $(".ui.dropdown.navigation").dropdown(
-        {
+    $(".ui.dropdown.navigation").dropdown({
             on: "click"
-        }
-    );
+    });
     var elems = document.querySelectorAll("a.menuLink[href]");
     for(var i = 0; i < elems.length; i++) {
         elems[i].addEventListener("click", function(e) {
@@ -66,6 +64,41 @@ const ajax = {
 };
 
 const modal = {
+    captcha: function(recaptchaCallback) {
+        var captchaExecute = function(recaptchaLoaded = false) {
+            if(KT.captchaType == "2") {
+                var modalID = modal.modal("reCaptcha", '<div id="recaptchaModal"></div>', "captchaModal");
+                grecaptcha.render('recaptchaModal', {
+                    'sitekey': KT.captchaPublicKey,
+                    'callback': function(token) {
+                        return new Promise(function(resolve, reject) { 
+                            recaptchaCallback(token);
+                            resolve();
+                            $("#modal" + modalID).modal('hide');
+                        });
+                    }
+                });
+            } else if(KT.captchaType == "3") {
+                var recaptchaReady = function() {
+                    grecaptcha.execute(KT.captchaPublicKey, {action: "homepage"}).then(function(token) {
+                        recaptchaCallback(token);
+                    });
+                };
+                if(recaptchaLoaded) {
+                    grecaptcha.ready(reCaptchaReady);
+                } else {
+                    recaptchaReady();
+                }
+            }
+        };
+        if(typeof grecaptcha === "undefined") {
+            utils.loadScript(KT.recaptchaTypes[KT.captchaType], function() {
+                captchaExecute(true);
+            });
+        } else {
+            captchaExecute();
+        }
+    },
     confirm: function (text, callback) {
         var id = Math.round(Math.random() * 100);
         var div = document.createElement("div");
@@ -81,10 +114,13 @@ const modal = {
             }
         }).modal('show');
     },
-    modal: function (title, text) {
+    modal: function (title, text, customClass = "") {
+        if(customClass !== "") {
+            customClass = " " + customClass;
+        }
         var id = Math.round(Math.random() * 100);
         var div = document.createElement("div");
-        div.innerHTML = '<div class="ui modal" id="modal' + id + '"><i class="close icon"></i><div class="header">' + title + '</div><div class="content">' + text + '</div></div>';
+        div.innerHTML = '<div class="ui modal' + customClass + '" id="modal' + id + '"><i class="close icon"></i><div class="header">' + title + '</div><div class="content">' + text + '</div></div>';
         document.body.appendChild(div);
         $('#modal' + id).modal({
             centered: false,
@@ -96,6 +132,13 @@ const modal = {
     }
 }
 const utils = {
+    loadScript: function(src, callback) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = callback
+        script.async = false;
+        document.body.appendChild(script);
+    },
     toASCI: function(string) {
         return string.replace(/./g, function(c) {
             return ('00' + c.charCodeAt(0)).slice(-3);
@@ -212,12 +255,14 @@ const custominput = {
                     '<div class="ui input">' +
                         '<input type="number" id="customInput' + count + '_minlength">' +
                     '</div>' +
+                    '<small class="helper">Du kannst den Wert <i>-1</i> verwenden um kein Limit festzulegen.</small>' +
                 '</div>' +
                 '<div class="field required">' +
                     '<label>Maximallänge</label>' +
                     '<div class="ui input">' +
                         '<input type="number" id="customInput' + count + '_maxlength">' +
                     '</div>' +
+                    '<small class="helper">Du kannst den Wert <i>-1</i> verwenden um kein Limit festzulegen.</small>' +
                 '</div>' +
                 '<div class="field">' +
                     '<label>Regex zur Validierung</label>' +
@@ -597,12 +642,14 @@ const custominput = {
                     '<div class="ui input">' +
                         '<input type="number" id="customInput' + mainid + '_minlength">' +
                     '</div>' +
+                    '<small class="helper">Du kannst den Wert <i>-1</i> verwenden um kein Limit festzulegen.</small>' +
                 '</div>' +
                 '<div class="field required">' +
                     '<label>Maximallänge</label>' +
                     '<div class="ui input">' +
                         '<input type="number" id="customInput' + mainid + '_maxlength">' +
                     '</div>' +
+                    '<small class="helper">Du kannst den Wert <i>-1</i> verwenden um kein Limit festzulegen.</small>' +
                 '</div>' +
                 '<div class="field">' +
                     '<label>Regex zur Validierung</label>' +
@@ -1052,9 +1099,11 @@ const notifications = {
             }
             if(ncounter > 0) {
                 $(".notificationbadgehandler").html(ncounter);
-                $(".notificationbadgehandler").css("display","block");
+                $(".notificationbadgehandler").css("display", "block");
+                $("#notificationsbell").addClass("unread");
             } else {
-                $(".notificationbadgehandler").css("display","none");
+                $(".notificationbadgehandler").css("display", "none");
+                $("#notificationsbell").removeClass("unread");
             }
 
             $('#notificationsbell').popup({
@@ -1091,9 +1140,11 @@ const notifications = {
 
             if(ncounter > 0) {
                 $(".notificationbadgehandler").html(ncounter);
-                $(".notificationbadgehandler").css("display","block");
+                $(".notificationbadgehandler").css("display", "block");
+                $("#notificationsbell").addClass("unread");
             } else {
-                $(".notificationbadgehandler").css("display","none");
+                $(".notificationbadgehandler").css("display", "none");
+                $("#notificationsbell").removeClass("unread");
             }
             document.getElementById("notificationmenulist").innerHTML = result;
         }
@@ -1173,7 +1224,7 @@ const externalpage = {
                                 if(!elems[i].classList.contains('item')) {
                                     if(elems[i].href.startsWith("http") || elems[i].href.startsWith("//")) {
                                         var url = elems[i].href;
-                                        if(url.includes(elems[i].innerText) && elems[i].dataset.titlechanged !== true) {
+                                        if(url.includes(elems[i].innerText) && elems[i].dataset.titlechanged !== "true") {
                                             url = externalpage.toASCI(url);
                                             var data = ajax.call(20, url);
                                             if(data['success']) {
@@ -1231,7 +1282,8 @@ const externalpage = {
                                     };
                                     elems[i].addEventListener("click", callback);
                                     elems[i].addEventListener("contextmenu", callback);
-                                    elems[i].addEventListener("mousewheel", callback);
+                                    elems[i].addEventListener("mousedown", callback);
+                                    elems[i].addEventListener("mouseup", callback);
                                 }
                             }
                         }

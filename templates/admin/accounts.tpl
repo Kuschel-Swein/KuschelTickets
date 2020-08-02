@@ -220,6 +220,13 @@
         </div>
     </div>
 </div>
+<div class="field">
+  <label>Signatur</label>
+  <div class="ui input">
+    <textarea name="signature" class="wysiwygFix" id="signature"></textarea>
+    {include file="__wysiwyg.tpl" selector="#signature" templates=false}
+  </div>
+</div>
 <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
 <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">
 {if $site['success'] == true}
@@ -309,15 +316,22 @@ $('.ui.selection.dropdown.usergroup').dropdown({
   </div>
   <small class="helper">fülle dieses Feld nur aus, wenn du das Passwort dieses Benutzers bearbeiten möchtest</small>
 </div>
-<div class="field required{if $site['errors']['group'] !== false} error{/if}">
+<div class="field required{if $site['errors']['group'] !== false} error{/if}"{if $site['edituser']->userID == 1} data-tooltip="Du kannst die Benutzergruppe dieses Benutzers aus Sicherheitsgründen nicht ändern."{/if}>
     <label>Benutzergruppe</label>
-    <div class="ui selection dropdown usergroup">
+    <div class="ui selection dropdown usergroup{if $site['edituser']->userID == 1} disabled{/if}">
         <input type="hidden" name="group" id="group">
         <i class="dropdown icon"></i>
         <div class="default text"></div>
         <div class="menu">
         </div>
     </div>
+</div>
+<div class="field">
+  <label>Signatur</label>
+  <div class="ui input">
+    <textarea name="signature" class="wysiwygFix" id="signature">{$site['edituser']->signature}</textarea>
+    {include file="__wysiwyg.tpl" selector="#signature" templates=false}
+  </div>
 </div>
 <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
 <input type="hidden" name="CRSF" value="{$__KT['CRSF']}">

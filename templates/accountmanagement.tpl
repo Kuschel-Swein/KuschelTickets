@@ -1,5 +1,5 @@
 {include file="header.tpl" title="Account Verwaltung"}
-<form class="ui form{if $errors['password'] !== false || $errors['username'] !== false || $errors['email'] !== false || $errors['password_new'] !== false || $errors['password_new_confirm'] !== false || $errors['twofactor'] !== false || $errors['token'] !== false} error{/if}{if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false || $success['twofactor'] !== false} success{/if}" action="{link url="accountmanagement"}" method="post">
+<form class="ui form{if $errors['password'] !== false || $errors['username'] !== false || $errors['email'] !== false || $errors['password_new'] !== false || $errors['password_new_confirm'] !== false || $errors['twofactor'] !== false || $errors['token'] !== false} error{/if}{if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false || $success['twofactor'] !== false || $success['signature'] !== false} success{/if}" action="{link url="accountmanagement"}" method="post">
     <div class="field required{if $errors['password'] !== false} error{/if}">
         <label>Passwort</label>
         <div class="ui input">
@@ -33,6 +33,16 @@
             <input type="password" name="password_new_confirm">
         </div>
     </div>
+    {if $__KT['user']->hasPermission("general.account.signature")}
+    <div class="ui divider"></div>
+    <div class="field">
+        <label>Signatur</label>
+        <div class="ui input">
+            <textarea name="signature" class="wysiwygFix" id="signature">{$__KT['user']->signature}</textarea>
+        </div>
+    </div>
+    {include file="__wysiwyg.tpl" selector="#signature" templates=false}
+    {/if}
     {if $__KT['user']->hasPermission("general.account.twofactor")}
     <div class="ui divider"></div>
     <div class="inline field">
@@ -126,7 +136,7 @@
           </ul>
         </div>
     {/if}
-    {if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false || $success['twofactor'] !== false}
+    {if $success['username'] !== false || $success['email'] !== false || $success['password'] !== false || $success['twofactor'] !== false || $success['signature'] !== false}
         <div class="ui success message">
             <ul class="list">
                 {if $success['username'] !== false}
@@ -140,6 +150,9 @@
                 {/if}
                 {if $success['twofactor'] !== false}
                     <li>{$success['twofactor']}</li>
+                {/if}
+                {if $success['signature'] !== false}
+                    <li>{$success['signature']}</li>
                 {/if}
             </ul>
         </div>

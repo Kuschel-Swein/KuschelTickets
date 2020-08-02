@@ -37,34 +37,38 @@ class recaptcha {
 
         if($config['recaptcha']['use'] == true && in_array($usecase, $config['recaptcha']['cases'])) {
             $version = $config['recaptcha']['version'];
-            if($version == 2) {
-                $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify");
-                $httpRequest->enableSSL();
-                $httpRequest->setRequestType(HttpRequest::POST);
-                $httpRequest->setPostFields(array(
-                    "secret" => $config['recaptcha']['secret'],
-                    "response" => $_POST['g-recaptcha-response']
-                ));
-                $httpRequest->execute();
-                $response = $httpRequest->getResponse();
-                $response = json_decode($response, true);
-                return $response['success'];
-            } else if($version == 3) {
-                $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify?secret=".$config['recaptcha']['secret']."&response=".$_POST['g-recaptcha-response']);
-                $httpRequest->enableSSL();
-                $httpRequest->setRequestType(HttpRequest::GET);
-                $httpRequest->execute();
-                $response = $httpRequest->getResponse();
-                $response = json_decode($response);
-                if($response->success == true){
-                    if($response->score >= 0.6){
-                        return true;
+            if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+                if($version == 2) {
+                    $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify");
+                    $httpRequest->enableSSL();
+                    $httpRequest->setRequestType(HttpRequest::POST);
+                    $httpRequest->setPostFields(array(
+                        "secret" => $config['recaptcha']['secret'],
+                        "response" => $_POST['g-recaptcha-response']
+                    ));
+                    $httpRequest->execute();
+                    $response = $httpRequest->getResponse();
+                    $response = json_decode($response, true);
+                    return $response['success'];
+                } else if($version == 3) {
+                    $httpRequest = new HttpRequest("https://www.google.com/recaptcha/api/siteverify?secret=".$config['recaptcha']['secret']."&response=".$_POST['g-recaptcha-response']);
+                    $httpRequest->enableSSL();
+                    $httpRequest->setRequestType(HttpRequest::GET);
+                    $httpRequest->execute();
+                    $response = $httpRequest->getResponse();
+                    $response = json_decode($response);
+                    if($response->success == true){
+                        if($response->score >= 0.6){
+                            return true;
+                        } else {
+                            return false;
+                        }
                     } else {
                         return false;
                     }
-                } else {
-                    return false;
                 }
+            } else {
+                return false;
             }
         } else {
             return true;

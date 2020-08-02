@@ -1,6 +1,8 @@
 <?php
 namespace kt\system;
 
+use kt\system\Utils;
+
 class Link {
 
     public static function get(String $url) {
@@ -8,6 +10,9 @@ class Link {
 
         if(filter_var($url, FILTER_VALIDATE_URL)) {
             return $url;
+        }
+        if(!$config['seourls']) {
+            $url = str_replace("?", "&", $url);
         }
         if($url !== "") {
             $mainurl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? "https" : "http") . "://".$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'];
@@ -25,6 +30,9 @@ class Link {
             } else {
                 $endurl = $mainurl."/";
             }
+        }
+        if(Utils::endsWith($endurl, "//")) {
+            return self::mainurl();
         }
         return $endurl;
     }

@@ -3,6 +3,7 @@ namespace kt\data\ticket\category;
 
 use kt\data\DatabaseObject;
 use kt\data\ticket\answer\AnswerList;
+use kt\system\Utils;
 
 class Category extends DatabaseObject {
     public $tableName = "ticket_categories";
@@ -102,20 +103,33 @@ class Category extends DatabaseObject {
             if($data[$i]->type == "checkbox" && isset($parameters['category'.$this->categoryID.'customInput'.$i])) {
                 $parameters['category'.$this->categoryID.'customInput'.$i] = "ON";
             }
+
             if(isset($parameters['category'.$this->categoryID.'customInput'.$i]) && !empty($parameters['category'.$this->categoryID.'customInput'.$i])) {
+                
+                if(isset($data[$i]->minlength)) {
+                    if($data[$i]->minlength == -1) {
+                        $data[$i]->minlength = strlen($parameters['category'.$this->categoryID.'customInput'.$i]);
+                    }
+                }
+                if(isset($data[$i]->maxlength)) {
+                    if($data[$i]->maxlength == -1) {
+                        $data[$i]->maxlength = strlen($parameters['category'.$this->categoryID.'customInput'.$i]);
+                    }
+                }
+
                 if($data[$i]->type == "text") {
                     if(strlen($parameters['category'.$this->categoryID.'customInput'.$i]) >= $data[$i]->minlength) {
                         if(strlen($parameters['category'.$this->categoryID.'customInput'.$i]) <= $data[$i]->maxlength) {
                             if($data[$i]->pattern !== "") {
                                 if(preg_match($data[$i]->pattern, $parameters['category'.$this->categoryID.'customInput'.$i])) {
                                     $result['errors'][$i] = false;
-                                    $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>";
+                                    $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>";
                                 } else {
                                     $result['errors'][$i] = "Deine Eingabe für das Feld ".$data[$i]->title." entspricht nicht dem geforderten Format.";
                                 }
                             } else {
                                 $result['errors'][$i] = false;
-                                $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>"; 
+                                $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>"; 
                             }
                         } else {
                             $result['errors'][$i] = "Deine Eingabe für das Feld ".$data[$i]->title." ist leider zu lang, es sind maximal ".$data[$i]->maxlength." Zeichen erlaubt.";
@@ -128,7 +142,7 @@ class Category extends DatabaseObject {
                         if($parameters['category'.$this->categoryID.'customInput'.$i] <= $data[$i]->max) {
                             if($parameters['category'.$this->categoryID.'customInput'.$i] >= $data[$i]->min) {
                                 $result['errors'][$i] = false;
-                                $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>";
+                                $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>";
                             } else {
                                 $result['errors'][$i] = "Deine Eingabe für das Feld ".$data[$i]->title." darf minimal ".$data[$i]->min." sein.";
                             }
@@ -145,13 +159,13 @@ class Category extends DatabaseObject {
                                 if($data[$i]->pattern !== "") {
                                     if(preg_match($data[$i]->pattern, $parameters['category'.$this->categoryID.'customInput'.$i])) {
                                         $result['errors'][$i] = false;
-                                        $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>";
+                                        $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>";
                                     } else {
                                         $result['errors'][$i] = "Deine Eingabe für das Feld ".$data[$i]->title." entspricht nicht dem geforderten Format.";
                                     }
                                 } else {
                                     $result['errors'][$i] = false;
-                                    $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>"; 
+                                    $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>"; 
                                 }
                             } else {
                                 $result['errors'][$i] = "Deine Eingabe für das Feld ".$data[$i]->title." ist leider zu lang, es sind maximal ".$data[$i]->maxlength." Zeichen erlaubt.";
@@ -186,12 +200,12 @@ class Category extends DatabaseObject {
                             $result['errors'][$i] = "Bitte wähle einen Wert für das Feld ".$data[$i]->title.".";
                         } else {
                             $result['errors'][$i] = false;
-                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>"; 
+                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>"; 
                         }
                     } else {
                         if(in_array($parameters['category'.$this->categoryID.'customInput'.$i], $values)) {
                             $result['errors'][$i] = false;
-                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".$parameters['category'.$this->categoryID.'customInput'.$i]."</p>"; 
+                            $result['results'][$i] = "<p><strong>".$data[$i]->title."</strong> ".Utils::replaceHTML($parameters['category'.$this->categoryID.'customInput'.$i])."</p>"; 
                         } else {
                             $result['errors'][$i] = "Bitte wähle einen Wert für das Feld ".$data[$i]->title.".";
                         }

@@ -17,11 +17,9 @@
             const kuscheltickets_version = "{$__KT['version']}";
             const notifications_link = "{link url="notifications"}";
             const KT = {
-                {if !$__KT['user']->userID}
-                userID: null,
-                {else}
-                userID: {$__KT['user']->userID},
-                {/if}
+                {if !$__KT['user']->userID}userID: null,{else}userID: {$__KT['user']->userID},{/if}{PHP_EOL}
+                captchaType: "{if $__KT['recaptcha']['use']}{$__KT['recaptcha']['version']}{/if}",
+                captchaPublicKey: "{if $__KT['recaptcha']['use']}{$__KT['recaptcha']['public']}{/if}",
                 mainurl: "{$__KT['mainurl']}",
                 seourls: {if $__KT['seourls']}true{else}false{/if},
                 externalURLFavicons: {if $__KT['externalURLFavicons']}true{else}false{/if},
@@ -33,13 +31,27 @@
                 faviconextension: "{$__KT['faviconextension']}",
                 externalURLTitle: {if $__KT['externalURLTitle']}true{else}false{/if},
                 proxyAllImages: {if $__KT['proxyAllImages']}true{else}false{/if},
-                useDesktopNotification: {if $__KT['useDesktopNotification']}true{else}false{/if}
+                useDesktopNotification: {if $__KT['useDesktopNotification']}true{else}false{/if},
+                recaptchaTypes: {
+                    "2": "https://www.google.com/recaptcha/api.js",
+                    "3": "https://www.google.com/recaptcha/api.js?render={if $__KT['recaptcha']['use']}{$__KT['recaptcha']['public']}{/if}"
+                }
             };
         </script>
         <script src="{$__KT['mainurl']}/assets/master.js?v={$__KT['version']}" type="text/javascript"></script>
         <script>
             KT.userTemplates = ajax.call(19, 1)['message'];
         </script>
+        <noscript>
+            <style>
+                .jsOnly {
+                    display: none!important;
+                }
+                .noJsOnly {
+                    display: block!important;
+                }
+            </style>
+        </noscript>
     </head>
     <body id="main"> 
         <div class="ui mobile tablet only padded grid">
@@ -52,20 +64,20 @@
                             </button>
                         </div>
                     </div>
-                    <div class="ui vertical fluid menu">
-                    {$__KT['topnavigation']}
-                    {if $__KT['user']->userID && $__KT['user']->hasPermission("general.notifications.view")}
-                        <a href="{link url="notifications"}" class="item"{if $__KT['user']->userID}{if $__KT['user']->twofactor->use == true}{if !isset($tpl['session']['twofactor'])} style="display: none"{/if}{/if}{/if}>Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
-                    {/if}
-                    {if $__KT['user']->userID}
-                        <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="item">Logout</a>
-                    {else}
-                        <a href="{link url="login"}" class="item{if $__KT['activepage'] =="login"} active{/if}">Login</a>
-                    {/if}
+                    <div class="ui vertical fluid menu mainmenucontainer">
+                        {$__KT['topnavigation']}
+                        {if $__KT['user']->userID && $__KT['user']->hasPermission("general.notifications.view")}
+                            <a href="{link url="notifications"}" class="item"{if $__KT['user']->userID}{if $__KT['user']->twofactor->use == true}{if !isset($tpl['session']['twofactor'])} style="display: none"{/if}{/if}{/if}>Benachrichtigungen <span class="ui red label notificationbadgehandler"></span></a>
+                        {/if}
+                        {if $__KT['user']->userID}
+                            <a href="{link url="logout/token-{$__KT['CRSF']}"}" class="item">Logout</a>
+                        {else}
+                            <a href="{link url="login"}" class="item{if $__KT['activepage'] =="login"} active{/if}">Login</a>
+                        {/if}
                 </div>
             </div>
         </div>
-        <div class="ui computer only grid menu top fixed">
+        <div class="ui computer only grid menu top fixed mainmenucontainer">
             <div class="item">
                 <h2>{$__KT['pagetitle']}</h2>
             </div>
@@ -93,4 +105,3 @@
         <div class="ui grid container" id="content">
             <div class="one wide column"></div>
             <div class="fourteen wide column">
-

@@ -4,6 +4,7 @@ namespace kt\page;
 use kt\system\page\AbstractPage;
 use kt\system\UserUtils;
 use kt\system\exception\AccessDeniedException;
+use kt\system\exception\PageNotFoundException;
 use kt\system\recaptcha;
 use kt\system\KuschelTickets;
 
@@ -25,11 +26,16 @@ class registerPage extends AbstractPage {
         );
         $this->success = false;
 
-        if(KuschelTickets::getUser()->userID) {
-            throw new AccessDeniedException("Du kannst diese Seite nicht öffnen");
+        if(!$config['registrationEnabled']) {
+            throw new PageNotFoundException();
         }
 
-        if(isset($parameters['submit']) && $config['registrationEnabled']) {
+        if(KuschelTickets::getUser()->userID) {
+            throw new AccessDeniedException();
+        }
+
+
+        if(isset($parameters['submit'])) {
             if(recaptcha::validate("registration")) {
                 if(isset($parameters['username']) && !empty($parameters['username'])) {
                     if(isset($parameters['email']) && !empty($parameters['email'])) {

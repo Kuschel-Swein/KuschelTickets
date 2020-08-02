@@ -25,7 +25,7 @@ define("DATA", array(
             "permission" => "general.view.faq"
         ),
         array(
-            "text" => "Account verwalten",
+            "text" => "Account-Verwaltung",
             "identifier" => "accountmanagement",
             "permission" => "general.account.manage"
         ),
@@ -53,6 +53,16 @@ define("DATA", array(
             "text" => "Benachrichtigungseinstellungen",
             "identifier" => "notifications/settings",
             "permission" => "general.notifications.settings"
+        ),
+        array(
+            "text" => "Ticket erstellen",
+            "identifier" => "addticket",
+            "permission" => "general.tickets.add"
+        ),
+        array(
+            "text" => "Avatar-Verwaltung",
+            "identifier" => "avataredit",
+            "permission" => "general.account.avatar"
         )
     ]
 ));

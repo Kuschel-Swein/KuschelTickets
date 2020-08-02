@@ -14,9 +14,10 @@
     <div class="field required{if $errors['title'] !== false} error{/if}">
     <label>Titel</label>
         <div class="ui input">
-            <input type="text" name="title" value="{if isset($tpl['post']['title']) && !$success}{$tpl['post']['title']}{/if}">
+            <input type="text" name="title" value="{if isset($tpl['post']['title']) && !$success}{$tpl['post']['title']}{/if}"{if $__KT['equalfaq']} onchange="getSimilarFAQ(this.value)"{/if}>
         </div>
     </div>
+    {if $__KT['equalfaq']}<div id="similarFAQ" class="ui info message" style="display: none"></div>{/if}
     <div class="field required{if $errors['category'] !== false} error{/if}">
         <label>Kategorie</label>
         <div class="ui selection dropdown category">
@@ -41,7 +42,7 @@
       </div>
     {/foreach}
     <div class="field required{if $errors['text'] !== false} error{/if}">
-      <label>Antwort</label>
+      <label>Nachricht</label>
       <textarea id="text" rows="10" name="text">{if isset($tpl['post']['text']) && !$success}{$tpl['post']['text']}{/if}</textarea>
     </div>
     {$recaptcha}
@@ -125,6 +126,27 @@ var elem = document.getElementById("categoryfields_" + value);
 if(elem) {
   elem.style.display = "block";
 }
+{if $__KT['equalfaq']}
+function getSimilarFAQ(text) {
+  var data = ajax.post(33, 0, "title=" + text);
+  if(data.success == "true") {
+    if(data.message.length > 0) {
+      $("#similarFAQ").show();
+      $("#similarFAQ").html("<p>Folgende ähnliche FAQ Einträge wurden gefunden:</p><ul class='ui list'>");
+      data.message.forEach(function(faq) {
+        document.getElementById("similarFAQ").innerHTML += '<li><a class="noticeLink" href="' + link("faq") + "#" + faq.faqID + '" target="_blank">' + faq.question + '</a></li>';
+      });
+      document.getElementById("similarFAQ").innerHTML += "</ul>";
+    } else {
+      $("#similarFAQ").html("");
+      $("#similarFAQ").hide();
+    }
+  } else {
+    $("#similarFAQ").html("");
+    $("#similarFAQ").hide();
+  }
+}
+{/if}
 </script>
 {include file="__wysiwyg.tpl" selector="#text"}
 {include file="footer.tpl"}

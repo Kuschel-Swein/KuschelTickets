@@ -22,7 +22,7 @@ class MenuEntry extends DatabaseObject {
     public function getChilds() {
         return new MenuEntryList(array(
             "parent" => $this->menuID
-        ));
+        ), "ORDER BY sorting ASC");
     }
 
     public function hasParent() {
@@ -128,7 +128,7 @@ class MenuEntry extends DatabaseObject {
                     $result = $result.'
                         <div class="ui dropdown navigation item'.$active.'">
                             <a class="menuLink" href="'.Link::get($entry->getLink()).'">'.$entry->title.'</a> <i class="dropdown icon"></i>
-                            <div class="menu">
+                            <div class="menu mainmenu">
                                 '.$childData.'
                             </div>
                         </div>';
@@ -169,7 +169,7 @@ class MenuEntry extends DatabaseObject {
             }
             $result = $result.'
                 <div class="ui dropdown child navigation item'.$activeChild.'">
-                    <a class="menuLink" href="'.Link::get($child->getLink()).'">'.$child->title.'</a> <i class="dropdown icon"></i>
+                    <a class="menuLink" href="'.Link::get($child->getLink()).'">'.$child->title.' <i class="dropdown icon"></i></a>
                     <div class="menu">';
             foreach($childsOfChild as $childOfChild) {
                 $data = MenuEntry::menuHelper($activePage, $childOfChild);

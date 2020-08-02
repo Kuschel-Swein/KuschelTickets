@@ -69,7 +69,6 @@ class addticketpage extends AbstractPage {
                                                 }
                                             }
                                             if(!empty($text) && $text !== "<p></p>") {
-                                                $text = $customfields.$text;
                                                 $title = strip_tags($parameters['title']);
                                                 $category = $cat->categoryName;
                                                 $ticket = Ticket::create(array(
@@ -77,6 +76,7 @@ class addticketpage extends AbstractPage {
                                                     "title" => $title,
                                                     "category" => $category,
                                                     "content" => $text,
+                                                    "customInputResponse" => $customfields,
                                                     "state" => 1,
                                                     "time" => time(),
                                                     "color" => $cat->color
@@ -86,14 +86,14 @@ class addticketpage extends AbstractPage {
                                                 $nonotify = false;
                                                 foreach(new UserList() as $account) {
                                                     if($account->hasPermission("mod.view.tickets.list")) {
-                                                        Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->category." erstellt.", "ticket-".$ticket->ticketID, $account);
+                                                        Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->category." erstellt.", "ticket-".$ticket->ticketID."/#ticketcontent", $account);
                                                         if($account->userID == KuschelTickets::getUser()->userID) {
                                                             $nonotify = true;
                                                         }
                                                     }
                                                 }
                                                 if(!$nonotify) {
-                                                    Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->category." erstellt.", "ticket-".$ticket->ticketID, $user);
+                                                    Notification::add("notification_ticket_new", "Es wurde ein neues Ticket von ".KuschelTickets::getUser()->username." in der Kategorie ".$ticket->category." erstellt.", "ticket-".$ticket->ticketID."/#ticketcontent", $user);
                                                 }
                                                 Utils::redirect(Link::get("ticket-".$ticket->ticketID));
                                             } else {

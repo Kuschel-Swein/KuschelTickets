@@ -71,7 +71,7 @@ if(isset($parameters['add'])) {
                         $errors['url'] = "Bitte gib eine URL an.";
                     }
                 } else {
-                    $errors['title'] = "Bitte gib einen Title an.";
+                    $errors['title'] = "Bitte gib einen Titel an.";
                 }
             } else {
                 $errors['token'] = "Deine Sitzung ist leider abgelaufen, bitte lade die Seite neu.";

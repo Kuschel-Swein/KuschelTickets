@@ -55,9 +55,30 @@ class KuschelTickets {
             ob_end_clean();
             try {
                 $errorcode = \kt\system\Utils::generateErrorCode();
-                $file = fopen("./data/logs/".$errorcode.".txt", "w");
-                fwrite($file, "======================================================================".PHP_EOL."EXCEPTION ".date("d.m.Y H:i:s").PHP_EOL."======================================================================".PHP_EOL.PHP_EOL.var_export($exception, true));
-                fclose($file);
+                $stripNewlines = function ($item) {
+                    return str_replace("\n", ' ', $item);
+                };
+                $message = gmdate('r', time())."\n".
+                    'Message: '.$stripNewlines($exception->getMessage())."\n".
+                    'PHP version: '.phpversion()."\n".
+                    'KuschelTickets Version: '.$config['version']."\n".
+                    'Request URI: '.$stripNewlines($_SERVER['REQUEST_URI'])."\n".
+                    'Referrer: '.$stripNewlines($_SERVER['HTTP_REFERER'] ?? '')."\n".
+                    'User Agent: '.$stripNewlines($_SERVER['HTTP_USER_AGENT'] ?? '')."\n".
+                    'Peak Memory Usage: '.memory_get_peak_usage()."\n";
+                $prev = $exception;
+                do {
+                    $message .= "======\n".
+                    'Error Class: '.get_class($prev)."\n".
+                    'Error Message: '.$stripNewlines($prev->getMessage())."\n".
+                    'Error Code: '.intval($prev->getCode())."\n".
+                    'File: '.$stripNewlines($prev->getFile()).' ('.$prev->getLine().')'."\n".
+                    'Stack Trace: '.json_encode($prev->getTrace(), JSON_PRETTY_PRINT)."\n";
+                }
+                while ($prev = $prev->getPrevious());
+                $entry = "<<<<<<<<".$errorcode."<<<<\n".$message."<<<<\n\n";
+                file_put_contents("./data/logs/".$errorcode.".txt", $entry);
+
                 if(!isset($_SERVER['HTTP_REFERER'])) {
                     $_SERVER['HTTP_REFERER'] = "-/-";
                 }

@@ -14,6 +14,30 @@ use kt\system\KuschelTickets;
 
 $permissions = [
     array(
+        "name" => "mod_tickets_edit_removenotice",
+        "display" => "kann den Editierungshinweis bei Ticket Nachrichten entfernen"
+    ),
+    array(
+        "name" => "general_tickets_edit_own",
+        "display" => "kann eigene Nachrichten bearbeiten"
+    ),
+    array(
+        "name" => "mod_tickets_edit_all",
+        "display" => "kann alle Nachrichten bearbeiten"
+    ),
+    array(
+        "name" => "mod_tickets_edithistory",
+        "display" => "kann den Bearbeitungsverlauf der Nachrichten sehen"
+    ),
+    array(
+        "name" => "general_account_signature",
+        "display" => "kann eigene Signatur verwalten"
+    ),
+    array(
+        "name" => "general_account_avatar",
+        "display" => "kann eigenen Avatar verwalten"
+    ),
+    array(
         "name" => "general_tickets_quote",
         "display" => "kann Zitieren"
     ),

@@ -15,6 +15,10 @@ use kt\data\supportchat\SupportChat;
 use kt\data\menu\MenuEntry;
 use kt\data\Page\Page as UserPage;
 use kt\system\KuschelTickets;
+use kt\data\faq\FAQList;
+use kt\data\ticket\answer\Answer;
+use kt\data\ticket\change\Change;
+use kt\system\recaptcha;
 
 class ajaxPage extends AbstractPage {
 
@@ -63,6 +67,8 @@ class ajaxPage extends AbstractPage {
          * 30 => [ADMIN] delete menuentry
          * 31 => [ADMIN] sort menuentries
          * 32 => rate ticket
+         * 33 => get matching faqs by ticket subject
+         * 34 => edit ticket answer
          */
         if($type == 1) {
             if(KuschelTickets::getUser()->userID) {
@@ -343,15 +349,20 @@ class ajaxPage extends AbstractPage {
         } else if($type == 10) {
             if(KuschelTickets::getUser()->userID) {
                 if(isset($parameters['object']) && !empty($parameters['object'])) {
-                    
                     if(KuschelTickets::getUser()->hasPermission("admin.acp.page.accounts")) {
                         $account = new User($parameters['object']);
                         if(!$account->hasPermission("admin.bypass.delete") && $parameters['object'] !== KuschelTickets::getUser()->userID && $account->userID) {
-                            $account->delete();
+                            
                             $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_tickets WHERE creator = ?");
                             $stmt->execute([$parameters['object']]);
                             $stmt = KuschelTickets::getDB()->prepare("DELETE FROM kuscheltickets".KT_N."_ticket_answers WHERE creator = ?");
                             $stmt->execute([$parameters['object']]);
+                            if(file_exists("./data/avatars/".$account->avatar)) {
+                                if($account->avatar !== "default.png") {
+                                    unlink("./data/avatars/".$account->avatar);
+                                }
+                            }
+                            $account->delete();
                             $result = array(
                                 "success" => true,
                                 "message" => "Dieser Benutzer wurde erfolgreich gelöscht.",
@@ -571,9 +582,9 @@ class ajaxPage extends AbstractPage {
                         $out = [];
                         foreach($editortemplates as $editortpl) {
                             $data = array(
-                                "title" => $editortpl->title,
-                                "description" => $editortpl->description,
-                                "content" => $editortpl->content
+                                "title" => $editortpl->title."",
+                                "description" => $editortpl->description."",
+                                "content" => $editortpl->content.""
                             );
                             array_push($out, $data);
                         }
@@ -981,6 +992,179 @@ class ajaxPage extends AbstractPage {
                     "code" => "403",
                     "message" => "access denied"
                 );
+            }
+        } else if($type == 33) {
+            if(KuschelTickets::getUser()->userID && $config['equalfaq']) {
+                if(isset($parameters['title']) && !empty($parameters['title'])) {
+                    if(KuschelTickets::getUser()->hasPermission("general.tickets.add")) {
+                        $faqList = new FAQList();
+                        $matchingFAQs = [];
+                        foreach($faqList as $faq) {
+                            similar_text(strtolower($parameters['title']), strtolower($faq->question), $percent);
+                            if($percent >= 60) {
+                                array_push($matchingFAQs, $faq);
+                            }
+                        }
+                        $result = array(
+                            "success" => "true",
+                            "message" => $matchingFAQs,
+                            "title" => null
+                        );
+                    }
+                }
+            } else {
+                $result = array(
+                    "code" => "403",
+                    "message" => "access denied"
+                );
+            }
+        } else if($type == 34) {
+            if(KuschelTickets::getUser()->userID) {
+                if(isset($parameters['removeeditnotice']) && strlen($parameters['removeeditnotice']) > 0) {
+                    if(isset($parameters['object']) && !empty($parameters['object'])) {
+                        if(is_numeric($parameters['object'])) {
+                            $answer = new Answer(intval($parameters['object']));
+                            if($answer->answerID) {
+                                if((KuschelTickets::getUser()->hasPermission("general.tickets.edit.own") && $answer->creator == KuschelTickets::getUser()->userID) || KuschelTickets::getUser()->hasPermission("mod.tickets.edit.all")) {
+                                    if(recaptcha::validate("ticketedit")) {
+                                        if(isset($parameters['content']) && !empty($parameters['content'])) {
+                                            if(isset($parameters['content']) && !empty($parameters['content'])) {
+                                                $content = Utils::purify($parameters['content']);
+                                                if(!empty(strip_tags($content)) && $content !== "<p></p>") {
+                                                    if($content !== $answer->content) {
+                                                        $oldContent = $answer->content;
+                                                        $answer->update(array(
+                                                            "content" => $content
+                                                        ));
+                                                        if($parameters['removeeditnotice'] !== "true" || !KuschelTickets::getUser()->hasPermission("mod.tickets.edit.removenotice")) {
+                                                            Change::create(array(
+                                                                "userID" => KuschelTickets::getUser()->userID,
+                                                                "ticketID" => $answer->ticketID,
+                                                                "answerID" => $answer->answerID,
+                                                                "newContent" => $content,
+                                                                "oldContent" => $oldContent,
+                                                                "time" => time()
+                                                            ));
+                                                        }
+                                                        $result = array(
+                                                            "success" => "true",
+                                                            "message" => "Du hast diese Antwort erfolgreich bearbeitet.",
+                                                            "title" => "Antwort bearbeitet"
+                                                        );
+                                                    } else {
+                                                        $result = array(
+                                                            "success" => "false",
+                                                            "message" => "Es wurde keine Änderung vorgenommen.",
+                                                            "title" => null
+                                                        );
+                                                    }
+                                                } else {
+                                                    $result = array(
+                                                        "success" => "false",
+                                                        "message" => "Bitte gib einen Inhalt an.",
+                                                        "title" => null
+                                                    );
+                                                }
+                                            } else {
+                                                $result = array(
+                                                    "success" => "false",
+                                                    "message" => "Bitte gib einen Inhalt an.",
+                                                    "title" => null
+                                                );
+                                            }
+                                        } else {
+                                            $result = array(
+                                                "success" => "false",
+                                                "message" => "Bitte gib einen Inhalt an.",
+                                                "title" => null
+                                            );
+                                        }
+                                    } else {
+                                        $result = array(
+                                            "success" => "false",
+                                            "message" => "Du wurdest von reCaptcha als Bot erkannt.",
+                                            "title" => null
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if($type == 35) {
+            if(KuschelTickets::getUser()->userID) {
+                if(isset($parameters['removeeditnotice']) && strlen($parameters['removeeditnotice']) > 0) {
+                    if(isset($parameters['object']) && !empty($parameters['object'])) {
+                        if(is_numeric($parameters['object'])) {
+                            $ticket = new Ticket(intval($parameters['object']));
+                            if($ticket->ticketID) {
+                                if((KuschelTickets::getUser()->hasPermission("general.tickets.edit.own") && $ticket->creator == KuschelTickets::getUser()->userID) || KuschelTickets::getUser()->hasPermission("mod.tickets.edit.all")) {
+                                    if(recaptcha::validate("ticketedit")) {
+                                        if(isset($parameters['content']) && !empty($parameters['content'])) {
+                                            if(isset($parameters['content']) && !empty($parameters['content'])) {
+                                                $content = Utils::purify($parameters['content']);
+                                                if(!empty(strip_tags($content)) && $content !== "<p></p>") {
+                                                    if($content !== $ticket->content) {
+                                                        $oldContent = $ticket->content;
+                                                        $ticket->update(array(
+                                                            "content" => $content
+                                                        ));
+                                                        if($parameters['removeeditnotice'] !== "true" || !KuschelTickets::getUser()->hasPermission("mod.tickets.edit.removenotice")) {
+                                                            Change::create(array(
+                                                                "userID" => KuschelTickets::getUser()->userID,
+                                                                "ticketID" => $ticket->ticketID,
+                                                                "answerID" => null,
+                                                                "newContent" => $content,
+                                                                "oldContent" => $oldContent,
+                                                                "time" => time()
+                                                            ));
+                                                        }
+                                                        $result = array(
+                                                            "success" => "true",
+                                                            "message" => "Du hast diese Antwort erfolgreich bearbeitet.",
+                                                            "title" => "Antwort bearbeitet"
+                                                        );
+                                                    } else {
+                                                        $result = array(
+                                                            "success" => "false",
+                                                            "message" => "Es wurde keine Änderung vorgenommen.",
+                                                            "title" => null
+                                                        );
+                                                    }
+                                                } else {
+                                                    $result = array(
+                                                        "success" => "false",
+                                                        "message" => "Bitte gib einen Inhalt an.",
+                                                        "title" => null
+                                                    );
+                                                }
+                                            } else {
+                                                $result = array(
+                                                    "success" => "false",
+                                                    "message" => "Bitte gib einen Inhalt an.",
+                                                    "title" => null
+                                                );
+                                            }
+                                        } else {
+                                            $result = array(
+                                                "success" => "false",
+                                                "message" => "Bitte gib einen Inhalt an.",
+                                                "title" => null
+                                            );
+                                        }
+                                    } else {
+                                        $result = array(
+                                            "success" => "false",
+                                            "message" => "Du wurdest von reCaptcha als Bot erkannt.",
+                                            "title" => null
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

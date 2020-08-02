@@ -24,7 +24,6 @@ class ticketPage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         global $config;
-
         if(!KuschelTickets::getUser()->userID) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
@@ -35,9 +34,8 @@ class ticketPage extends AbstractPage {
         if(!$ticket->ticketID) {
             throw new PageNotFoundException("Diese Seite wurde nicht gefunden.");
         }
-        $creator = $ticket->getCreator();
         if(!KuschelTickets::getUser()->hasPermission("mod.view.ticket.all")) {
-            if(KuschelTickets::getUser()->userID !== $creator->userID) {
+            if(KuschelTickets::getUser()->userID !== $ticket->creator) {
                 throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
             }
         }

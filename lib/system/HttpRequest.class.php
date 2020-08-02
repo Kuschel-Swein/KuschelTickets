@@ -27,6 +27,7 @@ class HttpRequest {
     private $responseHeader;
     private $httpCode;
     private $error;
+    private $contentType;
 
     public function __construct(String $address) {
         if (!isset($address)) {
@@ -92,8 +93,13 @@ class HttpRequest {
     public function getResponse() {
         return $this->responseBody;
     }
+
     public function getHeader() {
         return $this->responseHeader;
+    }
+
+    public function getContentType() {
+        return $this->contentType;
     }
 
     public function getHttpCode() {
@@ -150,9 +156,11 @@ class HttpRequest {
         $error = curl_error($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         $time = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         curl_close($ch);
 
+        $this->contentType = $contentType;
         $this->responseHeader = substr($response, 0, $header_size);
         $this->responseBody = substr($response, $header_size);
         $this->error = $error;

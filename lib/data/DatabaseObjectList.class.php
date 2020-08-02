@@ -11,27 +11,29 @@ abstract class DatabaseObjectList implements \Countable, \SeekableIterator {
         if($this->databaseObject == null) {
             throw new \InvalidArgumentException("you did not specify an database object");
         }
-        $primaryKey = get_class_vars($this->databaseObject)['tablePrimaryKey'];
-        $tableName = get_class_vars($this->databaseObject)['tableName'];
+        $primaryKey = new $this->databaseObject(0);
+        $primaryKey = $primaryKey->tablePrimaryKey;
+        $tableName = new $this->databaseObject(0);
+        $tableName = $tableName->tableName;
 
         $databaseObjectString = explode("\\", $this->databaseObject);
         $databaseObjectString = end($databaseObjectString);
-        if(empty($primaryKey)) {
-            $primaryKey = strtolower($databaseObjectString)."ID";
-        }
-        if(empty($tableName)) {
-            $tableName = self::formatTableName($databaseObjectString);
-        } else {
-            $tableName = "kuscheltickets".KT_N."_".$tableName;
-        }
 
         $conditionString = "";
         if(!empty($conditions)) {
             foreach($conditions as $key => $value) {
                 if(empty($conditionString)) {
-                    $conditionString = "WHERE ".$key." = :".strtolower($key)."";
+                    if($value == null) {
+                        $conditionString = "WHERE ".$key." IS NULL";
+                    } else {
+                        $conditionString = "WHERE ".$key." = :".strtolower($key)."";
+                    }
                 } else {
-                    $conditionString = $conditionString." AND ".$key." = :".strtolower($key)."";
+                    if($value == null) {
+                        $conditionString = $conditionString." AND ".$key." IS NULL";
+                    } else {
+                        $conditionString = $conditionString." AND ".$key." = :".strtolower($key)."";
+                    }
                 }
             }
         }
@@ -52,6 +54,9 @@ abstract class DatabaseObjectList implements \Countable, \SeekableIterator {
         }
         $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM ".$tableName." ".$conditionString);
         foreach($conditions as $key => &$value) {
+            if($conditions[$key] == false) {
+                continue;
+            }
             $stmt->bindParam(":".strtolower($key), $value);
         }
         $stmt->execute();
@@ -97,12 +102,5 @@ abstract class DatabaseObjectList implements \Countable, \SeekableIterator {
 
     public function getObjects() {
         return $this->objects;
-    }
-
-    protected static function formatTableName(String $name) {
-        $name = strtolower($name);
-        $name = preg_replace('/(?<!\ )[A-Z][a-z]/', '_$0', $name);
-        $name = "kuscheltickets".KT_N."_".$name;
-        return $name;
     }
 }

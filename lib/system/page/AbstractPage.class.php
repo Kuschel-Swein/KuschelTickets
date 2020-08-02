@@ -1,5 +1,6 @@
 <?php
 namespace kt\system\page;
+
 use kt\system\Link;
 use kt\data\user\User;
 use kt\system\UserUtils;

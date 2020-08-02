@@ -6,6 +6,7 @@ use kt\data\ticket\answer\AnswerList;
 use kt\data\user\User;
 use kt\data\ticket\category\Category;
 use kt\system\KuschelTickets;
+use kt\data\ticket\change\ChangeList;
 
 class Ticket extends DatabaseObject {
     public $tableName = "tickets";
@@ -37,6 +38,25 @@ class Ticket extends DatabaseObject {
 
     public function hasRating() {
         return $this->rating !== null;
+    }
+
+    public function getLatestChange() {
+        $changesList = new ChangeList(array(
+            "ticketID" => $this->ticketID,
+            "answerID" => $this->answerID
+        ), "ORDER BY changeID DESC", 1);
+        if(count($changesList) == 0) {
+            return null;
+        } else {
+            return $changesList->getObjects()[0];
+        }
+    }
+    
+    public function getChanges() {
+        return new ChangeList(array(
+            "ticketID" => $this->ticketID,
+            "answerID" => null
+        ), "ORDER BY changeID DESC");
     }
 
     public function addLog(String $text) {

@@ -144,7 +144,7 @@
     </div>
     <div class="field">
         <div class="ui checkbox">
-            <input type="checkbox"{if $site['config']['ticketRating']} checked{/if} name="ticketRating" onchange="if(this.checked) { document.getElementById('ticketsRating_section').style.display = 'block'; } else { document.getElementById('ticketsRating_section').style.display = 'none'; }">
+            <input type="checkbox"{if $site['config']['ticketRating']} checked{/if} name="ticketRating" onchange="toggleElement('#ticketsRating_section', this)">
             <label>Tickets können bewertet werden</label>
         </div>
     </div>
@@ -158,6 +158,13 @@
             <div class="menu">
             </div>
             </div>
+        </div>
+    </div>
+    <br>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['equalfaq']} checked{/if} name="equalfaq">
+            <label>ähnliche FAQ Einträge bei der Ticketerstellung anzeigen</label>
         </div>
     </div>
 </div>
@@ -207,7 +214,7 @@
     </div>
     <div class="field{if $site['errors']['smtpauth'] !== false} error{/if}">
         <div class="ui checkbox">
-            <input type="checkbox"{if $site['config']['mail']['auth']} checked{/if} name="smtpauth" onchange="if(this.checked) { document.getElementById('smtpauthdata').style.display = 'block'; } else { document.getElementById('smtpauthdata').style.display = 'none'; }">
+            <input type="checkbox"{if $site['config']['mail']['auth']} checked{/if} name="smtpauth" onchange="toggleElement('#smtpauthdata', this)">
             <label>SMTP Login</label>
         </div>
         <br>
@@ -239,7 +246,7 @@
 <div class="ui tab" data-tab="third">
     <div class="field required{if $site['errors']['recaptchause'] !== false} error{/if}{if $site['success'] !== false} success{/if}">
         <div class="ui checkbox">
-            <input type="checkbox"{if $site['config']['recaptcha']['use']} checked{/if} name="recaptchause" onchange="if(this.checked) { document.getElementById('recaptchadata').style.display = 'block'; } else { document.getElementById('recaptchadata').style.display = 'none'; }">
+            <input type="checkbox"{if $site['config']['recaptcha']['use']} checked{/if} name="recaptchause" onchange="toggleElement('#recaptchadata', this)">
             <label>reCaptcha aktivieren</label>
         </div>
     </div>
@@ -281,7 +288,7 @@
 <div class="ui tab" data-tab="fourth">
     <div class="field">
         <div class="ui checkbox">
-            <input type="checkbox"{if $site['config']['oauth']['google']['use']} checked{/if} name="oauth_google" onchange="if(this.checked) { document.getElementById('oauth_google').style.display = 'block'; } else { document.getElementById('oauth_google').style.display = 'none'; }">
+            <input type="checkbox"{if $site['config']['oauth']['google']['use']} checked{/if} name="oauth_google" onchange="toggleElement('#oauth_google', this)">
             <label>Google Drittanbieter Login</label>
         </div>
         <small><br>Du benötigst hierfür einen Google API Schlüssel, weitere Informationen findest du <a href="https://code.google.com/apis/console/" data-no-favicon="true" target="_blank" rel="noreferer">hier</a>.<br>Die Redirect-URL lautet <span data-tooltip="Klicke zum kopieren"><code onclick="utils.copy(this.innerText)" class="pointer">{link url="oauth-1"}</code></span></small>
@@ -303,7 +310,7 @@
     <br>
     <div class="field">
         <div class="ui checkbox">
-            <input type="checkbox"{if $site['config']['oauth']['github']['use']} checked{/if} name="oauth_github" onchange="if(this.checked) { document.getElementById('oauth_github').style.display = 'block'; } else { document.getElementById('oauth_github').style.display = 'none'; }">
+            <input type="checkbox"{if $site['config']['oauth']['github']['use']} checked{/if} name="oauth_github" onchange="toggleElement('#oauth_github', this)">
             <label>GitHub Drittanbieter Login</label>
         </div>
         <small><br>Du benötigst hierfür einen GitHub API Schlüssel, weitere Informationen findest du <a href="https://github.com/settings/developers" data-no-favicon="true" target="_blank" rel="noreferer">hier</a>.<br>Die Redirect-URL lautet <span data-tooltip="Klicke zum kopieren"><code onclick="utils.copy(this.innerText)" class="pointer">{link url="oauth-2"}</code></span></small>
@@ -335,6 +342,31 @@
             <label>Registrierung aktivieren</label>
         </div>
     </div>
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox"{if $site['config']['gravatar']} checked{/if} name="gravatar">
+            <label>Verwendung von Gravataren erlauben</label>
+        </div>
+    </div>
+    <div class="field required{if $site['errors']['avatarextensions'] !== false} error{/if}">
+        <label>Avatar Dateiendungen</label>
+        <div class="ui search multiple selection dropdown avatarextensions">
+            <input type="hidden" name="avatarextensions" id="avatarextensions">
+            <div class="default text"></div>
+            <div class="menu"></div>
+        </div>
+        <small class="helper">Gib hier alle Dateiendungen an welche für Avatare verwendet werden dürfen.</small>
+    </div>
+    <div class="field required{if $site['errors']['avatarsize'] !== false} error{/if}">
+        {assign var="avatarsize" value=$site['config']['avatarsize']}
+        <label>maximale Avatar Dateigröße</label>
+        <div class="ui right labeled input">
+            <input type="number" name="avatarsize" value="{$avatarsize/1000000}">
+            <div class="ui label">
+                MB
+            </div>
+        </div>
+    </div>
 </div>
 <br>
 <button type="submit" name="submit" class="ui blue submit button">Absenden</button>
@@ -364,8 +396,12 @@ $("input:text").click(function() {
 });
     
 $('input:file', '.ui.labeled.input').on('change', function(e) {
-    var name = e.target.files[0].name;
-    $('input:text', $(e.target).parent()).val(name);
+    if(e.target.files[0] !== undefined) {
+        var name = e.target.files[0].name;
+        $('input:text', $(e.target).parent()).val(name);
+    } else {
+        $('input:text', $(e.target).parent()).val("");
+    }
 });
 $('.menu .item').tab();
 $('.ui.selection.dropdown.states.closecolor').dropdown({
@@ -485,7 +521,7 @@ $('.ui.selection.dropdown.recaptchacases').dropdown({
             {if "accountmanagement"|in_array:$site['config']['recaptcha']['cases']}
             selected: true,
             {/if}
-            name: "Accountverwaltung",
+            name: "Account-Verwaltung",
             value: "accountmanagement"
         },
         {
@@ -508,7 +544,44 @@ $('.ui.selection.dropdown.recaptchacases').dropdown({
             {/if}
             name: "2-Faktor Authentisierung",
             value: "twofactor"
+        },
+        {
+            {if "ticketedit"|in_array:$site['config']['recaptcha']['cases']}
+            selected: true,
+            {/if}
+            name: "Ticket Eintrag Bearbeitung",
+            value: "ticketedit"
+        },
+        {
+            {if "avataredit"|in_array:$site['config']['recaptcha']['cases']}
+            selected: true,
+            {/if}
+            name: "Avatar-Verwaltung",
+            value: "avataredit"
         }
     ],
+});
+$('.ui.selection.dropdown.avatarextensions').dropdown({
+    allowAdditions: true,
+    forceSelection: false,
+    hideAdditions: false,
+    useLabels: true,
+    {literal}
+    message: {
+        addResult : '<b>{term}</b> wählen',
+        count : '{count} ausgewählt',
+        maxSelections : 'maximal {maxCount} Auswahlen',
+        noResults : 'Keine Ergebnisse gefunden.'
+    },
+    {/literal}
+    values: [
+        {foreach from=$site['config']['avatarextensions'] item="extension"}
+            {
+                selected: true,
+                name: "{$extension}",
+                value: "{$extension}"
+            },
+        {/foreach}
+    ]
 });
 </script>

@@ -42,6 +42,7 @@ class accountmanagementPage extends AbstractPage {
             "username" => false,
             "password" => false,
             "twofactor" => false,
+            "signature" => false,
             "email" => false
         );
 
@@ -55,6 +56,7 @@ class accountmanagementPage extends AbstractPage {
                                     if(UserUtils::exists($parameters['username'], "username") && $parameters['username'] !== KuschelTickets::getUser()->username) {
                                         $this->errors['username'] = "Dieser Benutzername ist bereits vergeben.";
                                         $this->twofactor($parameters);
+                                        $this->signature($parameters);
                                         $this->emailChange($parameters);
                                         $this->passwordChange($parameters);
                                     } else {
@@ -66,6 +68,7 @@ class accountmanagementPage extends AbstractPage {
                                             $this->success["username"] = "Dein neuer Benutzername wurde erfolgreich gespeichert.";
                                         }
                                         $this->twofactor($parameters);
+                                        $this->signature($parameters);
                                         $this->emailChange($parameters);
                                         $this->passwordChange($parameters);
                                     }
@@ -86,6 +89,19 @@ class accountmanagementPage extends AbstractPage {
                 }
             } else {
                 $this->errors['token'] = "Du wurdest von reCaptcha als Bot erkannt.";
+            }
+        }
+    }
+
+    public function signature(Array $parameters) {
+        if(KuschelTickets::getUser()->hasPermission("general.account.signature")) {
+            if(isset($parameters['signature']) && !empty($parameters['signature'])) {
+                if(Utils::purify($parameters['signature']) !== KuschelTickets::getUser()->signature) {
+                    KuschelTickets::getUser()->update(array(
+                        "signature" => Utils::purify($parameters['signature'])
+                    ));
+                    $this->success['signature'] = "Deine Signatur wurde erfolgreich gespeichert.";
+                }
             }
         }
     }

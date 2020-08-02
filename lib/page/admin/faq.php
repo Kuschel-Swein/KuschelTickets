@@ -18,7 +18,7 @@ if(isset($parameters['add'])) {
     $categorys = new CategoryList();
     $categorysID = [];
     foreach($categorys as $category) {
-        array_push($categorysID, $row['categoryID']);
+        array_push($categorysID, $category->categoryID);
     }
 
     $errors = array(

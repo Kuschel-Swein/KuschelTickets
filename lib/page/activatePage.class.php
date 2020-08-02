@@ -4,6 +4,8 @@ namespace kt\page;
 use kt\system\page\AbstractPage;
 use kt\data\user\User;
 use kt\system\UserUtils;
+use kt\system\exception\PageNotFoundException;
+use kt\system\exception\AccessDeniedException;
 use kt\system\KuschelTickets;
 
 class activatePage extends AbstractPage {
@@ -12,6 +14,12 @@ class activatePage extends AbstractPage {
 
     public function readParameters(Array $parameters) {
         global $config;
+
+        if(KuschelTickets::getUser()->userID) {
+            if(KuschelTickets::getUser()->userGroup !== 3) {
+                throw new AccessDeniedException();
+            }
+        }
 
         if(isset($parameters['token']) && !empty($parameters['token'])) {
             $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_accounts WHERE token = ?");
@@ -24,20 +32,17 @@ class activatePage extends AbstractPage {
                         "token" => UserUtils::generateToken(),
                         "userGroup" => 2
                     ));
-                    $this->result['type'] = "success";
-                    $this->result['message'] = "Dein Benutzerkonto wurde erfolgreich aktiviert und du wurdest automatisch eingeloggt.";
+                    KuschelTickets::getUser()->load();
+                    $this->result = "Dein Benutzerkonto wurde erfolgreich aktiviert und du wurdest automatisch eingeloggt.";
                     UserUtils::loginAs($user, $user->password);
                 } else {
-                    $this->result['type'] = "error";
-                    $this->result['message'] = "Deine Aktivierungsanfrage war Fehlerhaft, deshalb konnte kein Account aktiviert werden, solltest du dies für einen Fehler halten wende dich an ".$config['adminmail'];
+                    throw new PageNotFoundException();
                 }
             } else {
-                $this->result['type'] = "error";
-                $this->result['message'] = "Deine Aktivierungsanfrage war Fehlerhaft, deshalb konnte kein Account aktiviert werden, solltest du dies für einen Fehler halten wende dich an ".$config['adminmail'];
+                throw new PageNotFoundException();
             }
         } else {
-            $this->result['type'] = "error";
-            $this->result['message'] = "Deine Aktivierungsanfrage war Fehlerhaft, deshalb konnte kein Account aktiviert werden, solltest du dies für einen Fehler halten wende dich an ".$config['adminmail'];
+            throw new PageNotFoundException();
         }
     }
 

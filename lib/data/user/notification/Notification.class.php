@@ -5,7 +5,7 @@ use kt\data\DatabaseObject;
 use kt\data\user\User;
 use kt\system\Link;
 use kt\system\mailer\Mailer;
-use kt\KuschelTickets;
+use kt\system\KuschelTickets;
 
 class Notification extends DatabaseObject {
     public $tableName = "notifications";

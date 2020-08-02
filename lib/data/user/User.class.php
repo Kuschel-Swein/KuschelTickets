@@ -6,6 +6,8 @@ use kt\data\user\group\Group;
 use kt\data\user\editortemplate\EditorTemplateList;
 use kt\data\user\notification\NotificationList;
 use kt\data\ticket\TicketList;
+use kt\system\Oauth;
+use kt\system\Link;
 
 class User extends DatabaseObject {
     public $tableName = "accounts";
@@ -36,6 +38,19 @@ class User extends DatabaseObject {
         ), "ORDER BY notificationID DESC");
     }
 
+    public function getAvatar() {
+        if($this->banned == 1) {
+            return Link::mainurl()."data/avatars/default.png";
+        }
+        if(!$this->hasPermission("general.account.avatar")) {
+            return Link::mainurl()."data/avatars/default.png";
+        }
+        if(file_exists("./data/avatars/".$this->avatar)) {
+            return Link::mainurl()."data/avatars/".$this->avatar;
+        }
+        return Link::mainurl()."data/avatars/default.png";
+    }
+
     public function getNotificationType(String $identifier) {
         if($this->notificationsettings !== "") {
             $settings = array_keys((array) $this->notificationsettings);
@@ -57,5 +72,15 @@ class User extends DatabaseObject {
         return count(new TicketList(array(
             "creator" => $this->userID
         )));
+    }
+
+    public function getOauthProvider() {
+        return Oauth::getProvider($this->oauth);
+    }
+
+    public function getTickets() {
+        return new TicketList(array(
+            "creator" => $this->userID
+        ));
     }
 }

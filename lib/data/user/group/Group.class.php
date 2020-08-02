@@ -25,6 +25,13 @@ class Group extends DatabaseObject {
         return str_replace("%NAME%", $this->name, $this->badge);
     }
 
+    public function getBadgeColor() {
+        $badge = $this->badge;
+        $badge = str_replace('<div class="ui ', '', $badge);
+        $badge = str_replace(' label groupBadge">%NAME%</div>', '', $badge);
+        return $badge;
+    }
+
     public function getPermissions() {
         $stmt = KuschelTickets::getDB()->prepare("SELECT * FROM kuscheltickets".KT_N."_group_permissions WHERE groupID = ?");
         $stmt->execute([$this->groupID]);

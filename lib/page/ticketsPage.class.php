@@ -18,7 +18,7 @@ class ticketsPage extends AbstractPage {
         if(!KuschelTickets::getUser()->hasPermission("mod.view.tickets.list")) {
             throw new AccessDeniedException("Du hast nicht die erforderliche Berechtigung diese Seite zu sehen.");
         }
-        $this->tickets = new TicketList();
+        $this->tickets = new TicketList([], "ORDER BY ticketID DESC");
     }
 
     public function assign() {

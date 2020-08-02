@@ -22,7 +22,7 @@ class myticketsPage extends AbstractPage {
         }
         $this->tickets = new TicketList(array(
             "creator" => KuschelTickets::getUser()->userID
-        ));
+        ), "ORDER BY ticketID DESC");
     }
 
     public function assign() {

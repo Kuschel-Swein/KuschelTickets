@@ -48,7 +48,7 @@
       <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->title}</a></td>
       <td data-label="Ersteller">{$ticket->getCreator()->username}</td>
       <td data-label="Kategorie"><a data-tooltip="alle Tickets der Kategorie „{$ticket->category}“ anzeigen" onclick="utils.setSearch('search_type', 'search_text', 3, this.innerText, 7);" class="ui label {$ticket->color}">{$ticket->category}</a></td>
-      <td data-label="Datum">{$ticket->time|date_format:"%d.%m.%Y"}, {$ticket->time|date_format:"%H:%M"} Uhr</td>
+      <td data-label="Datum">{$ticket->time|datetime}</td>
       <td data-label="Status"><a data-tooltip="alle Tickets mit dem Status „{$ticket->getFormattedState("name")}“ anzeigen" onclick="utils.setSearch('search_type', 'search_text', 5, this.innerText, 7);" class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</a></td>
       {if $__KT['ticketRating']}
         {if $ticket->rating != null}

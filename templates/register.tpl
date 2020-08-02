@@ -1,7 +1,6 @@
 {include file="header.tpl" title="Registrierung"}
 <div class="ui grid container">
   <div class="column centered">
-    {if $__KT['registrationEnabled']}
     <form class="ui form{if $errors['username'] !== false || $errors['email'] !== false || $errors['password'] !== false || $errors['password_confirm'] !== false || $errors['legal_notice'] !== false || $errors['token'] !== false} error{/if}{if $success == true} success{/if}" action="{link url="register"}" method="post">
       <div class="field required{if $errors['username'] !== false} error{/if}">
         <label>Benutzername</label>
@@ -68,14 +67,6 @@
         </div>
       {/if}
     </form>
-    {else}
-    <div class="ui error message">
-      <ul class="list">
-        <li>Die Registrierung wurde von einem Administrator deaktiviert.</li>
-        <li>Solltest du dies für deinen Fehler halten, wende dich bitte an {$__KT['adminmail']}</li>
-      </ul>
-    </div>
-    {/if}
     <div class="ui center aligned basic segment">
       <div class="ui horizontal divider">
         Oder

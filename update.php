@@ -8,15 +8,15 @@ if(file_exists("data/INSTALLED")) {
 }
 $success = "";
 require "config.php";
-define("UPDATERTOVERSION", "v2.3");
-define("UPDATERFROMVERSION", "v2.2.1");
+define("UPDATERTOVERSION", "v2.4");
+define("UPDATERFROMVERSION", "v2.3");
 if($config['version'] !== UPDATERFROMVERSION) {
     die("Dieser Updater kann nur von der Version <b>".UPDATERFROMVERSION."</b> auf die Version <b>".UPDATERTOVERSION."</b> aktualisieren.");
 }
 if(isset($_POST['submit'])) {
     $pdo = $config['db'];
 
-    $permissions = ['general.account.twofactor'];
+    $permissions = ['general.tickets.edit.own', 'mod.tickets.edit.all', 'mod.tickets.edithistory', 'general.account.signature', 'general.account.avatar', 'mod.tickets.edit.removenotice'];
     $stmt = $pdo->prepare("SELECT * FROM kuscheltickets".KT_N."_groups WHERE groupID NOT 1");
     $stmt->execute();
     while($row = $stmt->fetch()) {
@@ -29,11 +29,27 @@ if(isset($_POST['submit'])) {
         $stmt = $pdo->prepare("INSERT INTO kuscheltickets".KT_N."_group_permissions(`groupID`, `name`, `value`) VALUES (1, ? , 1)");
         $stmt->execute([$perm]);
     }
+    
 
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_ticket_categorys RENAME TO kuscheltickets".KT_N."_ticket_categories");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_faq_categorys RENAME TO kuscheltickets".KT_N."_faq_categories");
-    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `twofactor` TEXT NOT NULL DEFAULT '{\"use\":false,\"code\":\"\",\"backupcodes\":[]}' AFTER `oauth`;");
-    $pdo->query("UPDATE kuscheltickets".KT_N."_accounts SET `twofactor`='{\"use\":false,\"code\":\"\",\"backupcodes\":[]}' WHERE `twofactor` = ''");
+
+
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts CHANGE `twofactor` `twofactor` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '{\"use\":false,\"code\":\"\",\"backupcodes\":[]}';");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `signature` TEXT NOT NULL AFTER `userGroup`;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_accounts ADD `avatar` TEXT NOT NULL DEFAULT 'default.png' AFTER `signature`;");
+    $pdo->query("ALTER TABLE kuscheltickets".KT_N."_tickets ADD `customInputResponse` TEXT NOT NULL DEFAULT '' AFTER `content`;");
+    $pdo->query("CREATE TABLE kuscheltickets".KT_N."_ticket_change (
+        changeID int NOT NULL AUTO_INCREMENT,
+        userID int NOT NULL,
+        ticketID int NOT NULL,
+        answerID int DEFAULT NULL,
+        time int NOT NULL,
+        newContent TEXT NOT NULL,
+        oldContent TEXT NOT NULL,
+        PRIMARY KEY (changeID),
+        FOREIGN KEY (userID) REFERENCES kuscheltickets".KT_N."_accounts(userID) ON DELETE CASCADE,
+        FOREIGN KEY (ticketID) REFERENCES kuscheltickets".KT_N."_tickets(ticketID) ON DELETE CASCADE,
+        FOREIGN KEY (answerID) REFERENCES kuscheltickets".KT_N."_ticket_answers(answerID) ON DELETE CASCADE
+    );");
 
     $count = count($config['recaptcha']['cases']);
     $recaptchacases = $config['recaptcha']['cases'];
@@ -65,6 +81,10 @@ if(isset($_POST['submit'])) {
     '        "php" => false, // stellst du dies auf true, kann es zu Anzeigefehlern kommen'.PHP_EOL.
     '        "database" => false'.PHP_EOL.
     '    ),'.PHP_EOL.
+    '    "equalfaq" => true,'.PHP_EOL.
+    '    "avatarextensions" => ["png", "jpg"],'.PHP_EOL.
+    '    "gravatar" => true,'.PHP_EOL.
+    '    "avatarsize" => 10000000,'.PHP_EOL.
     '    "cookie" => "'.$config['cookie'].'",'.PHP_EOL.
     '    "cookienotice" => '.$config['cookienotice'].','.PHP_EOL.
     '    "seourls" => '.$config['seourls'].','.PHP_EOL.

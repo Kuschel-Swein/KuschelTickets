@@ -1,7 +1,7 @@
 {include file="header.tpl" title="Account Aktivierung"}
-<div class="ui {$result['type']} message">
+<div class="ui success message">
     <ul class="list">
-        <li>{$result['message']}</li>
+        <li>{$result}</li>
     </ul>
 </div>
 {include file="footer.tpl"}

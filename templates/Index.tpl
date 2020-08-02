@@ -1,7 +1,7 @@
 {include file="header.tpl" title="Startseite"}
 <h1>Willkommen, {$__KT['user']->username}</h1>
 <div class="ui divider"></div>
-<h3>deine letzten 10 Tickets</h3>
+<h3>deine letzten {$tickets|count} Tickets</h3>
 <table class="ui celled table">
     <thead>
         <tr>
@@ -21,7 +21,7 @@
             <td data-label="ID">{$ticket->ticketID}</td>
             <td data-label="Titel"><a href="{link url="ticket-{$ticket->ticketID}"}">{$ticket->title}</a></td>
             <td data-label="Kategorie"><span class="ui label {$ticket->color}">{$ticket->category}</span></td>
-            <td data-label="Datum">{$ticket->time|date_format:"%d.%m.%Y"}, {$ticket->time|date_format:"%H:%M"} Uhr</td>
+            <td data-label="Datum">{$ticket->time|datetime}</td>
             <td data-label="Status"><div class="ui {$ticket->getFormattedState("color")} label">{$ticket->getFormattedState("name")}</div></td>
             {if $__KT['ticketRating']}
                 {if $ticket->hasRating()}

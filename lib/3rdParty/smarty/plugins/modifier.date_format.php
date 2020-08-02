@@ -55,8 +55,8 @@ function smarty_modifier_date_format($string, $format = null, $default_date = ''
                 '%h',
                 '%n',
                 '%r',
-                '%R',
                 '%t',
+                '%R',
                 '%T'
             );
             $_win_to = array(
@@ -80,6 +80,15 @@ function smarty_modifier_date_format($string, $format = null, $default_date = ''
         }
         return strftime($format, $timestamp);
     } else {
-        return date($format, $timestamp);
+        $date = date($format, $timestamp);
+        $germanMonths = kt\system\Utils::germanMonths;
+        foreach($germanMonths as $key => $value) {
+            $date = str_replace($key, $value, $date);
+        }
+        $germanWeekDays = kt\system\Utils::germanWeekdays;
+        foreach($germanWeekDays as $key => $value) {
+            $date = str_replace($key, $value, $date);
+        }
+        return $date;
     }
 }

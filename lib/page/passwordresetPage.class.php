@@ -2,10 +2,11 @@
 namespace kt\page;
 
 use kt\system\page\AbstractPage;
-use kt\system\Mailer;
+use kt\system\mailer\Mailer;
 use kt\system\Link;
 use kt\system\UserUtils;
 use kt\system\exception\AccessDeniedException;
+use kt\system\exception\PageNotFoundException;
 use kt\system\recaptcha;
 use kt\data\user\User;
 use kt\system\KuschelTickets;
@@ -87,7 +88,7 @@ class passwordresetPage extends AbstractPage {
                                             "token" => UserUtils::generateToken(),
                                             "password_reset" => 0
                                         ));
-                                        $this->result = "Dein Passwort wurde erfolgreich geändert. Du kannst dich nun <a href='index.php?login'>einloggen</a>.";
+                                        $this->result = "Dein Passwort wurde erfolgreich geändert. Du kannst dich nun <a href='index.php?login' class='noticeLink'>einloggen</a>.";
                                     } else {
                                         $this->errors['password_confirm'] = "Dieses Passwort stimmt nicht mit dem obrigen überein.";
                                     }
@@ -109,7 +110,7 @@ class passwordresetPage extends AbstractPage {
                     $this->errors['token'] = "Deine Anfrage ist leider abgelaufen, du hast nur <b>15 Minuten</b> zeit dein Passwort zu ändern.";
                 }
             } else {
-                $this->errors['token'] = "Dies ist eine falsche Anfrage.";
+                throw new PageNotFoundException();
             }
         }
     }

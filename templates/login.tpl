@@ -37,7 +37,7 @@
         Oder
       </div>
       <div class="ui horizontal bulleted list">
-        <a class="item" href="{link url="register"}">Registrieren</a>
+        {if $__KT['registrationEnabled']}<a class="item" href="{link url="register"}">Registrieren</a>{/if}
         <a class="item" href="{link url="passwordreset"}">Passwort vergessen</a>
       </div>
       {include file="__oauth_providers.tpl"}

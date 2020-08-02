@@ -44,12 +44,19 @@ if(isset($parameters['add'])) {
                                                     $password = password_hash($parameters['password'], PASSWORD_BCRYPT);
                                                     $usergroup = strip_tags($parameters['group']);
                                                     $token = UserUtils::generateToken();
+                                                    $signature = "";
+                                                    if(isset($parameters['signature']) && !empty($parameters['signature'])) {
+                                                        if(!empty(strip_tags($parameters['signature'])) && $parameters['signature'] !== "<p></p>") {
+                                                            $signature = Utils::purify($parameters['signature']);
+                                                        }
+                                                    }
                                                     User::create(array(
                                                         "username" => $username,
                                                         "password" => $password,
                                                         "email" => $email,
                                                         "token" => $token,
                                                         "userGroup" => $usergroup,
+                                                        "signature" => $signature,
                                                         "banned" => 0,
                                                         "password_reset" => 0
                                                     ));
@@ -132,12 +139,22 @@ if(isset($parameters['add'])) {
                                                     $password = password_hash($parameters['password'], PASSWORD_BCRYPT);
                                                     $usergroup = strip_tags($parameters['group']);
                                                     $token = UserUtils::generateToken();
+                                                    if($account->userID == 1) {
+                                                        $usergroup = 1;
+                                                    }
+                                                    $signature = $account->signature;
+                                                    if(isset($parameters['signature']) && !empty($parameters['signature'])) {
+                                                        if(!empty(strip_tags($parameters['signature'])) && $parameters['signature'] !== "<p></p>") {
+                                                            $signature = Utils::purify($parameters['signature']);
+                                                        }
+                                                    }
                                                     $account->update(array(
                                                         "username" => $username,
                                                         "password" => $password,
                                                         "email" => $email,
                                                         "token" => $token,
-                                                        "userGroup" => $usergroup
+                                                        "userGroup" => $usergroup,
+                                                        "signature" => $signature
                                                     ));
                                                     $success = true;
                                                 } else {
@@ -151,11 +168,18 @@ if(isset($parameters['add'])) {
                                             $email = strip_tags($parameters['email']);
                                             $usergroup = strip_tags($parameters['group']);
                                             $token = UserUtils::generateToken();
+                                            $signature = $account->signature;
+                                            if(isset($parameters['signature']) && !empty($parameters['signature'])) {
+                                                if(!empty(strip_tags($parameters['signature'])) && $parameters['signature'] !== "<p></p>") {
+                                                    $signature = Utils::purify($parameters['signature']);
+                                                }
+                                            }
                                             $account->update(array(
                                                 "username" => $username,
                                                 "email" => $email,
                                                 "token" => $token,
-                                                "userGroup" => $usergroup
+                                                "userGroup" => $usergroup,
+                                                "signature" => $signature
                                             ));
                                             $success = true;
                                         }
