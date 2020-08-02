@@ -16,9 +16,10 @@ function resultVersion() {
     global $error;
 
     $result = phpversion();
+    $result = substr($result, 0, -2);
     $class = "error";
     $error++;
-    if($result == "7.4.0") {
+    if($result == "7.4") {
         $class = "success";
         $error--;
     }
@@ -89,7 +90,7 @@ function resultEnd() {
         <meta charset="utf-8">
         <style>
             html {
-                font-family: 'Arial', sans-serif;
+                font-family: -apple-system,'Arial', sans-serif;
             }
             .success {
                 color: #4cd137;
