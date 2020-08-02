@@ -10,7 +10,7 @@ $KT_N = 1;
  * ================================================================================
  */
 define("KT_N", $KT_N);
-define("VERSION", "v2.3");
+define("VERSION", "v2.4");
 
 require "lib/system/exception/MailerException.class.php";
 require "lib/system/mailer/PHPMailer.class.php";
