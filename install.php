@@ -53,7 +53,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
                 `token` text NOT NULL,
                 `userGroup` int(11) NOT NULL,
                 `signature` text NOT NULL,
-                `avatar` text NOT NULL DEFAULT 'default.png',
+                `avatar` text NOT NULL,
                 `notificationsettings` text NOT NULL,
                 `banned` int(11) NOT NULL,
                 `banreason` text DEFAULT NULL,
@@ -61,7 +61,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
                 `email_change_email` text DEFAULT NULL,
                 `email_change_time` int(11) NOT NULL,
                 `oauth` int(11) DEFAULT 0,
-                `twofactor` text NOT NULL DEFAULT '{\"use\":false,\"code\":\"\",\"backupcodes\":[]}'
+                `twofactor` text NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
             "CREATE TABLE `kuscheltickets1_editortemplates` (
                 `templateID` int(11) NOT NULL,
@@ -230,7 +230,7 @@ if(STEP == 2 && isset($_POST['submit'])) {
             "ALTER TABLE `kuscheltickets1_supportchat_messages` ADD CONSTRAINT `kuscheltickets1_supportchat_messages_ibfk_1` FOREIGN KEY (`chatID`) REFERENCES `kuscheltickets1_supportchat` (`chatID`) ON DELETE CASCADE;",
             "ALTER TABLE `kuscheltickets1_tickets` ADD CONSTRAINT `kuscheltickets1_tickets_ibfk_1` FOREIGN KEY (`creator`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE;",
             "ALTER TABLE `kuscheltickets1_ticket_answers` ADD CONSTRAINT `kuscheltickets1_ticket_answers_ibfk_1` FOREIGN KEY (`ticketID`) REFERENCES `kuscheltickets1_tickets` (`ticketID`) ON DELETE CASCADE;",
-            "ALTER TABLE `kuscheltickets1_ticket_change` ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE, ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_2` FOREIGN KEY (`ticketID`) REFERENCES `kuscheltickets1_tickets` (`ticketID`) ON DELETE CASCADE, ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_3` FOREIGN KEY (`answerID`) REFERENCES `kuscheltickets1_ticket_answers` (`answerID`) ON DELETE CASCADE;"
+            "ALTER TABLE `kuscheltickets1_ticket_change` ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `kuscheltickets1_accounts` (`userID`) ON DELETE CASCADE, ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_2` FOREIGN KEY (`ticketID`) REFERENCES `kuscheltickets1_tickets` (`ticketID`) ON DELETE CASCADE, ADD CONSTRAINT `kuscheltickets1_ticket_change_ibfk_3` FOREIGN KEY (`answerID`) REFERENCES `kuscheltickets1_ticket_answers` (`answerID`) ON DELETE CASCADE;",
         ];
         foreach($statements as $statement) {
             $statement = str_replace("kuscheltickets1", "kuscheltickets".KT_N, $statement);
@@ -561,13 +561,13 @@ if(STEP == 5) {
                 <small class="helper">Hat der SMTP Server einen Login?</small>
             </div>
             <div id="smtpauthdata" style="display: none">
-                <div class="field">
+                <div class="field required">
                     <label>SMTP Benutzername</label>
                     <div class="ui input">
                         <input type="text" name="smtpusername">
                     </div>
                 </div>
-                <div class="field">
+                <div class="field required">
                     <label>SMTP Passwort</label>
                     <div class="ui input">
                         <input type="password" name="smtppassword">

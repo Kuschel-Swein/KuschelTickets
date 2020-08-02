@@ -44,7 +44,6 @@ $errors = array(
 $success = false;
 $colors = ['red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey', 'black'];
 
-
 if(isset($parameters['submit'])) {
     if(isset($parameters['CRSF']) && !empty($parameters['CRSF'])) {
         if(CRSF::validate($parameters['CRSF'])) {
@@ -124,6 +123,10 @@ if(isset($parameters['submit'])) {
                                                                                                             if($mailexception == "") {
                                                                                                                 $userecaptcha = false;
                                                                                                                 $validrecaptcha = false;
+                                                                                                                if(!isset($parameters['recaptchause'])) {
+                                                                                                                    $userecaptcha = true;
+                                                                                                                    $validrecaptcha = true;
+                                                                                                                }
                                                                                                                 if(isset($parameters['recaptchause'])) {
                                                                                                                     if(isset($parameters['recaptchaversion']) && !empty($parameters['recaptchaversion'])) {
                                                                                                                         if(in_array($parameters['recaptchaversion'], ["2", "3"])) {
@@ -274,7 +277,7 @@ if(isset($parameters['submit'])) {
                                                                                                                     } else {
                                                                                                                         $recaptchause = "false";
                                                                                                                     }
-                                                                                                                    
+
                                                                                                                     if(isset($parameters['seourls'])) {
                                                                                                                         $seourls = ($parameters['seourls'] == "on") ? "true" : "false";
                                                                                                                     } else {

@@ -15,14 +15,14 @@ $error = 0;
 function resultVersion() {
     global $error;
 
-    $result = (int) phpversion();
+    $result = phpversion();
     $class = "error";
     $error++;
-    if($result == 7) {
+    if($result == "7.4.0") {
         $class = "success";
         $error--;
     }
-    return '<div class="result '.$class.'">PHP 7 (PHP v'.phpversion().')</div>';
+    return '<div class="result '.$class.'">PHP 7.4 (PHP v'.phpversion().')</div>';
 }
 function resultMemory() {
     global $error;
@@ -30,11 +30,11 @@ function resultMemory() {
     $result = (int) ini_get('memory_limit');
     $class = "error";
     $error++;
-    if($result > 128) {
+    if($result > 80) {
         $class = "success";
         $error--;
     }
-    return '<div class="result '.$class.'">Arbeitsspeicherlimit > 128MB ('.$result.' MB)</div>';
+    return '<div class="result '.$class.'">Arbeitsspeicherlimit > 80MB ('.$result.' MB)</div>';
 }
 function resultDisk() {
     global $error;

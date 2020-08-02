@@ -7,6 +7,8 @@ class KuschelTickets {
     private static $user;
 
     public function __construct() {
+        global $config;
+        
         ob_start();
 
         require "data/data.php";

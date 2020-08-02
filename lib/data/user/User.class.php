@@ -12,6 +12,25 @@ use kt\system\Link;
 class User extends DatabaseObject {
     public $tableName = "accounts";
 
+    /**
+     * workarround for older mysql versions that ignore default text values
+     */
+    public function __construct(int $primaryKeyValue) {
+        parent::__construct($primaryKeyValue);
+        if(empty($this->avatar)) {
+            $this->avatar = "default.png";
+        }
+        if(!is_object($this->twofactor)) {
+            $value = array(
+                "use" => false,
+                "code" => "",
+                "backupcodes" => []
+            );
+            $value = (object) $value;
+            $this->twofactor = $value;
+        }
+    }
+
     public function getGroup() {
         return new Group($this->userGroup);
     }
