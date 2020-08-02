@@ -42,6 +42,9 @@ Achte bitte darauf, dass du KuschelTickets nur unter _Releases_ herunterladen so
 - Menü über das ACP verwalten und sortieren (auch externe URLs oder eingene Seiten sind als Menüpunkt möglich)
 - Drittanbieter Login (GitHub & Google)
 - SupportChat System (*kann* Server belasten, da der Chat aktuell gehalten werden muss)
+- Avatar System
+- Ticket Nachrichten bearbeitbar, mit Bearbeitungslog (Einträge können per Berechtigung gelöscht werden), unterstützt ebenfalls reCaptcha!
+- Signaturen
 
 
 ## Wie installiere ich KuschelTickets?
