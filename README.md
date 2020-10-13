@@ -1,3 +1,5 @@
+# Dieses Projekt wird aus privaten Gründen derzeit nicht weiterentwickelt!
+
 ![KuschelTickets](https://user-images.githubusercontent.com/52657944/78670180-aafc7a00-78dd-11ea-9bd4-0c73d8b62c6b.png)
 ---
 
